@@ -71,6 +71,14 @@ const SUBJECTS: Subject[] = [
       "Drama develops confidence, teamwork and creativity through practical performance work.",
   },
   {
+    id: "digital-media",
+    name: "Digital Media",
+    phase: "KS4 & KS5",
+    videoUrl: "",
+    description:
+      "Digital Media develops creative and technical skills in content creation, production and storytelling across modern platforms.",
+  },
+  {
     id: "english",
     name: "English",
     phase: "KS3 & KS4",
@@ -276,9 +284,11 @@ const KS3_FEATURES = [
 export default function TeachingLearningPage() {
   const [activeSubject, setActiveSubject] = useState<Subject | null>(null);
   const [filteredSubjects, setFilteredSubjects] = useState(SUBJECTS);
+  const [libraryExpanded, setLibraryExpanded] = useState(false);
+  const [coachingExpanded, setCoachingExpanded] = useState(false);
 
   return (
-    <div className="bg-slate-50">
+    <div className="bg-white">
       {/* Full-width hero matching other pages */}
       <section className="relative overflow-hidden bg-slate-900 text-slate-50">
         {/* Background video */}
@@ -301,13 +311,13 @@ export default function TeachingLearningPage() {
 
         {/* Centered text content */}
         <div className="relative mx-auto flex min-h-[520px] max-w-6xl flex-col items-center justify-center px-4 py-24 text-center lg:px-8 lg:py-32">
-          <p className="text-xs font-semibold tracking-[0.2em] text-sky-200">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-morpeth-light/75">
             TEACHING &amp; LEARNING
           </p>
-          <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-5xl">
+          <h1 className="mt-5 font-heading text-3xl uppercase tracking-[0.14em] text-morpeth-light sm:text-4xl md:text-5xl">
             Subjects at Morpeth
           </h1>
-          <p className="mt-5 max-w-3xl text-sm leading-relaxed text-sky-100 md:text-base">
+          <p className="mt-6 max-w-3xl text-sm leading-relaxed text-morpeth-light/90 md:text-[15px]">
             Explore each subject to find out more about what students study,
             how learning is organised across the year groups, and what support
             is available. Each subject page will include a short video from
@@ -316,63 +326,114 @@ export default function TeachingLearningPage() {
         </div>
       </section>
 
-      <main className="mx-auto max-w-6xl px-4 py-12 lg:px-8 lg:py-16">
+      <main className="mx-auto max-w-6xl px-4 pt-8 pb-14 lg:px-8 lg:pt-12 lg:pb-20">
+
+        <section className="mb-10">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-morpeth-mid">
+            ON THIS PAGE
+          </p>
+          <h2 className="mt-3 font-heading text-xl uppercase tracking-[0.14em] text-morpeth-navy md:text-[1.55rem] md:tracking-[0.18em]">
+            Teaching & learning at Morpeth
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-700 md:text-[15px]">
+            An overview of our curriculum from Key Stage 3 through to Sixth Form, with a quick way to explore subjects and the support we provide to help every student thrive.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a
+              href="#ks3"
+              className="inline-flex items-center rounded-full bg-morpeth-offwhite px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5"
+            >
+              KS3 overview
+            </a>
+            <a
+              href="#subjects"
+              className="inline-flex items-center rounded-full bg-morpeth-offwhite px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5"
+            >
+              Explore subjects
+            </a>
+            <a
+              href="#support"
+              className="inline-flex items-center rounded-full bg-morpeth-offwhite px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5"
+            >
+              Support & guidance
+            </a>
+          </div>
+        </section>
 
         {/* KS3 curriculum overview (interactive) */}
         <section
-          className="mt-8 rounded-3xl bg-white px-5 py-6 shadow-sm ring-1 ring-slate-100 md:px-6"
+          id="ks3"
+          className="relative mt-8 w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden bg-gradient-to-r from-morpeth-navy via-[#12355b] to-[#3b6fb6] text-white"
         >
-          <div className="md:flex md:items-end md:justify-between">
-            <div>
-              <h2 className="text-base font-semibold tracking-tight text-slate-900">
-                Key Stage 3 curriculum
-              </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-700">
-                At Morpeth, our KS3 curriculum is broad and balanced, giving pupils a
-                strong foundation across a wide range of subjects.
-              </p>
-            </div>
-            {/* KS3 subjects pill strip */}
-            <div className="mt-4 flex flex-wrap gap-2 text-[0.7rem] sm:text-xs md:mt-0">
-              {KS3_SUBJECTS.map((subject) => (
-                <span
-                  key={subject}
-                  className="rounded-full bg-slate-50 px-3 py-1 font-medium text-slate-700 ring-1 ring-slate-200"
-                >
-                  {subject}
-                </span>
-              ))}
-            </div>
-          </div>
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/30"
+            aria-hidden="true"
+          />
 
-          {/* Feature cards */}
-          <div className="mt-6">
+          <div className="relative mx-auto max-w-6xl px-4 py-12 sm:py-16 lg:px-8 lg:py-24">
+            <div className="relative md:flex md:items-end md:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200">
+                  KEY STAGE 3
+                </p>
+                <h2 className="mt-3 font-heading text-xl uppercase tracking-[0.14em] text-white sm:text-2xl md:text-[1.55rem] md:tracking-[0.18em]">
+                  A broad, balanced foundation for Years 7–9
+                </h2>
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-sky-100 sm:text-base">
+                  KS3 at Morpeth builds strong subject knowledge, confidence and curiosity.
+                  Pupils study a wide range of subjects so they can discover interests, develop core skills
+                  and be well prepared for Key Stage 4.
+                </p>
+              </div>
+
+              {/* KS3 subjects pill strip */}
+              <div className="relative mt-5 -mx-5 overflow-x-auto pl-5 pr-10 no-scrollbar sm:mx-0 sm:mt-6 sm:overflow-visible sm:px-0 md:mt-0">
+                <div className="flex w-max gap-2 text-[0.7rem] sm:w-auto sm:flex-wrap sm:text-xs">
+                  {KS3_SUBJECTS.map((subject) => (
+                    <span
+                      key={subject}
+                      className="whitespace-nowrap rounded-full bg-white/10 px-3 py-1 font-medium text-white ring-1 ring-white/15"
+                    >
+                      {subject}
+                    </span>
+                  ))}
+                </div>
+                <div
+                  className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-[#3b6fb6] via-[#3b6fb6]/60 to-transparent sm:hidden"
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+
+            {/* Feature cards */}
+            <div className="mt-6">
             {/* Mobile: swipeable cards */}
             <div className="sm:hidden">
               <div className="mb-2 flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-700">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-200">
                   KS3 at a glance
                 </p>
-                <p className="text-[11px] font-medium text-slate-500">Swipe →</p>
+                <p className="text-[11px] font-medium text-sky-200/80">Swipe →</p>
               </div>
 
               <div className="relative -mx-5 overflow-x-auto pl-5 pr-10 pb-1 no-scrollbar snap-x snap-mandatory scroll-px-5">
-                <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-white via-white/80 to-transparent" />
+                <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-[#3b6fb6] via-[#3b6fb6]/60 to-transparent" />
                 <div className="flex gap-4">
                   {KS3_FEATURES.map(({ id, title, description, Icon }) => (
                     <div
                       key={id}
-                      className="group relative min-w-[76vw] max-w-[22rem] flex-shrink-0 snap-start overflow-hidden rounded-3xl bg-gradient-to-br from-white to-slate-50 ring-1 ring-slate-100 shadow-sm"
+                    className="group relative min-w-[76vw] max-w-[22rem] flex-shrink-0 snap-start overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/15 shadow-sm backdrop-blur"
                     >
-                      <div className="absolute -left-10 -top-10 h-24 w-24 rounded-full bg-sky-50 blur-2xl" />
+                      <div className="absolute -left-10 -top-10 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
                       <div className="relative flex h-full flex-col p-5">
-                        <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-sky-600/10 text-sky-700 ring-1 ring-sky-200">
+                        <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-sky-100 ring-1 ring-white/20">
                           <Icon className="h-5 w-5" />
                         </div>
-                        <h3 className="text-sm font-semibold tracking-tight text-slate-900">
+                        <h3 className="text-sm font-semibold tracking-tight text-white">
                           {title}
                         </h3>
-                        <p className="mt-2 text-xs leading-relaxed text-slate-600">
+                        <p className="mt-2 text-xs leading-relaxed text-sky-100/90">
                           {description}
                         </p>
                       </div>
@@ -387,17 +448,17 @@ export default function TeachingLearningPage() {
               {KS3_FEATURES.map(({ id, title, description, Icon }) => (
                 <div
                   key={id}
-                  className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-white to-slate-50 ring-1 ring-slate-100 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="group relative overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/15 shadow-sm transition hover:-translate-y-0.5 hover:bg-white/15 hover:shadow-md backdrop-blur"
                 >
-                  <div className="absolute -left-10 -top-10 h-24 w-24 rounded-full bg-sky-50 blur-2xl" />
+                  <div className="absolute -left-10 -top-10 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
                   <div className="relative flex h-full flex-col p-5">
-                    <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-sky-600/10 text-sky-700 ring-1 ring-sky-200">
+                    <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-sky-100 ring-1 ring-white/20">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <h3 className="text-sm font-semibold tracking-tight text-slate-900">
+                    <h3 className="text-sm font-semibold tracking-tight text-white">
                       {title}
                     </h3>
-                    <p className="mt-2 text-xs leading-relaxed text-slate-600">
+                    <p className="mt-2 text-xs leading-relaxed text-sky-100/90">
                       {description}
                     </p>
                   </div>
@@ -407,13 +468,13 @@ export default function TeachingLearningPage() {
           </div>
 
           {/* Extra detail (kept for those who like to read more) */}
-          <div className="mt-6 space-y-3 text-sm leading-relaxed text-slate-700">
-            <details className="group rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3">
-              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-slate-900">
+          <div className="mt-6 space-y-3 text-sm leading-relaxed text-sky-100">
+            <details className="group rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
+              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-white">
                 Subjects studied at KS3
-                <span className="text-xs text-sky-700 transition group-open:rotate-90">›</span>
+                <span className="text-xs text-sky-200 transition group-open:rotate-90">›</span>
               </summary>
-              <div className="mt-2 text-xs text-slate-700 sm:text-sm">
+              <div className="mt-2 text-xs text-sky-100 sm:text-sm">
                 <p>
                   Pupils build their knowledge and skills in Art, Drama, Design &amp; Technology (DT),
                   English, Geography, History, Computing &amp; ICT, Maths, Modern Foreign Languages (MFL),
@@ -421,12 +482,12 @@ export default function TeachingLearningPage() {
                 </p>
               </div>
             </details>
-            <details className="group rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3">
-              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-slate-900">
+            <details className="group rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
+              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-white">
                 How classes are organised
-                <span className="text-xs text-sky-700 transition group-open:rotate-90">›</span>
+                <span className="text-xs text-sky-200 transition group-open:rotate-90">›</span>
               </summary>
-              <div className="mt-2 text-xs text-slate-700 sm:text-sm">
+              <div className="mt-2 text-xs text-sky-100 sm:text-sm">
                 <p>
                   Pupils in Year 7 have a lesson a fortnight focusing on oracy. Pupils are taught in mixed
                   prior‑attainment groupings in all subjects apart from Maths, which operates a setting system
@@ -434,12 +495,12 @@ export default function TeachingLearningPage() {
                 </p>
               </div>
             </details>
-            <details className="group rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3">
-              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-slate-900">
+            <details className="group rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
+              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-white">
                 Design &amp; Technology and Modern Foreign Languages
-                <span className="text-xs text-sky-700 transition group-open:rotate-90">›</span>
+                <span className="text-xs text-sky-200 transition group-open:rotate-90">›</span>
               </summary>
-              <div className="mt-2 space-y-2 text-xs text-slate-700 sm:text-sm">
+              <div className="mt-2 space-y-2 text-xs text-sky-100 sm:text-sm">
                 <p>
                   In DT, pupils study Food Technology, Product Design and Resistant Materials on a carousel basis
                   each year so that they experience all three disciplines.
@@ -451,32 +512,45 @@ export default function TeachingLearningPage() {
                 </p>
               </div>
             </details>
-            <details className="group rounded-2xl border border-slate-100 bg-slate-50/60 px-4 py-3">
-              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-slate-900">
+            <details className="group rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur">
+              <summary className="flex cursor-pointer items-center justify-between text-sm font-semibold text-white">
                 Beyond the classroom &amp; further information
-                <span className="text-xs text-sky-700 transition group-open:rotate-90">›</span>
+                <span className="text-xs text-sky-200 transition group-open:rotate-90">›</span>
               </summary>
-              <div className="mt-2 text-xs text-slate-700 sm:text-sm">
+              <div className="mt-2 text-xs text-sky-100 sm:text-sm">
                 <p>
                   There is a wide range of extra‑curricular activities on offer in many subject areas to support pupils’
                   learning beyond the classroom.
                 </p>
-                <p className="mt-2 text-[0.7rem] text-slate-500">
+                <p className="mt-2 text-[0.7rem] text-sky-200/70">
                   If you require further information about the curriculum, please contact us by phone on 020 8981 0921,
                   or email enquiries@morpeth.towerhamlets.sch.uk.
                 </p>
               </div>
             </details>
           </div>
+
+          </div>
         </section>
 
         {/* Subject cards carousel with search and filter */}
-        <section className="mt-10">
+        <section id="subjects" className="mt-14">
+          <div className="mb-7">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-morpeth-mid">
+              SUBJECTS
+            </p>
+            <h2 className="mt-3 font-heading text-xl uppercase tracking-[0.14em] text-morpeth-navy md:text-[1.55rem] md:tracking-[0.18em]">
+              Explore our curriculum
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-700 md:text-[15px]">
+              Search and filter to find a subject. Each card will link to a short video and key information as we build out the curriculum pages.
+            </p>
+          </div>
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <input
               type="text"
               placeholder="Search subjects..."
-              className="w-full max-w-md rounded-xl border border-slate-200 px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full max-w-md rounded-2xl bg-morpeth-offwhite px-4 py-2 text-sm text-slate-800 shadow-card ring-1 ring-slate-200/60 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-morpeth-mid"
               onChange={(e) => {
                 const value = e.target.value.toLowerCase();
                 setFilteredSubjects(
@@ -487,7 +561,7 @@ export default function TeachingLearningPage() {
               }}
             />
             <select
-              className="rounded-xl border border-slate-200 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="rounded-2xl bg-morpeth-offwhite px-3 py-2 text-sm text-slate-800 shadow-card ring-1 ring-slate-200/60 focus:outline-none focus:ring-2 focus:ring-morpeth-mid"
               onChange={(e) => {
                 const value = e.target.value;
                 setFilteredSubjects(
@@ -508,12 +582,12 @@ export default function TeachingLearningPage() {
           </div>
 
           <motion.div
-            className="relative overflow-x-auto pb-4"
+            className="relative -mx-4 overflow-x-auto px-4 pb-4 no-scrollbar snap-x snap-mandatory scroll-px-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="flex gap-6">
+            <div className="flex gap-5">
               {filteredSubjects.map((subject) => {
                 const imageSrc = subject.image || `/images/${subject.id}.webp`;
 
@@ -522,7 +596,7 @@ export default function TeachingLearningPage() {
                     key={subject.id}
                     type="button"
                     onClick={() => setActiveSubject(subject)}
-                    className="group relative w-80 flex-shrink-0 overflow-hidden rounded-3xl shadow-md ring-1 ring-slate-200 hover:ring-sky-500 focus:outline-none"
+                    className="group relative w-80 flex-shrink-0 snap-start overflow-hidden rounded-2xl bg-morpeth-offwhite shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-morpeth-mid"
                     whileHover={{ scale: 1.02 }}
                   >
                     <div className="absolute inset-0">
@@ -537,14 +611,14 @@ export default function TeachingLearningPage() {
 
                     <div className="relative flex flex-col justify-between h-full p-6 text-white">
                       <div>
-                        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-morpeth-light/80">
                           {subject.phase || "Subject"}
                         </span>
-                        <h3 className="mt-2 text-xl font-semibold tracking-tight">
+                        <h3 className="mt-3 font-heading text-lg uppercase tracking-[0.14em] text-white">
                           {subject.name}
                         </h3>
                       </div>
-                      <span className="mt-4 text-sm font-medium text-sky-100 group-hover:underline">
+                      <span className="mt-5 inline-flex w-fit rounded-full bg-white/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-light ring-1 ring-white/20 transition group-hover:-translate-y-0.5">
                         Learn more →
                       </span>
                     </div>
@@ -556,10 +630,10 @@ export default function TeachingLearningPage() {
         </section>
 
         {/* Library and academic coaching */}
-        <section className="mt-12 space-y-6">
+        <section id="support" className="mt-12 space-y-6">
           {/* Library card with image */}
           <motion.article
-            className="grid overflow-hidden rounded-3xl bg-white ring-1 ring-slate-100 shadow-sm md:grid-cols-5"
+            className="grid overflow-hidden rounded-2xl bg-morpeth-offwhite shadow-card ring-1 ring-slate-200/60 md:grid-cols-5"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
@@ -576,34 +650,52 @@ export default function TeachingLearningPage() {
               />
             </div>
             <div className="p-5 md:col-span-3 md:p-6">
-              <h2 className="text-base font-semibold tracking-tight text-slate-900">Library</h2>
-              <div className="mt-3 space-y-3 text-sm leading-relaxed text-slate-700">
+              <h2 className="font-heading text-xl uppercase tracking-[0.14em] text-morpeth-navy md:text-[1.3rem]">Library</h2>
+
+              <div className="relative mt-3 space-y-3 text-sm leading-relaxed text-slate-700">
                 <p>
                   Our library, led by Librarian James Nash with support from Kim Cunningham, holds around
                   10,500 books, including a large fiction collection, bilingual books and a wide range of
                   dictionaries and special collections.
                 </p>
-                <p>
-                  The library supports pupils with special educational needs by sourcing accessible formats
-                  such as large print, Braille and reader‑friendly texts, as well as bilingual dictionaries
-                  and dual‑language resources for newly arrived pupils.
-                </p>
-                <p>
-                  Alongside book stock there are digital resources, computers and printing facilities, plus
-                  a dedicated A‑level and GCSE area with revision guides, textbooks, past papers and study
-                  skills materials.
-                </p>
-                <p className="text-xs text-slate-500">
-                  Students are encouraged to help develop the library by suggesting new books and can also
-                  apply to become Student Librarians, gaining leadership experience and rewards for their contribution.
-                </p>
+
+                {/* Extra detail: collapsed on mobile until expanded */}
+                <div className={libraryExpanded ? "space-y-3" : "hidden space-y-3 sm:block"}>
+                  <p>
+                    The library supports pupils with special educational needs by sourcing accessible formats
+                    such as large print, Braille and reader‑friendly texts, as well as bilingual dictionaries
+                    and dual‑language resources for newly arrived pupils.
+                  </p>
+                  <p>
+                    Alongside book stock there are digital resources, computers and printing facilities, plus
+                    a dedicated A‑level and GCSE area with revision guides, textbooks, past papers and study
+                    skills materials.
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Students are encouraged to help develop the library by suggesting new books and can also
+                    apply to become Student Librarians, gaining leadership experience and rewards for their contribution.
+                  </p>
+                </div>
+
+                {/* Mobile fade + toggle */}
+                {!libraryExpanded && (
+                  <div className="pointer-events-none absolute bottom-10 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-morpeth-offwhite sm:hidden" />
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setLibraryExpanded((v) => !v)}
+                  className="mt-4 inline-flex items-center rounded-full bg-morpeth-light/80 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5 sm:hidden"
+                >
+                  {libraryExpanded ? "Show less" : "Read more"}
+                </button>
               </div>
             </div>
           </motion.article>
 
           {/* Academic coaching card with image */}
           <motion.article
-            className="grid overflow-hidden rounded-3xl bg-white ring-1 ring-slate-100 shadow-sm md:grid-cols-5"
+            className="grid overflow-hidden rounded-2xl bg-morpeth-offwhite shadow-card ring-1 ring-slate-200/60 md:grid-cols-5"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
@@ -619,26 +711,44 @@ export default function TeachingLearningPage() {
               />
             </div>
             <div className="p-5 md:col-span-3 md:p-6">
-              <h2 className="text-base font-semibold tracking-tight text-slate-900">Academic coaching</h2>
-              <div className="mt-3 space-y-3 text-sm leading-relaxed text-slate-700">
+              <h2 className="font-heading text-xl uppercase tracking-[0.14em] text-morpeth-navy md:text-[1.3rem]">Academic coaching</h2>
+
+              <div className="relative mt-3 space-y-3 text-sm leading-relaxed text-slate-700">
                 <p>
                   Our academic coaching programme supports students to achieve at, or above, their target grades
                   through focused small‑group and one‑to‑one work in English and Maths. Coaches work closely with
                   class teachers to reinforce key skills and build confidence.
                 </p>
-                <p>
-                  Targeted Year 11 pupils typically work with a coach twice a week during the school day, followed
-                  by small‑group sessions before or after school. Coaches also support groups in Years 7 and 8 with
-                  reading, writing and mathematical understanding.
-                </p>
-                <p>
-                  The programme runs across the year and may include sessions in half term and on Saturdays. We also
-                  work with external partners, including the National Tutoring Programme, to supplement the in‑school offer.
-                </p>
-                <p className="text-xs text-slate-500">
-                  Academic coaching is an important part of our strategy to support students and ensure that all pupils
-                  can reach their full potential.
-                </p>
+
+                {/* Extra detail: collapsed on mobile until expanded */}
+                <div className={coachingExpanded ? "space-y-3" : "hidden space-y-3 sm:block"}>
+                  <p>
+                    Targeted Year 11 pupils typically work with a coach twice a week during the school day, followed
+                    by small‑group sessions before or after school. Coaches also support groups in Years 7 and 8 with
+                    reading, writing and mathematical understanding.
+                  </p>
+                  <p>
+                    The programme runs across the year and may include sessions in half term and on Saturdays. We also
+                    work with external partners, including the National Tutoring Programme, to supplement the in‑school offer.
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Academic coaching is an important part of our strategy to support students and ensure that all pupils
+                    can reach their full potential.
+                  </p>
+                </div>
+
+                {/* Mobile fade + toggle */}
+                {!coachingExpanded && (
+                  <div className="pointer-events-none absolute bottom-10 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-morpeth-offwhite sm:hidden" />
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setCoachingExpanded((v) => !v)}
+                  className="mt-4 inline-flex items-center rounded-full bg-morpeth-light/80 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5 sm:hidden"
+                >
+                  {coachingExpanded ? "Show less" : "Read more"}
+                </button>
               </div>
             </div>
           </motion.article>
@@ -657,10 +767,10 @@ export default function TeachingLearningPage() {
             <header className="flex items-center justify-between border-b border-slate-100 px-5 py-3 md:px-6">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">
-                  {activeSubject.phase || "Subject"}
+                  {activeSubject?.phase || "Subject"}
                 </p>
                 <h2 className="text-lg font-semibold tracking-tight text-slate-900 md:text-xl">
-                  {activeSubject.name}
+                  {activeSubject?.name}
                 </h2>
               </div>
               <button
@@ -679,7 +789,7 @@ export default function TeachingLearningPage() {
                 {activeSubject.videoUrl ? (
                   <iframe
                     src={activeSubject.videoUrl}
-                    title={`${activeSubject.name} video`}
+                    title={`${activeSubject?.name || "Subject"} video`}
                     className="h-full w-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
@@ -694,7 +804,7 @@ export default function TeachingLearningPage() {
               {/* Course info */}
               <div className="space-y-3">
                 <p className="text-sm leading-relaxed text-slate-700">
-                  {activeSubject.description ||
+                  {activeSubject?.description ||
                     "Information about this course, including topics studied, assessment and how families can support learning at home, will be added here soon."}
                 </p>
 

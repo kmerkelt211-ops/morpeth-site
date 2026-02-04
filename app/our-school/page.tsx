@@ -21,6 +21,7 @@ export default function OurSchoolPage() {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const valuesTrackRef = useRef<HTMLDivElement | null>(null)
   const resultsDeckRef = useRef<HTMLDivElement | null>(null)
+  const resultsTabsRef = useRef<HTMLDivElement | null>(null)
   const [recruitmentLoopSrc, setRecruitmentLoopSrc] = useState<string | null>(null)
 
   useEffect(() => {
@@ -127,6 +128,20 @@ export default function OurSchoolPage() {
       window.removeEventListener('resize', syncToMiddle)
     }
   }, [])
+
+  useEffect(() => {
+    const el = resultsTabsRef.current
+    if (!el) return
+
+    const btn = el.querySelector<HTMLElement>(`[data-results-tab="${resultsDeckIndex}"]`)
+    if (!btn) return
+
+    try {
+      btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+    } catch {
+      // no-op
+    }
+  }, [resultsDeckIndex])
   return (
     <main className="min-h-screen">
       {/* HERO */}
@@ -489,12 +504,13 @@ export default function OurSchoolPage() {
           {/* Mobile: tabs + swipeable deck (avoids long scrolling) */}
           <div className="md:hidden">
             {/* Tabs */}
-            <div className="-mx-4 overflow-x-auto px-4 no-scrollbar">
+            <div ref={resultsTabsRef} className="-mx-4 overflow-x-auto px-4 no-scrollbar">
               <div className="flex gap-2">
                 {['Results', 'Exams', 'Prospectus', 'Pupil Premium', 'Ofsted', 'Policies'].map((label, i) => (
                   <button
                     key={label}
                     type="button"
+                    data-results-tab={i}
                     onClick={() => {
                       setResultsDeckIndex(i)
                       const el = resultsDeckRef.current
@@ -546,7 +562,7 @@ export default function OurSchoolPage() {
                 {/* 1) Results */}
                 <article
                   data-results-card
-                  className="relative min-w-[88vw] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-morpeth-navy p-6 text-white shadow-sm ring-1 ring-morpeth-navy/20"
+                  className="relative w-[calc(100vw-2rem)] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-morpeth-navy p-6 text-white shadow-sm ring-1 ring-morpeth-navy/20"
                 >
                   <div className="pointer-events-none absolute -left-16 -top-16 h-32 w-32 rounded-full bg-sky-500/25 blur-3xl" />
                   <h3 className="relative text-sm font-semibold tracking-[0.18em] uppercase">Results &amp; destinations</h3>
@@ -568,7 +584,7 @@ export default function OurSchoolPage() {
                 {/* 2) Exams */}
                 <article
                   data-results-card
-                  className="min-w-[88vw] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-white p-6 ring-1 ring-slate-100 shadow-sm"
+                  className="w-[calc(100vw-2rem)] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-white p-6 ring-1 ring-slate-100 shadow-sm"
                 >
                   <h3 className="text-base font-semibold tracking-tight text-slate-900">Exams &amp; assessment</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-700">
@@ -596,7 +612,7 @@ export default function OurSchoolPage() {
                 {/* 3) Prospectus */}
                 <article
                   data-results-card
-                  className="min-w-[88vw] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-white p-6 ring-1 ring-slate-100 shadow-sm"
+                  className="w-[calc(100vw-2rem)] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-white p-6 ring-1 ring-slate-100 shadow-sm"
                 >
                   <h3 className="text-base font-semibold tracking-tight text-slate-900">Prospectus</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-700">Find out more about our wide curriculum and opportunities at Morpeth.</p>
@@ -613,7 +629,7 @@ export default function OurSchoolPage() {
                 {/* 4) Pupil Premium */}
                 <article
                   data-results-card
-                  className="min-w-[88vw] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-white p-6 ring-1 ring-slate-100 shadow-sm"
+                  className="w-[calc(100vw-2rem)] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-white p-6 ring-1 ring-slate-100 shadow-sm"
                 >
                   <h3 className="text-base font-semibold tracking-tight text-slate-900">Pupil Premium</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-700">
@@ -640,7 +656,7 @@ export default function OurSchoolPage() {
                 {/* 5) Ofsted */}
                 <article
                   data-results-card
-                  className="min-w-[88vw] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-white p-6 ring-1 ring-slate-100 shadow-sm"
+                  className="w-[calc(100vw-2rem)] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-white p-6 ring-1 ring-slate-100 shadow-sm"
                 >
                   <h3 className="text-base font-semibold tracking-tight text-slate-900">Ofsted</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-700">
@@ -659,7 +675,7 @@ export default function OurSchoolPage() {
                 {/* 6) Policies */}
                 <article
                   data-results-card
-                  className="min-w-[88vw] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-white p-6 ring-1 ring-slate-100 shadow-sm"
+                  className="w-[calc(100vw-2rem)] max-w-[28rem] flex-shrink-0 snap-start rounded-3xl bg-white p-6 ring-1 ring-slate-100 shadow-sm"
                 >
                   <h3 className="text-base font-semibold tracking-tight text-slate-900">Policies</h3>
                   <p className="mt-2 text-sm leading-relaxed text-slate-700">

@@ -4,11 +4,41 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import Script from "next/script";
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "Morpeth School | Bethnal Green, London",
   description:
     "Morpeth School is a vibrant, creative secondary school and sixth form in Bethnal Green, London.",
+
+  // Keep root fallbacks for browser conventions, but point everything else at the tidy folder.
+  manifest: "/morpeth-icon-pack/site.webmanifest",
+  themeColor: "#0d2a45",
+
+  icons: {
+    // Browsers often look for /favicon.ico automatically; we also provide explicit PNG icons.
+    icon: [
+      { url: "/favicon.ico" },
+      {
+        url: "/morpeth-icon-pack/favicon-32x32.png",
+        sizes: "32x32",
+        type: "image/png",
+      },
+      {
+        url: "/morpeth-icon-pack/favicon-16x16.png",
+        sizes: "16x16",
+        type: "image/png",
+      },
+    ],
+    // iOS often looks for /apple-touch-icon.png by default, so keep it at the root.
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+
+  other: {
+    "msapplication-config": "/morpeth-icon-pack/browserconfig.xml",
+    "msapplication-TileColor": "#0d2a45",
+  },
 };
 
 const parentQuickLinks = [
@@ -324,6 +354,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
           </footer>
 
+          <Analytics />
+          <SpeedInsights />
           <Script id="morpeth-ui" strategy="afterInteractive">
             {`
 (function(){
