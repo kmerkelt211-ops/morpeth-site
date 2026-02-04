@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 // `atob` is available in the Edge runtime, but may not be typed depending on TS lib settings.
 declare function atob(data: string): string;
 
-export function middleware(req: NextRequest) {
+export default function proxy(req: NextRequest) {
   const user = process.env.BASIC_AUTH_USER || "";
   const pass = process.env.BASIC_AUTH_PASS || "";
 
