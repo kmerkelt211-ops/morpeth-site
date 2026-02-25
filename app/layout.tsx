@@ -482,16 +482,23 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   // Site-wide scroll reveal
   let revealObserver = null;
+  let revealMutationObserver = null;
+  let pendingRevealScan = false;
 
-  const initReveals = () => {
-    if (revealObserver) revealObserver.disconnect();
+  const revealSelector = 'main > section, main > article, [data-reveal]';
 
+  const prepareRevealNode = (node, reset = false) => {
+    if (!(node instanceof HTMLElement)) return;
+    if (node.dataset.revealIgnore === 'true') return;
+    if (!node.dataset.reveal) node.dataset.reveal = 'up';
+    if (reset || !node.dataset.revealVisible) node.dataset.revealVisible = 'false';
+    if (revealObserver) revealObserver.observe(node);
+  };
+
+  const scanRevealNodes = (reset = false) => {
     const targets = [];
-    document.querySelectorAll('main > section, main > article, [data-reveal]').forEach((node) => {
+    document.querySelectorAll(revealSelector).forEach((node) => {
       if (!(node instanceof HTMLElement)) return;
-      if (node.dataset.revealIgnore === 'true') return;
-      if (!node.dataset.reveal) node.dataset.reveal = 'up';
-      node.dataset.revealVisible = 'false';
       targets.push(node);
     });
 
@@ -501,6 +508,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     }
 
     root.dataset.revealReady = 'true';
+    targets.forEach((node) => prepareRevealNode(node, reset));
+  };
+
+  const queueRevealScan = (reset = false) => {
+    if (pendingRevealScan) return;
+    pendingRevealScan = true;
+    window.requestAnimationFrame(() => {
+      pendingRevealScan = false;
+      scanRevealNodes(reset);
+    });
+  };
+
+  const initReveals = () => {
+    if (revealObserver) revealObserver.disconnect();
+    if (revealMutationObserver) revealMutationObserver.disconnect();
 
     revealObserver = new IntersectionObserver(
       (entries) => {
@@ -521,7 +543,27 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       { threshold: 0.16, rootMargin: '0px 0px -10% 0px' }
     );
 
-    targets.forEach((el) => revealObserver.observe(el));
+    scanRevealNodes(true);
+
+    revealMutationObserver = new MutationObserver((mutations) => {
+      let foundRevealCandidates = false;
+
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (!(node instanceof HTMLElement)) return;
+          if (
+            node.matches('section, article, [data-reveal]') ||
+            !!node.querySelector('section, article, [data-reveal]')
+          ) {
+            foundRevealCandidates = true;
+          }
+        });
+      });
+
+      if (foundRevealCandidates) queueRevealScan(false);
+    });
+
+    revealMutationObserver.observe(document.body, { childList: true, subtree: true });
   };
 
   const scheduleRevealInit = () => {

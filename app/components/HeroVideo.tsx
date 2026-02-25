@@ -15,7 +15,7 @@ type HeroVideoProps = {
 };
 
 const DEFAULT_HERO_OVERLAY =
-  "z-20 bg-gradient-to-b from-black/55 via-morpeth-navy/65 to-morpeth-navy/85";
+  "pointer-events-none bg-gradient-to-b from-black/55 via-morpeth-navy/65 to-morpeth-navy/85";
 
 export default function HeroVideo({
   src,

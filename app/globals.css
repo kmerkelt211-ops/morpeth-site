@@ -51,7 +51,7 @@ body {
 /* -----------------------------
    Scroll reveal (site-wide)
 ------------------------------ */
-html[data-reveal-ready="true"] [data-reveal][data-reveal-visible="false"] {
+html[data-reveal-ready="true"] [data-reveal] {
   opacity: 0;
   transform: translate3d(0, var(--reveal-distance, 24px), 0);
   transition:
@@ -61,15 +61,15 @@ html[data-reveal-ready="true"] [data-reveal][data-reveal-visible="false"] {
   will-change: opacity, transform;
 }
 
-html[data-reveal-ready="true"] [data-reveal="left"][data-reveal-visible="false"] {
+html[data-reveal-ready="true"] [data-reveal="left"] {
   transform: translate3d(calc(var(--reveal-distance, 24px) * -1), 0, 0);
 }
 
-html[data-reveal-ready="true"] [data-reveal="right"][data-reveal-visible="false"] {
+html[data-reveal-ready="true"] [data-reveal="right"] {
   transform: translate3d(var(--reveal-distance, 24px), 0, 0);
 }
 
-html[data-reveal-ready="true"] [data-reveal="down"][data-reveal-visible="false"] {
+html[data-reveal-ready="true"] [data-reveal="down"] {
   transform: translate3d(0, calc(var(--reveal-distance, 24px) * -1), 0);
 }
 

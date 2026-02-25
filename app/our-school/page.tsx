@@ -147,11 +147,8 @@ export default function OurSchoolPage() {
   return (
     <main className="min-h-screen">
       {/* HERO */}
-      <section className="relative isolate text-morpeth-light">
-        <HeroVideo
-          src="/video/our-school-hero.mp4"
-          containerClassName="-z-10"
-        />
+      <section className="relative bg-morpeth-navy text-morpeth-light">
+        <HeroVideo src="/video/our-school-hero.mp4" />
         <div className="relative mx-auto flex min-h-[60vh] md:min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-14 text-center md:py-24">
           <p className="text-xs uppercase tracking-[0.25em] text-morpeth-light/80">
             Morpeth School · Our School
