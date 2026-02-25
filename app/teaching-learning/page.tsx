@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import HeroVideo from "../components/HeroVideo";
 
 type Subject = {
   id: string;
@@ -291,23 +292,7 @@ export default function TeachingLearningPage() {
     <div className="bg-white">
       {/* Full-width hero matching other pages */}
       <section className="relative overflow-hidden bg-slate-900 text-slate-50">
-        {/* Background video */}
-        <video
-          className="absolute inset-0 h-full w-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          aria-hidden="true"
-        >
-          <source src="/video/teaching-learning-hero.mp4" type="video/mp4" />
-        </video>
-
-        {/* Gradient overlay on top of video */}
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-900/60 via-slate-900/40 to-slate-900/80"
-          aria-hidden="true"
-        />
+        <HeroVideo src="/video/teaching-learning-hero.mp4" />
 
         {/* Centered text content */}
         <div className="relative mx-auto flex min-h-[520px] max-w-6xl flex-col items-center justify-center px-4 py-24 text-center lg:px-8 lg:py-32">

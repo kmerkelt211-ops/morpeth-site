@@ -1,7 +1,7 @@
 /* app/letters-home/page.tsx */
 import Link from "next/link";
 import { groq } from "next-sanity";
-import { client } from "../../sanity/lib/client";
+import { client } from "../../sanity/client";
 
 export const metadata = {
   title: "Letters home | Morpeth School",

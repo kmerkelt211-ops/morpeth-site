@@ -19,7 +19,8 @@ const sanityClient = createClient({
 });
 
 const builder = imageUrlBuilder(sanityClient);
-const urlFor = (src: any) => builder.image(src).width(256).height(256).fit("crop").url();
+const urlFor = (src: Record<string, unknown>) =>
+  builder.image(src).width(256).height(256).fit("crop").url();
 
 // Map your brand keys in Sanity to Tailwind classes used for accents
 const colourClassFromBrand = (brand?: string) => {
@@ -63,6 +64,27 @@ type House = {
   videoUrl?: string;
 };
 
+type SanityHouseRow = {
+  name?: string;
+  short?: string;
+  slug: string;
+  leader?: string;
+  summary?: string;
+  videoUrl?: string;
+  brandColor?: string;
+  crest?: Record<string, unknown>;
+};
+
+type DocumentWithPiP = Document & {
+  pictureInPictureElement?: Element | null;
+  exitPictureInPicture?: () => Promise<void>;
+};
+
+type VideoWithPiPAndAirPlay = HTMLVideoElement & {
+  requestPictureInPicture?: () => Promise<unknown>;
+  webkitShowPlaybackTargetPicker?: () => void;
+};
+
 function Mp4Player({ src }: { src: string }) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
@@ -101,20 +123,19 @@ function Mp4Player({ src }: { src: string }) {
   };
 
   const requestPiP = async () => {
+    const pipDocument = document as DocumentWithPiP;
+    const video = videoRef.current as VideoWithPiPAndAirPlay | null;
     try {
-      // @ts-ignore: PiP types not in lib yet
-      if (document.pictureInPictureElement) {
-        // @ts-ignore
-        await document.exitPictureInPicture();
-      } else if (videoRef.current && "requestPictureInPicture" in videoRef.current) {
-        // @ts-ignore
-        await videoRef.current.requestPictureInPicture();
+      if (pipDocument.pictureInPictureElement && pipDocument.exitPictureInPicture) {
+        await pipDocument.exitPictureInPicture();
+      } else if (video?.requestPictureInPicture) {
+        await video.requestPictureInPicture();
       }
     } catch {}
   };
 
   const requestAirPlay = () => {
-    const v: any = videoRef.current;
+    const v = videoRef.current as VideoWithPiPAndAirPlay | null;
     if (v && typeof v.webkitShowPlaybackTargetPicker === "function") {
       try {
         v.webkitShowPlaybackTargetPicker();
@@ -132,8 +153,6 @@ function Mp4Player({ src }: { src: string }) {
         className="w-full aspect-video rounded-xl bg-black"
         // Enable AirPlay in Safari
         x-webkit-airplay="allow"
-        // @ts-ignore
-        airplay="allow"
         controlsList="nodownload"
       />
       <div className="mt-3 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-white/60 p-3">
@@ -215,7 +234,7 @@ function HousesPageInner() {
   // Fetch houses from Sanity on mount
   useEffect(() => {
     let cancelled = false;
-    sanityClient.fetch(HOUSES_GROQ).then((rows: any[]) => {
+    sanityClient.fetch<SanityHouseRow[]>(HOUSES_GROQ).then((rows) => {
       if (cancelled) return;
       const mapped: House[] = rows.map((r) => ({
         name: r.name || r.short || r.slug,

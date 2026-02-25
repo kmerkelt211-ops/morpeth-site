@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { createClient } from "@sanity/client"
 import { PortableText } from "@portabletext/react"
+import type { TypedObject } from "@portabletext/types"
 import imageUrlBuilder from "@sanity/image-url"
 
 const sanityClient = createClient({
@@ -16,7 +17,10 @@ const sanityClient = createClient({
 
 const builder = imageUrlBuilder(sanityClient)
 
-function urlForImage(source: any) {
+type SanityRichTextBlock = TypedObject
+type SanityImageValue = Record<string, unknown>
+
+function urlForImage(source: SanityImageValue) {
   return builder.image(source)
 }
 
@@ -90,15 +94,15 @@ type ResultGraph = {
 type GCSEResults = {
   title?: string
   heroHeading?: string
-  heroImage?: any
-  intro?: any[]
+  heroImage?: SanityImageValue
+  intro?: SanityRichTextBlock[]
   resultsHeading?: string
   resultsBullets?: string[]
   headlineMetrics?: ResultMetric[]
   progressHeading?: string
-  progressBody?: any[]
+  progressBody?: SanityRichTextBlock[]
   proudHeading?: string
-  proudBody?: any[]
+  proudBody?: SanityRichTextBlock[]
   dfeLinkLabel?: string
   dfeLinkUrl?: string
   breakdownGraphs?: ResultGraph[]
@@ -107,15 +111,15 @@ type GCSEResults = {
 type SixthFormResults = {
   title?: string
   heroHeading?: string
-  heroImage?: any
-  intro?: any[]
+  heroImage?: SanityImageValue
+  intro?: SanityRichTextBlock[]
   destinationsHeading?: string
-  destinationsBody?: any[]
+  destinationsBody?: SanityRichTextBlock[]
   curriculumHeading?: string
-  curriculumBody?: any[]
+  curriculumBody?: SanityRichTextBlock[]
   aLevelHeadlineMetrics?: ResultMetric[]
   btecHeadlineMetrics?: ResultMetric[]
-  btecSummary?: any[]
+  btecSummary?: SanityRichTextBlock[]
   dfeLinkLabel?: string
   dfeLinkUrl?: string
   breakdownGraphs?: ResultGraph[]

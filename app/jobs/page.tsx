@@ -8,7 +8,7 @@ const SkeletonCard = () => (
   </div>
 );
 import Link from "next/link";
-import { client } from "../../sanity/lib/client";
+import { client } from "../../sanity/client";
 
 // Helpers for date formatting and badge colour
 const formatGB = (iso?: string) =>

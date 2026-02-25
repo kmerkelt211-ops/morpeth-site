@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useState } from "react";
+import HeroVideo from "../components/HeroVideo";
 
 export default function ExtracurricularPage() {
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
@@ -11,21 +11,7 @@ export default function ExtracurricularPage() {
     <main className="min-h-screen bg-slate-50">
       {/* HERO – matches main site hero pattern */}
       <section className="relative bg-morpeth-navy text-morpeth-light">
-        {/* Background media (optional video; falls back to solid colour if file missing) */}
-        <div className="absolute inset-0 overflow-hidden">
-          <video
-            className="h-full w-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster="/images/extracurricular-hero-poster.jpg"
-          >
-            <source src="/video/extracurricular-hero.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-morpeth-navy/65 to-morpeth-navy/85" />
-        </div>
+        <HeroVideo src="/video/extracurricular-hero.mp4" />
 
         {/* Content layer */}
         <div className="relative z-10 mx-auto flex min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-16 text-center md:py-24">

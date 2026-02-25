@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 
@@ -46,6 +46,38 @@ function NamesList({ items, onOpen }: { items: StaffMember[]; onOpen: (m: StaffM
         ))
       )}
     </ul>
+  )
+}
+
+function SectionCard({
+  title,
+  count,
+  children,
+  openByDefault,
+}: {
+  title: string
+  count: number
+  children: React.ReactNode
+  openByDefault?: boolean
+}) {
+  return (
+    <details
+      open={openByDefault}
+      className="acc group rounded-3xl bg-white ring-1 ring-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:ring-morpeth-navy/20"
+    >
+      <summary className="list-none cursor-pointer select-none px-5 py-4 flex items-center justify-between gap-4 rounded-3xl transition-colors duration-200 group-hover:bg-slate-50">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Team</p>
+          <h3 className="font-heading text-xl md:text-2xl text-morpeth-navy uppercase tracking-[0.1em]">
+            {title} <span className="text-slate-400 normal-case font-sans text-sm">({count})</span>
+          </h3>
+        </div>
+        <svg className="h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fillRule="evenodd" d="M10 12.5a.75.75 0 0 1-.53-.22l-4-4a.75.75 0 1 1 1.06-1.06L10 10.69l3.47-3.47a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-.53.22Z" clipRule="evenodd" />
+        </svg>
+      </summary>
+      <div className="p-3 md:p-4">{children}</div>
+    </details>
   )
 }
 
@@ -108,8 +140,21 @@ function sortBySurnameThenFirst(a: StaffMember, b: StaffMember) {
   return A.first.localeCompare(B.first, undefined, { sensitivity: 'base' })
 }
 
+function matchesMember(m: StaffMember, qParam: string, letterParam: string) {
+  const matchesQ =
+    !qParam ||
+    m.name?.toLowerCase().includes(qParam) ||
+    m.role?.toLowerCase().includes(qParam) ||
+    m.department?.toLowerCase().includes(qParam)
+
+  if (!matchesQ) return false
+  if (!letterParam) return true
+  if (surnameInitial(m.name) === letterParam) return true
+  if (firstInitial(m.name) === letterParam) return true
+  return getAllInitials(m.name).includes(letterParam)
+}
+
 export default function DirectoryClient({ slt, teaching, support }: Props) {
-  const [open, setOpen] = useState<StaffMember | null>(null)
   const closeBtnRef = useRef<HTMLButtonElement | null>(null)
   const lastFocused = useRef<Element | null>(null)
 
@@ -122,36 +167,26 @@ export default function DirectoryClient({ slt, teaching, support }: Props) {
   const letterParam = (searchParams.get('letter') || '').trim().toUpperCase().charAt(0)
   const qParam = (searchParams.get('q') || '').trim().toLowerCase()
 
-  // Predicate: free‑text query across name/role/department
-  const matchesQ = (m: StaffMember) =>
-    !qParam ||
-    m.name?.toLowerCase().includes(qParam) ||
-    m.role?.toLowerCase().includes(qParam) ||
-    m.department?.toLowerCase().includes(qParam)
-
-  // Predicate: letter filter (surname OR first initial OR any word initial)
-  const matchesLetter = (m: StaffMember) => {
-    if (!letterParam) return true
-    if (surnameInitial(m.name) === letterParam) return true
-    if (firstInitial(m.name) === letterParam) return true
-    return getAllInitials(m.name).includes(letterParam)
-  }
-
   // Filter + stable sort per section
   const filteredSlt = useMemo(
-    () => (slt ?? []).filter((m) => matchesQ(m) && matchesLetter(m)).slice().sort(sortBySurnameThenFirst),
+    () => (slt ?? []).filter((m) => matchesMember(m, qParam, letterParam)).slice().sort(sortBySurnameThenFirst),
     [slt, qParam, letterParam]
   )
   const filteredTeaching = useMemo(
-    () => (teaching ?? []).filter((m) => matchesQ(m) && matchesLetter(m)).slice().sort(sortBySurnameThenFirst),
+    () => (teaching ?? []).filter((m) => matchesMember(m, qParam, letterParam)).slice().sort(sortBySurnameThenFirst),
     [teaching, qParam, letterParam]
   )
   const filteredSupport = useMemo(
-    () => (support ?? []).filter((m) => matchesQ(m) && matchesLetter(m)).slice().sort(sortBySurnameThenFirst),
+    () => (support ?? []).filter((m) => matchesMember(m, qParam, letterParam)).slice().sort(sortBySurnameThenFirst),
     [support, qParam, letterParam]
   )
 
   const allMembers = useMemo<StaffMember[]>(() => [...filteredSlt, ...filteredTeaching, ...filteredSupport], [filteredSlt, filteredTeaching, filteredSupport])
+  const openId = searchParams.get('open') || ''
+  const open = useMemo<StaffMember | null>(() => {
+    if (!openId) return null
+    return allMembers.find((m) => m._id === openId) ?? null
+  }, [openId, allMembers])
 
   // Auto‑open logic: only when a text search returns exactly one match and no letter filter is active
   const qValue = (searchParams.get('q') || '').trim()
@@ -161,27 +196,28 @@ export default function DirectoryClient({ slt, teaching, support }: Props) {
     return `${qValue}|${allMembers[0]._id}`
   }, [qValue, allMembers])
 
-  // Keep modal state in sync with the URL (?open=<id>)
-  function openCard(m: StaffMember) {
-    const existing = searchParams.get('open')
-    if (existing !== m._id) {
-      const params = new URLSearchParams(searchParams.toString())
-      params.set('open', m._id)
-      router.replace(`?${params.toString()}`, { scroll: false })
-    }
-    setOpen(m)
-  }
+  const openCard = useCallback(
+    (m: StaffMember) => {
+      const existing = searchParams.get('open')
+      if (existing !== m._id) {
+        const params = new URLSearchParams(searchParams.toString())
+        params.set('open', m._id)
+        router.replace(`?${params.toString()}`, { scroll: false })
+      }
+    },
+    [router, searchParams]
+  )
 
-  function closeCard() {
+  const closeCard = useCallback(() => {
     const q = (searchParams.get('q') || '').trim()
-    if (q && open?._id) userClosedForKey.current = `${q}|${open._id}`
+    const currentOpenId = searchParams.get('open')
+    if (q && currentOpenId) userClosedForKey.current = `${q}|${currentOpenId}`
     const params = new URLSearchParams(searchParams.toString())
     params.delete('open')
     const qs = params.toString()
     const url = qs ? `?${qs}` : window.location.pathname
     router.replace(url, { scroll: false })
-    setOpen(null)
-  }
+  }, [router, searchParams])
 
   // Handle Escape, scroll lock, and focus restore
   useEffect(() => {
@@ -199,21 +235,7 @@ export default function DirectoryClient({ slt, teaching, support }: Props) {
       if (lastFocused.current instanceof HTMLElement) lastFocused.current.focus()
     }
     return () => window.removeEventListener('keydown', onKey)
-  }, [open])
-
-  // Open card if URL has ?open=<id>
-  useEffect(() => {
-    const id = searchParams.get('open')
-    if (id) {
-      if (!open || open._id !== id) {
-        const found = allMembers.find((m) => m._id === id)
-        if (found) setOpen(found)
-      }
-    } else if (open) {
-      setOpen(null)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, allMembers])
+  }, [open, closeCard])
 
   // Auto‑open if a search yields exactly one person (avoid loops / respect manual close)
   useEffect(() => {
@@ -236,36 +258,20 @@ export default function DirectoryClient({ slt, teaching, support }: Props) {
       didAutoOpenForQuery.current = singleKey
       openCard(only)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [singleKey, searchParams, allMembers])
-
-  const Card = ({ title, count, children, openByDefault }: { title: string; count: number; children: React.ReactNode; openByDefault?: boolean }) => (
-    <details open={openByDefault} className="acc group rounded-3xl bg-white ring-1 ring-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:ring-morpeth-navy/20">
-      <summary className="list-none cursor-pointer select-none px-5 py-4 flex items-center justify-between gap-4 rounded-3xl transition-colors duration-200 group-hover:bg-slate-50">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Team</p>
-          <h3 className="font-heading text-xl md:text-2xl text-morpeth-navy uppercase tracking-[0.1em]">
-            {title} <span className="text-slate-400 normal-case font-sans text-sm">({count})</span>
-          </h3>
-        </div>
-        <svg className="h-5 w-5 shrink-0 text-slate-500 transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M10 12.5a.75.75 0 0 1-.53-.22l-4-4a.75.75 0 1 1 1.06-1.06L10 10.69l3.47-3.47a.75.75 0 1 1 1.06 1.06l-4 4a.75.75 0 0 1-.53.22Z" clipRule="evenodd"/></svg>
-      </summary>
-      <div className="p-3 md:p-4">{children}</div>
-    </details>
-  )
+  }, [singleKey, searchParams, allMembers, openCard])
 
   return (
     <>
       <div className="space-y-4">
-        <Card title="Senior Leadership Team" count={filteredSlt.length} openByDefault={!!letterParam}>
+        <SectionCard title="Senior Leadership Team" count={filteredSlt.length} openByDefault={!!letterParam}>
           <NamesList items={filteredSlt} onOpen={openCard} />
-        </Card>
-        <Card title="Teaching Staff" count={filteredTeaching.length} openByDefault={!!letterParam}>
+        </SectionCard>
+        <SectionCard title="Teaching Staff" count={filteredTeaching.length} openByDefault={!!letterParam}>
           <NamesList items={filteredTeaching} onOpen={openCard} />
-        </Card>
-        <Card title="Support Staff" count={filteredSupport.length} openByDefault={!!letterParam}>
+        </SectionCard>
+        <SectionCard title="Support Staff" count={filteredSupport.length} openByDefault={!!letterParam}>
           <NamesList items={filteredSupport} onOpen={openCard} />
-        </Card>
+        </SectionCard>
       </div>
 
       {open && (

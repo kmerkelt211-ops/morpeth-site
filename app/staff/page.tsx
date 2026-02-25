@@ -1,5 +1,6 @@
-import { client } from "../../sanity/lib/client";
+import { client } from "../../sanity/client";
 import DirectoryClient from "./DirectoryClient";
+import HeroVideo from "../components/HeroVideo";
 
 export const revalidate = 60;
 
@@ -139,18 +140,7 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
     <main className="bg-morpeth-offwhite text-slate-900">
       {/* HERO — matches the site hero pattern */}
       <section className="relative bg-morpeth-navy text-morpeth-light">
-        <div className="absolute inset-0 overflow-hidden">
-          <video
-            className="h-full w-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src="/video/hero-staff.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-morpeth-navy/65 to-morpeth-navy/85" />
-        </div>
+        <HeroVideo src="/video/hero-staff.mp4" />
 
         <div className="relative mx-auto flex min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-16 text-center md:py-24">
           <p className="text-xs uppercase tracking-[0.25em] text-morpeth-light/80">

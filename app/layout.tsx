@@ -348,6 +348,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 ))}
               </div>
 
+              <div className="mt-5 text-center">
+                <Link
+                  href="/content"
+                  className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 underline underline-offset-4 hover:text-morpeth-navy"
+                >
+                  Content admin
+                </Link>
+              </div>
+
               <div className="mt-10 border-t border-slate-200 pt-4 text-center text-xs text-slate-500">
                 © {currentYear} Morpeth School. All rights reserved.
               </div>
@@ -471,10 +480,61 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     if (e.key === 'Escape' && root.dataset.menuOpen === 'true') closeMenu();
   }, true);
 
+  // Site-wide scroll reveal
+  let revealObserver = null;
+
+  const initReveals = () => {
+    if (revealObserver) revealObserver.disconnect();
+
+    const targets = [];
+    document.querySelectorAll('main > section, main > article, [data-reveal]').forEach((node) => {
+      if (!(node instanceof HTMLElement)) return;
+      if (node.dataset.revealIgnore === 'true') return;
+      if (!node.dataset.reveal) node.dataset.reveal = 'up';
+      node.dataset.revealVisible = 'false';
+      targets.push(node);
+    });
+
+    if (targets.length === 0) {
+      delete root.dataset.revealReady;
+      return;
+    }
+
+    root.dataset.revealReady = 'true';
+
+    revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const el = entry.target;
+          if (!(el instanceof HTMLElement)) return;
+
+          if (entry.isIntersecting) {
+            el.dataset.revealVisible = 'true';
+            if (el.dataset.revealOnce !== 'false' && revealObserver) {
+              revealObserver.unobserve(el);
+            }
+          } else if (el.dataset.revealOnce === 'false') {
+            el.dataset.revealVisible = 'false';
+          }
+        });
+      },
+      { threshold: 0.16, rootMargin: '0px 0px -10% 0px' }
+    );
+
+    targets.forEach((el) => revealObserver.observe(el));
+  };
+
+  const scheduleRevealInit = () => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(initReveals);
+    });
+  };
+
   // Close menu on route changes (Next uses history.pushState)
   const onLocationChange = () => {
     setActive();
     closeMenu();
+    scheduleRevealInit();
   };
 
   const patchHistory = (type) => {
@@ -495,6 +555,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   // Initial state
   setActive();
   syncAria(root.dataset.menuOpen === 'true');
+  scheduleRevealInit();
 })();
             `}
           </Script>

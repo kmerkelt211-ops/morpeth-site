@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useRef } from "react";
 import Link from "next/link";
+import HeroVideo from "../components/HeroVideo";
 
 /**
  * Parents & Carers — landing page
@@ -22,30 +22,35 @@ const card =
 const sectionTitle =
   "text-[10px] font-semibold uppercase tracking-[0.28em] text-morpeth-mid";
 
-// Small helper so we can intercept link clicks and show an overlay instead
 type QuickLink = { label: string; href: string };
 
-const RAW_LINKS: QuickLink[] = [
-  { label: "Term dates", href: "/term-dates" },
-  { label: "Uniform", href: "/uniform" },
-  { label: "Letters home", href: "/letters-home" },
-  { label: "Supporting your child", href: "/supporting-your-child" },
-  { label: "Edulink", href: "/edulink" },
-  { label: "School lunches", href: "/school-lunches" },
-  { label: "Payments", href: "/payments" },
-  { label: "Attendance", href: "/attendance" },
-  { label: "Safeguarding", href: "/safeguarding" },
-  { label: "Policies", href: "/policies" },
-  { label: "Data Protection", href: "/data-protection" }, // ← new
-  { label: "Contact", href: "/contact" },
-];
+type ChipButtonProps = QuickLink & {
+  className?: string;
+  onOpen?: (item: QuickLink) => void;
+};
 
-// Quick normalisation so anything not built yet still shows something helpful
-const normalise = (l: QuickLink): QuickLink => l;
+function ChipButton({ label, href, className, onOpen }: ChipButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (onOpen) {
+          onOpen({ label, href });
+        } else {
+          window.location.assign(href);
+        }
+      }}
+      className={className ?? chip}
+      aria-haspopup="dialog"
+      aria-controls="parents-overlay"
+    >
+      {label}
+    </button>
+  );
+}
 
 export default function ParentsPage() {
   const subscribeHref = "webcal://www.morpethschool.org.uk/calendar/events.ics";
-  const quickLinks = RAW_LINKS.map(normalise);
 
   // Overlay state
   const [open, setOpen] = useState(false);
@@ -91,19 +96,6 @@ export default function ParentsPage() {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  // Reusable chip as a button that opens the overlay
-  const ChipButton = ({ label, href, className }: QuickLink & { className?: string }) => (
-    <button
-      type="button"
-      onClick={() => openOverlay({ label, href })}
-      className={className ?? chip}
-      aria-haspopup="dialog"
-      aria-controls="parents-overlay"
-    >
-      {label}
-    </button>
-  );
 
   // Render overlay content by target "href"
   const renderOverlayContent = (item: QuickLink) => {
@@ -255,7 +247,7 @@ export default function ParentsPage() {
                     Shop online
                   </a>
                   <a
-                    href="/documents/7.-Uniform-List-2025.pdf"
+                    href="/Documents/7.-Uniform-List-2025.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
@@ -640,7 +632,7 @@ export default function ParentsPage() {
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <a
-                    href="/documents/Morpeth-School-Attendance-and-Punctuality-Policy-2024-25.pdf"
+                    href="/Documents/Morpeth-School-Attendance-and-Punctuality-Policy-2024-25.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
@@ -872,40 +864,11 @@ export default function ParentsPage() {
     );
   };
 
-  const faqs = [
-    {
-      q: "How do I report my child absent?",
-      a: "Please call the school office before 8:30am or email the attendance team with your child’s name, tutor group and reason for absence.",
-    },
-    {
-      q: "What time does the school day start and finish?",
-      a: "Registration starts at 8:40am and the day usually finishes at 3:15pm. Clubs and rehearsals often run later (see the calendar).",
-    },
-    {
-      q: "How do I get updates about trips, clubs and closures?",
-      a: "Check ‘Letters home’ and the school calendar. Urgent messages are also sent via Edulink.",
-    },
-  ];
-
   return (
     <main className="bg-morpeth-offwhite text-slate-900">
       {/* HERO — matches home page design */}
       <section className="relative bg-morpeth-navy text-morpeth-light">
-        {/* Background video */}
-        <div className="absolute inset-0 overflow-hidden">
-          <video
-            className="h-full w-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            aria-hidden="true"
-          >
-            <source src="/video/parents-hero.mp4" type="video/mp4" />
-          </video>
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-morpeth-navy/65 to-morpeth-navy/85" />
-        </div>
+        <HeroVideo src="/video/parents-hero.mp4" />
 
         {/* Content layer */}
         <div className="relative mx-auto flex min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-16 text-center md:py-24">
@@ -953,8 +916,8 @@ export default function ParentsPage() {
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {/* open overlay (calendar for now) */}
-                <ChipButton label="View term dates" href="/term-dates" />
-                <ChipButton label="View full calendar" href="/calendar" />
+                <ChipButton label="View term dates" href="/term-dates" onOpen={openOverlay} />
+                <ChipButton label="View full calendar" href="/calendar" onOpen={openOverlay} />
                 <a href={subscribeHref} className={chip}>
                   Subscribe (webcal)
                 </a>
@@ -969,13 +932,13 @@ export default function ParentsPage() {
               </h2>
               <ul className="mt-3 grid gap-2 text-sm text-slate-800">
                 <li>
-                  <ChipButton label="Uniform & equipment" href="/uniform" />
+                  <ChipButton label="Uniform & equipment" href="/uniform" onOpen={openOverlay} />
                 </li>
                 <li>
-                  <ChipButton label="School lunches & menus" href="/school-lunches" />
+                  <ChipButton label="School lunches & menus" href="/school-lunches" onOpen={openOverlay} />
                 </li>
                 <li>
-                  <ChipButton label="Payments / ParentPay" href="/payments" />
+                  <ChipButton label="Payments / ParentPay" href="/payments" onOpen={openOverlay} />
                 </li>
               </ul>
             </article>
@@ -990,10 +953,10 @@ export default function ParentsPage() {
                 Keep up to date with messages, trip details and reports.
               </p>
             <div className="mt-4 flex flex-wrap gap-2">
-                <ChipButton label="Letters home" href="/letters-home" />
-                <ChipButton label="Edulink" href="/edulink" />
-                <ChipButton label="Supporting your child" href="/supporting-your-child" />
-                <ChipButton label="Contact us" href="/contact" />
+                <ChipButton label="Letters home" href="/letters-home" onOpen={openOverlay} />
+                <ChipButton label="Edulink" href="/edulink" onOpen={openOverlay} />
+                <ChipButton label="Supporting your child" href="/supporting-your-child" onOpen={openOverlay} />
+                <ChipButton label="Contact us" href="/contact" onOpen={openOverlay} />
               </div>
             </article>
 
@@ -1024,7 +987,7 @@ export default function ParentsPage() {
                 </p>
               </div>
               <div className="mt-4">
-                <ChipButton label="Attendance guidance" href="/attendance" />
+                <ChipButton label="Attendance guidance" href="/attendance" onOpen={openOverlay} />
               </div>
             </article>
 
@@ -1080,16 +1043,19 @@ export default function ParentsPage() {
                   label="Behaviour & anti-bullying"
                   href="/policies"
                   className={chipCompact}
+                  onOpen={openOverlay}
                 />
                 <ChipButton
                   label="Safeguarding & child protection"
                   href="/safeguarding"
                   className={chipCompact}
+                  onOpen={openOverlay}
                 />
                 <ChipButton
                   label="SEN information report"
                   href="/policies"
                   className={chipCompact}
+                  onOpen={openOverlay}
                 />
               </div>
             </article>
@@ -1104,16 +1070,18 @@ export default function ParentsPage() {
                   <ChipButton
                     label="Medication / medical updates"
                     href="/forms"
+                    onOpen={openOverlay}
                   />
                 </li>
                 <li>
                   <ChipButton
                     label="Free School Meals application"
                     href="/forms"
+                    onOpen={openOverlay}
                   />
                 </li>
                 <li>
-                  <ChipButton label="Trip consent" href="/forms" />
+                  <ChipButton label="Trip consent" href="/forms" onOpen={openOverlay} />
                 </li>
               </ul>
             </article>
@@ -1151,8 +1119,8 @@ export default function ParentsPage() {
 
           {/* CTA */}
           <div className="mt-8 flex flex-wrap gap-3">
-            <ChipButton label="Join our staff" href="/jobs" />
-            <ChipButton label="Contact the school" href="/contact" />
+            <ChipButton label="Join our staff" href="/jobs" onOpen={openOverlay} />
+            <ChipButton label="Contact the school" href="/contact" onOpen={openOverlay} />
           </div>
         </div>
       </section>

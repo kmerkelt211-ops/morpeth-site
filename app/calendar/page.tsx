@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 
 // Event shape coming from /api/events
 type CalendarEvent = {
@@ -10,7 +11,14 @@ type CalendarEvent = {
   category?: string;
 };
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+async function getBaseUrlFromRequest() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  if (!host) return process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const protocol =
+    h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
+  return `${protocol}://${host}`;
+}
 
 function formatMonthLabel(iso: string) {
   const d = new Date(iso);
@@ -125,8 +133,15 @@ export const metadata = {
 };
 
 export default async function CalendarPage() {
-  const res = await fetch(`${baseUrl}/api/events?limit=300`, { cache: "no-store" });
-  const events: CalendarEvent[] = res.ok ? await res.json() : [];
+  let events: CalendarEvent[] = [];
+
+  try {
+    const baseUrl = await getBaseUrlFromRequest();
+    const res = await fetch(`${baseUrl}/api/events?limit=300`, { cache: "no-store" });
+    events = res.ok ? await res.json() : [];
+  } catch {
+    events = [];
+  }
 
   // sort ascending
   events.sort((a, b) => +new Date(a.start) - +new Date(b.start));

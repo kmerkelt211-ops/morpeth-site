@@ -2,12 +2,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PortableText } from "@portabletext/react";
+import type { TypedObject } from "@portabletext/types";
 import { client } from "../../../sanity/client";
 import Image from "next/image";
 import imageUrlBuilder from "@sanity/image-url";
 
 const builder = imageUrlBuilder(client);
-const urlFor = (source: any) => builder.image(source);
+const urlFor = (source: Record<string, unknown>) => builder.image(source);
 
 export const revalidate = 60;
 export const dynamicParams = true;
@@ -36,7 +37,7 @@ type Post = {
   title: string;
   date: string;
   excerpt?: string;
-  body?: any;
+  body?: TypedObject[];
   hero?: {
     alt?: string;
     asset?: { _ref?: string; url?: string };

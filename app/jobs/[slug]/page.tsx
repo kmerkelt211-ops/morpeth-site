@@ -1,23 +1,58 @@
 import { notFound } from "next/navigation";
-import { client } from "../../../sanity/lib/client";
-import { PortableText } from "@portabletext/react";
+import { client } from "../../../sanity/client";
+import { PortableText, type PortableTextComponents } from "@portabletext/react";
+import type { TypedObject } from "@portabletext/types";
 import imageUrlBuilder from "@sanity/image-url";
+import Image from "next/image";
 
 type RouteParams = { params: Promise<{ slug: string }> };
 
 // Build Sanity image URLs
-const builder = imageUrlBuilder(client as any);
-const urlFor = (src: any) => builder.image(src);
+const builder = imageUrlBuilder(client as unknown as Parameters<typeof imageUrlBuilder>[0]);
+const urlFor = (src: string | Record<string, unknown>) => builder.image(src);
+
+type JobAttachment = {
+  _key: string;
+  url?: string;
+  name?: string;
+  size?: number;
+};
+
+type PortableImageValue = {
+  assetRef?: string;
+  asset?: { _ref?: string };
+  _ref?: string;
+  alt?: string;
+  caption?: string;
+};
+
+type PortableLinkMark = { href?: string };
+
+type JobPost = {
+  title: string;
+  department?: string;
+  jobType?: string;
+  contractType?: string;
+  salary?: string;
+  location?: string;
+  closingDate?: string;
+  summary?: string;
+  howToApply?: string;
+  contactEmail?: string;
+  body?: TypedObject[];
+  attachments?: JobAttachment[];
+};
 
 // Portable Text renderers (images, links, etc.)
-const ptComponents = {
+const ptComponents: PortableTextComponents = {
   types: {
-    image: ({ value }: any) => {
+    image: ({ value }) => {
+      const image = value as PortableImageValue | undefined;
       // Accept either assetRef (preferred) or an image object with asset._ref
       const ref =
-        value?.assetRef ||
-        value?.asset?._ref ||
-        (typeof value?._ref === "string" ? value._ref : null);
+        image?.assetRef ||
+        image?.asset?._ref ||
+        (typeof image?._ref === "string" ? image._ref : null);
 
       if (!ref) return null;
 
@@ -25,10 +60,16 @@ const ptComponents = {
 
       return (
         <figure className="my-6">
-          <img src={src} alt={value?.alt || ""} className="rounded-xl" />
-          {value?.caption ? (
+          <Image
+            src={src}
+            alt={image?.alt || ""}
+            width={1200}
+            height={800}
+            className="h-auto w-full rounded-xl"
+          />
+          {image?.caption ? (
             <figcaption className="mt-2 text-sm text-slate-500">
-              {value.caption}
+              {image.caption}
             </figcaption>
           ) : null}
         </figure>
@@ -36,16 +77,18 @@ const ptComponents = {
     },
   },
   marks: {
-    link: ({ children, value }: any) => (
+    link: ({ children, value }) => {
+      const link = value as PortableLinkMark | undefined;
+      return (
       <a
-        href={value?.href}
+        href={link?.href}
         target="_blank"
         rel="noreferrer"
         className="underline decoration-slate-400 hover:decoration-slate-700"
       >
         {children}
       </a>
-    ),
+    )},
   },
 };
 
@@ -89,7 +132,7 @@ export const revalidate = 60;
 // Metadata (Next 16: params is a Promise)
 export async function generateMetadata({ params }: RouteParams) {
   const { slug } = await params;
-  const job = await client.fetch(query, { slug });
+  const job = await client.fetch<JobPost | null>(query, { slug });
   return {
     title: job?.title
       ? `${job.title} | Vacancies | Morpeth School`
@@ -108,7 +151,7 @@ export async function generateStaticParams() {
 
 export default async function JobPage({ params }: RouteParams) {
   const { slug } = await params;
-  const job: any = await client.fetch(query, { slug });
+  const job = await client.fetch<JobPost | null>(query, { slug });
 
   if (!job) return notFound();
 
@@ -165,7 +208,7 @@ export default async function JobPage({ params }: RouteParams) {
         <section className="mt-10 rounded-xl border border-slate-200 bg-white p-6 shadow-card">
           <h2 className="font-heading text-xl">Documents</h2>
           <ul className="mt-3 space-y-2">
-            {job.attachments.map((doc: any) => (
+            {job.attachments.map((doc) => (
               <li key={doc._key}>
                 {doc.url ? (
                   <a

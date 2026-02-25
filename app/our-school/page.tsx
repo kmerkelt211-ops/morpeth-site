@@ -7,6 +7,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@sanity/client'
 import { motion } from 'framer-motion'
+import HeroVideo from '../components/HeroVideo'
+import { EXTERNAL_GALLERY_URL } from '../../lib/siteLinks'
 
 const sanityClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
@@ -124,7 +126,7 @@ export default function OurSchoolPage() {
     window.addEventListener('resize', syncToMiddle)
 
     return () => {
-      el.removeEventListener('scroll', onScroll as any)
+      el.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', syncToMiddle)
     }
   }, [])
@@ -146,18 +148,10 @@ export default function OurSchoolPage() {
     <main className="min-h-screen">
       {/* HERO */}
       <section className="relative isolate text-morpeth-light">
-        {/* Optional hero video (safe to leave missing until you add it) */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <video
-            className="h-full w-full object-cover"
-            autoPlay
-            muted
-            playsInline
-            loop
-            src="/video/our-school-hero.mp4"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/50 to-slate-900/20" />
-        </div>
+        <HeroVideo
+          src="/video/our-school-hero.mp4"
+          containerClassName="-z-10"
+        />
         <div className="relative mx-auto flex min-h-[60vh] md:min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-14 text-center md:py-24">
           <p className="text-xs uppercase tracking-[0.25em] text-morpeth-light/80">
             Morpeth School · Our School
@@ -936,7 +930,14 @@ export default function OurSchoolPage() {
                   <p className="mt-2 text-sm leading-relaxed text-slate-700">
                     We celebrate creative work across the school year. Visit our gallery to see recent exhibitions and student projects.
                   </p>
-                  <Link href="/gallery" className="mt-3 inline-flex rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100">Visit the gallery</Link>
+                  <a
+                    href={EXTERNAL_GALLERY_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
+                  >
+                    Visit the gallery
+                  </a>
                 </div>
               </div>
             </article>
@@ -1062,7 +1063,7 @@ export default function OurSchoolPage() {
                 Email: <a className="text-sky-700 hover:underline" href="mailto:enquiries@morpeth.towerhamlets.sch.uk">enquiries@morpeth.towerhamlets.sch.uk</a>
               </p>
               <div className="mt-3 flex flex-wrap gap-3">
-                <a href="/Documents/governors-code-of-conduct.pdf" target="_blank" rel="noopener noreferrer" className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100">Governors' Code of Conduct</a>
+                <a href="/Documents/governors-code-of-conduct.pdf" target="_blank" rel="noopener noreferrer" className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100">Governors&apos; Code of Conduct</a>
                 <a href="/Documents/governors-meeting-calendar.pdf" target="_blank" rel="noopener noreferrer" className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100">Meeting calendar</a>
               </div>
             </div>

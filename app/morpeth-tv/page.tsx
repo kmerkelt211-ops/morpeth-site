@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import { EXTERNAL_GALLERY_URL } from "../../lib/siteLinks"
 
 type VideoItem = {
   title: string
@@ -19,6 +20,14 @@ type SanityVideoDoc = {
   category?: "feature" | "news"
   dateLabel?: string
   order?: number
+}
+
+const DEFAULT_NEWS_VIDEO: VideoItem = {
+  title: "Morpeth News",
+  youtubeId: "dQw4w9WgXcQ",
+  category: "news",
+  strapline: "",
+  dateLabel: "",
 }
 
 function buildSanityQueryUrl() {
@@ -200,20 +209,11 @@ export default function MorpethTVPage() {
   const featureVideos = videos.filter((v) => v.category === "feature")
   const newsVideos = videos.filter((v) => v.category === "news")
 
-  const [selectedNews, setSelectedNews] = useState<VideoItem>(
-    newsVideos[0] ?? {
-      title: "Morpeth News",
-      youtubeId: "dQw4w9WgXcQ",
-      category: "news",
-      strapline: "",
-      dateLabel: "",
-    }
+  const [selectedNewsTitle, setSelectedNewsTitle] = useState<string | null>(null)
+  const selectedNews = useMemo(
+    () => newsVideos.find((n) => n.title === selectedNewsTitle) ?? newsVideos[0] ?? DEFAULT_NEWS_VIDEO,
+    [newsVideos, selectedNewsTitle]
   )
-
-  useEffect(() => {
-    // When videos update from Sanity, keep selectedNews valid.
-    if (newsVideos.length > 0) setSelectedNews((prev) => newsVideos.find((n) => n.title === prev.title) ?? newsVideos[0])
-  }, [newsVideos])
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -523,7 +523,7 @@ export default function MorpethTVPage() {
                     <button
                       key={v.title}
                       type="button"
-                      onClick={() => setSelectedNews(v)}
+                      onClick={() => setSelectedNewsTitle(v.title)}
                       className={[
                         "w-full text-left rounded-2xl px-4 py-3 ring-1 transition",
                         active
@@ -614,12 +614,14 @@ export default function MorpethTVPage() {
             >
               Email to join Morpeth TV
             </a>
-            <Link
-              href="/gallery"
+            <a
+              href={EXTERNAL_GALLERY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="rounded-full border border-white/30 px-5 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white hover:bg-white/10 transition"
             >
               Visit the Gallery
-            </Link>
+            </a>
           </div>
         </div>
         <NeonRibbon className="my-8" />

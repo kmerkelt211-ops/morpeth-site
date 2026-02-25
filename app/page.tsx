@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { sanityFetch } from "../sanity/client";
+import HeroVideo from "./components/HeroVideo";
 // Reusable button with shared hover/transition
 type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & { className?: string };
 const btnBase =
@@ -46,6 +47,35 @@ type ResultBarProps = {
   value: number; // percentage
   onDark?: boolean;
 };
+
+const NEWS_QUERY = `
+*[_type == "post" && defined(slug.current)]
+| order(coalesce(publishedAt, _createdAt) desc)[0...3]{
+  title,
+  "href": "/news/" + slug.current,
+  "date": coalesce(publishedAt, _createdAt),
+  excerpt,
+  "imageUrl": coalesce(mainImage.asset->url, coverImage.asset->url, image.asset->url),
+  "imageAlt": coalesce(mainImage.alt, coverImage.alt, title)
+}
+`;
+
+const RESULTS_QUERY = `
+{
+  "gcse": *[_type == "gcseResults"][0]{
+    "headline": headlineMetrics[]{
+      label,
+      value
+    }
+  },
+  "sixth": *[_type == "sixthFormResults"][0]{
+    "headline": aLevelHeadlineMetrics[]{
+      label,
+      value
+    }
+  }
+}
+`;
 
 function ResultBar({ label, value, onDark = false }: ResultBarProps) {
   const [visible, setVisible] = useState(false);
@@ -107,38 +137,12 @@ function ResultBar({ label, value, onDark = false }: ResultBarProps) {
 /* ===== HERO WITH DRONE VIDEO ===== */
 
 function Hero() {
-  const [videoReady, setVideoReady] = useState(false);
   return (
     <section className="relative bg-morpeth-navy text-morpeth-light">
-      {/* Background media (poster + video crossfade) */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        {/* Poster image as a stable background */}
-        <Image
-          src="/images/morpeth-drone-hero-poster.jpg"
-          alt="Morpeth School aerial view"
-          fill
-          priority
-          className="object-cover z-0"
-          sizes="100vw"
-        />
-
-        {/* Video fades in only after it's ready, to avoid a harsh flash */}
-        <video
-          className={`absolute inset-0 z-10 h-full w-full object-cover transition-opacity duration-300 ${videoReady ? "opacity-100" : "opacity-0"}`}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          onLoadedData={() => setVideoReady(true)}
-        >
-          <source src="/video/morpeth-drone-hero.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-
-        {/* Gradient overlay over both poster and video */}
-        <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/55 via-morpeth-navy/65 to-morpeth-navy/85" />
-      </div>
+      <HeroVideo
+        src="/video/morpeth-drone-hero.mp4"
+        preload="auto"
+      />
       {/* Content on top of video */}
       <div className="relative z-30 mx-auto flex min-h-[60vh] md:min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-16 text-center md:py-24">
         <p className="text-xs uppercase tracking-[0.25em] text-morpeth-light/80">
@@ -179,40 +183,6 @@ function Hero() {
   );
 }
 
-/* ===== KEY STATS STRIP ===== */
-
-function KeyStatsStrip() {
-  // TEMP values – we’ll plug real data in later
-  const stats = [
-    { label: "GCSE grades 9–4", value: "xx%" },
-    { label: "GCSE grades 9–7", value: "xx%" },
-    { label: "A level A*–B", value: "xx%" },
-    { label: "Students staying in education or training", value: "xx%" },
-  ];
-
-  return (
-    <section className="bg-morpeth-offwhite">
-      <div className="mx-auto max-w-6xl px-4 py-6 md:py-7">
-        <div className="grid grid-cols-2 gap-4 border-y border-slate-200 py-4 text-sm md:flex md:flex-wrap md:items-center md:justify-between md:gap-4 md:text-[15px]">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="min-w-0 border-slate-200/70 text-sm md:min-w-[10rem] md:flex-1 md:text-[15px]"
-            >
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                {stat.label}
-              </p>
-              <p className="mt-1 text-xl font-heading text-morpeth-navy">
-                {stat.value}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 // ===== GENERIC SCROLL REVEAL COMPONENT =====
 type RevealProps = {
   children: React.ReactNode;
@@ -221,9 +191,16 @@ type RevealProps = {
   direction?: "up" | "down" | "left" | "right";
 };
 
-// Simplified: no scroll-based animation, just a pass-through wrapper
-function Reveal({ children, className = "" }: RevealProps) {
-  return <div className={className}>{children}</div>;
+function Reveal({ children, delay = 0, className = "", direction = "up" }: RevealProps) {
+  return (
+    <div
+      className={className}
+      data-reveal={direction}
+      style={{ "--reveal-delay": `${delay}ms` } as React.CSSProperties}
+    >
+      {children}
+    </div>
+  );
 }
 
 /* ===== UPCOMING EVENTS (from ICS via API) ===== */
@@ -250,7 +227,7 @@ function UpcomingEvents() {
         if (!res.ok) throw new Error("Failed to load events");
         const data = (await res.json()) as CalendarEvent[];
         setEvents(Array.isArray(data) ? data : []);
-      } catch (e: any) {
+      } catch {
         setError("Calendar unavailable right now.");
         setEvents([]);
       } finally {
@@ -311,12 +288,12 @@ function UpcomingEvents() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2 md:justify-end">
-              <a
+              <Link
                 href="/calendar"
                 className="rounded-full border border-morpeth-navy/30 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-morpeth-navy transition hover:-translate-y-0.5 hover:shadow-sm"
               >
                 View full calendar
-              </a>
+              </Link>
               <a
                 href={subscribeHref}
                 className="rounded-full border border-morpeth-navy/30 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-morpeth-navy transition hover:-translate-y-0.5 hover:shadow-sm"
@@ -356,6 +333,16 @@ function UpcomingEvents() {
               </div>
             )}
 
+            {!loading && !error && events.length === 0 && (
+              <div className="min-w-[240px] flex-shrink-0 snap-start rounded-xl bg-morpeth-offwhite p-4 text-sm text-slate-700 shadow-card">
+                No upcoming events to show right now.{" "}
+                <Link href="/calendar" className="font-semibold text-morpeth-navy underline underline-offset-4">
+                  Open the full calendar
+                </Link>
+                .
+              </div>
+            )}
+
             {!loading &&
               !error &&
               events.map((ev, i) => (
@@ -392,19 +379,6 @@ function LatestNews() {
     imageUrl?: string;
     imageAlt?: string;
   };
-
-  const NEWS_QUERY = `
-  *[_type == "post" && defined(slug.current)]
-  | order(coalesce(publishedAt, _createdAt) desc)[0...3]{
-    title,
-    "href": "/news/" + slug.current,
-    "date": coalesce(publishedAt, _createdAt),
-    excerpt,
-    // Try a few common image field names; whichever exists will be used
-    "imageUrl": coalesce(mainImage.asset->url, coverImage.asset->url, image.asset->url),
-    "imageAlt": coalesce(mainImage.alt, coverImage.alt, title)
-  }
-  `;
 
   const [posts, setPosts] = useState<NewsCard[]>([]);
   const [idx, setIdx] = useState(0);
@@ -554,23 +528,6 @@ function ResultsSection() {
     value: number;
   };
 
-  const RESULTS_QUERY = `
-  {
-    "gcse": *[_type == "gcseResults"][0]{
-      "headline": headlineMetrics[]{
-        label,
-        value
-      }
-    },
-    "sixth": *[_type == "sixthFormResults"][0]{
-      "headline": aLevelHeadlineMetrics[]{
-        label,
-        value
-      }
-    }
-  }
-  `;
-
   const defaultGcseBars: Metric[] = [
     { label: "Grade 5+ in English & Maths", value: 65 },
     { label: "Grades 9–7 (all subjects)", value: 30 },
@@ -708,15 +665,8 @@ type RevealCardProps = {
   delay?: number;
 };
 
-// Simplified: static card wrapper, no scroll or wipe animation
-function RevealCard({ children }: RevealCardProps) {
-  return (
-    <div className="relative">
-      <div className="relative z-10">
-        {children}
-      </div>
-    </div>
-  );
+function RevealCard({ children, delay = 0 }: RevealCardProps) {
+  return <Reveal delay={delay}>{children}</Reveal>;
 }
 
 /* ===== LIFE AT MORPETH ===== */

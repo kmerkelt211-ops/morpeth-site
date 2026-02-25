@@ -1,6 +1,7 @@
 "use client";
 // app/school-lunches/page.tsx
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@sanity/client";
 
@@ -22,6 +23,9 @@ export default function SchoolLunchesPage() {
     specialMenuLabel?: string;
     images?: { url: string; alt?: string }[];
   };
+
+  const getErrorMessage = (error: unknown) =>
+    error instanceof Error ? error.message : "Load failed";
 
   const sanity = useMemo(() => {
     const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
@@ -82,7 +86,7 @@ export default function SchoolLunchesPage() {
             specialMenuPdfUrl: data.specialMenuPdfUrl,
             specialMenuLabel: data.specialMenuLabel,
             images: Array.isArray(data.images)
-              ? data.images.filter((i: any) => i?.url)
+              ? data.images.filter((i: { url?: string; alt?: string }) => Boolean(i?.url)) as { url: string; alt?: string }[]
               : [],
           });
           setMenuError(null);
@@ -92,12 +96,12 @@ export default function SchoolLunchesPage() {
             'No published School menu found. Create a School menu in Studio, upload the PDF + images, and publish it.'
           );
         }
-      } catch (e: any) {
-        console.error("Failed to load school menu from Sanity", e);
+      } catch (error: unknown) {
+        console.error("Failed to load school menu from Sanity", error);
         if (!cancelled) {
           setMenu(null);
           setMenuError(
-            `Error loading menu from Sanity: ${e?.message || "Load failed"}. Check the browser console for details.`
+            `Error loading menu from Sanity: ${getErrorMessage(error)}. Check the browser console for details.`
           );
         }
       }
@@ -334,12 +338,13 @@ export default function SchoolLunchesPage() {
                   className="block overflow-hidden rounded-xl"
                   aria-label="Open menu image"
                 >
-                  <div className="flex h-[520px] w-full items-center justify-center rounded-xl bg-white/5">
-                    <img
+                  <div className="relative flex h-[520px] w-full items-center justify-center rounded-xl bg-white/5">
+                    <Image
                       src={activeMenuImage.url}
                       alt={activeMenuImage.alt || "Menu"}
+                      fill
+                      sizes="(min-width: 768px) 360px, 100vw"
                       className="h-full w-full rounded-xl object-contain"
-                      loading="lazy"
                     />
                   </div>
                 </a>
@@ -387,11 +392,12 @@ export default function SchoolLunchesPage() {
                         }
                         aria-label={`View menu image ${idx + 1}`}
                       >
-                        <img
+                        <Image
                           src={img.url}
                           alt={img.alt || `Menu ${idx + 1}`}
+                          fill
+                          sizes="80px"
                           className="h-full w-full object-cover"
-                          loading="lazy"
                         />
                       </button>
                     ))}

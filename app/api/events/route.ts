@@ -4,6 +4,15 @@ export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
 import * as ical from 'node-ical';
 
+type IcalEventCandidate = {
+  type?: string;
+  summary?: string;
+  start?: Date | string;
+  end?: Date | string;
+  location?: string;
+  url?: string;
+};
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -20,9 +29,9 @@ export async function GET(req: Request) {
 
     const now = Date.now() - 24 * 60 * 60 * 1000; // keep events from yesterday onwards
 
-    const events = Object.values<any>(data)
-      .filter((e: any) => e?.type === 'VEVENT' && e.summary && e.start)
-      .map((e: any) => ({
+    const events = Object.values(data as Record<string, IcalEventCandidate>)
+      .filter((e) => e?.type === 'VEVENT' && e.summary && e.start)
+      .map((e) => ({
         title: e.summary as string,
         start: e.start instanceof Date ? e.start.toISOString() : String(e.start),
         end: e.end instanceof Date ? e.end.toISOString() : (e.end ? String(e.end) : undefined),

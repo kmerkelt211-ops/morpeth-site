@@ -3,7 +3,6 @@ import house from "../schemas/house";
 import houseUpdate from "../schemas/houseUpdate";
 import coachingCircles from "../schemas/coachingCircles";
 import letter from "../schemas/letter";
-import galleryExhibition from "../schemas/galleryExhibition";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -646,6 +645,5 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     houseUpdate,
     coachingCircles,
     letter,
-    galleryExhibition,
   ],
 };

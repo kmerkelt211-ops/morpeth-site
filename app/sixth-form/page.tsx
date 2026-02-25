@@ -3,6 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useState } from "react"
+import HeroVideo from "../components/HeroVideo"
 
 export default function SixthFormPage() {
   const [welcomeExpanded, setWelcomeExpanded] = useState(false)
@@ -16,19 +17,7 @@ export default function SixthFormPage() {
     <main className="min-h-screen bg-slate-50">
       {/* HERO – matches main site hero pattern */}
       <section className="relative bg-morpeth-navy text-morpeth-light">
-        {/* Background video (optional – safe if missing, just shows solid colour) */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-          <video
-            className="h-full w-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src="/video/sixth-form-hero.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-morpeth-navy/35 to-transparent" />
-        </div>
+        <HeroVideo src="/video/sixth-form-hero.mp4" />
 
         {/* Content layer */}
         <div className="relative z-10 mx-auto flex min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-16 text-center md:py-24">

@@ -1,5 +1,6 @@
 // app/news/page.tsx
 import Link from "next/link";
+import Image from "next/image";
 import { client } from "../../sanity/client";
 
 export const revalidate = 60;
@@ -55,11 +56,12 @@ export default async function NewsIndex() {
               >
                 {p.imageUrl ? (
                   <div className="relative h-36 md:h-44 w-full overflow-hidden">
-                    <img
+                    <Image
                       src={p.imageUrl}
                       alt={p.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      loading="lazy"
+                      fill
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-12 md:h-20 bg-gradient-to-t from-black/60 to-transparent" />
                   </div>
