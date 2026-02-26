@@ -28,9 +28,12 @@ If you need raw access, use **All Document Types**.
 In **Site settings**:
 
 - `Global hero video URL` sets the default hero video used across the website.
+- `Global hero video file (upload)` can be used instead of URL, and takes priority over global URL.
 - `Per-page hero overrides` lets you change specific pages without affecting others.
   Leave an override blank to use the global default.
+- `Per-page hero file overrides (upload)` can override global settings for individual pages.
 - `Global hero video WebM URL` and `Per-page hero WebM overrides` are optional, but recommended for faster load.
+- `Global hero video WebM file (upload)` and `Per-page hero WebM file overrides` are optional upload-based WebM equivalents.
 
 ## Developer notes
 

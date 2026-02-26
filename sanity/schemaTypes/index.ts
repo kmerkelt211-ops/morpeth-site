@@ -292,11 +292,27 @@ export const schema: { types: SchemaTypeDefinition[] } = {
             "Default hero video for all pages. Use an MP4/WebM URL. Individual page overrides below are optional.",
         }),
         defineField({
+          name: "heroVideoFile",
+          title: "Global hero video file (upload)",
+          type: "file",
+          options: { accept: "video/*", storeOriginalFilename: true },
+          description:
+            "Upload a global hero video file. If set, this is preferred over the global URL.",
+        }),
+        defineField({
           name: "heroVideoWebmUrl",
           title: "Global hero video WebM URL (optional)",
           type: "url",
           description:
             "Optional WebM source used before MP4 for faster delivery on supported browsers.",
+        }),
+        defineField({
+          name: "heroVideoWebmFile",
+          title: "Global hero video WebM file (upload, optional)",
+          type: "file",
+          options: { accept: "video/webm", storeOriginalFilename: true },
+          description:
+            "Upload a global WebM file for faster delivery. If set, this is preferred over the global WebM URL.",
         }),
         defineField({
           name: "heroVideoOverrides",
@@ -321,6 +337,55 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           ],
         }),
         defineField({
+          name: "heroVideoFileOverrides",
+          title: "Per-page hero file overrides (upload, optional)",
+          type: "object",
+          fields: [
+            defineField({
+              name: "home",
+              title: "Home hero video file",
+              type: "file",
+              options: { accept: "video/*", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "ourSchool",
+              title: "Our School hero video file",
+              type: "file",
+              options: { accept: "video/*", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "teachingLearning",
+              title: "Teaching & Learning hero video file",
+              type: "file",
+              options: { accept: "video/*", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "sixthForm",
+              title: "Sixth Form hero video file",
+              type: "file",
+              options: { accept: "video/*", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "extracurricular",
+              title: "Extracurricular hero video file",
+              type: "file",
+              options: { accept: "video/*", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "parents",
+              title: "Parents hero video file",
+              type: "file",
+              options: { accept: "video/*", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "staff",
+              title: "Staff hero video file",
+              type: "file",
+              options: { accept: "video/*", storeOriginalFilename: true },
+            }),
+          ],
+        }),
+        defineField({
           name: "heroVideoWebmOverrides",
           title: "Per-page hero WebM overrides (optional)",
           type: "object",
@@ -340,6 +405,55 @@ export const schema: { types: SchemaTypeDefinition[] } = {
             }),
             defineField({ name: "parents", title: "Parents hero WebM URL", type: "url" }),
             defineField({ name: "staff", title: "Staff hero WebM URL", type: "url" }),
+          ],
+        }),
+        defineField({
+          name: "heroVideoWebmFileOverrides",
+          title: "Per-page hero WebM file overrides (upload, optional)",
+          type: "object",
+          fields: [
+            defineField({
+              name: "home",
+              title: "Home hero WebM file",
+              type: "file",
+              options: { accept: "video/webm", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "ourSchool",
+              title: "Our School hero WebM file",
+              type: "file",
+              options: { accept: "video/webm", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "teachingLearning",
+              title: "Teaching & Learning hero WebM file",
+              type: "file",
+              options: { accept: "video/webm", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "sixthForm",
+              title: "Sixth Form hero WebM file",
+              type: "file",
+              options: { accept: "video/webm", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "extracurricular",
+              title: "Extracurricular hero WebM file",
+              type: "file",
+              options: { accept: "video/webm", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "parents",
+              title: "Parents hero WebM file",
+              type: "file",
+              options: { accept: "video/webm", storeOriginalFilename: true },
+            }),
+            defineField({
+              name: "staff",
+              title: "Staff hero WebM file",
+              type: "file",
+              options: { accept: "video/webm", storeOriginalFilename: true },
+            }),
           ],
         }),
         // NEW: Year 5 film fields
