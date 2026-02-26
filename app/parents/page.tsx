@@ -44,6 +44,7 @@ type ParentsAttendanceContent = {
     emailLabel: string;
     emailAddress: string;
     buttonLabel: string;
+    buttonHelper: string;
   };
   modal: {
     heading: string;
@@ -88,7 +89,8 @@ const DEFAULT_ATTENDANCE_CONTENT: ParentsAttendanceContent = {
     phoneHref: "tel:02088981000",
     emailLabel: "Email",
     emailAddress: "attendance@morpethschool.org.uk",
-    buttonLabel: "Attendance guidance",
+    buttonLabel: "Open attendance & absence guidance",
+    buttonHelper: "Opens a guidance window on this page.",
   },
   modal: {
     heading: "Attendance & absence",
@@ -326,6 +328,9 @@ export default function ParentsPage() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, closeOverlay]);
+
+  const overlayHeading =
+    active?.href === "/attendance" ? attendanceContent.modal.heading : active?.label;
 
   // Hide header on scroll down
   useEffect(() => {
@@ -1185,6 +1190,9 @@ export default function ParentsPage() {
                   href="/attendance"
                   onOpen={openOverlay}
                 />
+                <p className="mt-2 text-xs text-slate-600">
+                  {attendanceContent.card.buttonHelper}
+                </p>
               </div>
             </article>
 
@@ -1336,9 +1344,16 @@ export default function ParentsPage() {
         >
           <div className="relative w-full max-w-5xl h-[85vh] rounded-2xl bg-white ring-1 ring-slate-300 shadow-2xl overflow-hidden">
             <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
-              <h2 className="font-heading text-[13px] uppercase tracking-[0.22em] text-morpeth-navy">
-                {active.label}
-              </h2>
+              <div>
+                <h2 className="font-heading text-[13px] uppercase tracking-[0.22em] text-morpeth-navy">
+                  {overlayHeading}
+                </h2>
+                {active.href === "/attendance" ? (
+                  <p className="mt-1 text-xs text-slate-600">
+                    Use this window for absence reporting, attendance bands and policy details.
+                  </p>
+                ) : null}
+              </div>
               <div className="flex items-center gap-2">
                 {/* fallback open in a new tab if needed */}
                 {!["/uniform", "/payments", "/attendance", "/safeguarding"].includes(active.href) ? (

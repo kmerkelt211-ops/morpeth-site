@@ -1,24 +1,7 @@
 import Link from "next/link";
-import { headers } from "next/headers";
+import { getCalendarEvents, type CalendarEvent } from "../../lib/calendarEvents";
 
-// Event shape coming from /api/events
-type CalendarEvent = {
-  title: string;
-  start: string; // ISO
-  end?: string; // ISO
-  location?: string;
-  url?: string;
-  category?: string;
-};
-
-async function getBaseUrlFromRequest() {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  if (!host) return process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const protocol =
-    h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
-  return `${protocol}://${host}`;
-}
+type CalendarEventView = CalendarEvent & { category?: string };
 
 function formatMonthLabel(iso: string) {
   const d = new Date(iso);
@@ -127,21 +110,14 @@ function MonthNav({ months, currentMonth }: { months: string[]; currentMonth: st
 }
 
 export const revalidate = 0; // always fresh
+export const runtime = "nodejs";
 
 export const metadata = {
   title: "School calendar",
 };
 
 export default async function CalendarPage() {
-  let events: CalendarEvent[] = [];
-
-  try {
-    const baseUrl = await getBaseUrlFromRequest();
-    const res = await fetch(`${baseUrl}/api/events?limit=300`, { cache: "no-store" });
-    events = res.ok ? await res.json() : [];
-  } catch {
-    events = [];
-  }
+  const events: CalendarEventView[] = await getCalendarEvents(300);
 
   // sort ascending
   events.sort((a, b) => +new Date(a.start) - +new Date(b.start));
@@ -151,7 +127,7 @@ export default async function CalendarPage() {
     const key = formatMonthLabel(ev.start);
     (acc[key] ||= []).push(ev);
     return acc;
-  }, {} as Record<string, CalendarEvent[]>);
+  }, {} as Record<string, CalendarEventView[]>);
 
   const today = new Date();
   const months = Object.keys(grouped);

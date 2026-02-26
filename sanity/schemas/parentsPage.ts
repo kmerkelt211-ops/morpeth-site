@@ -8,9 +8,10 @@ export default defineType({
   fields: [
     defineField({
       name: "attendanceCard",
-      title: "Attendance card",
+      title: "Attendance card (Parents page)",
       type: "object",
       group: "attendance",
+      description: "This card appears on the Parents page before the popup opens.",
       fields: [
         defineField({ name: "eyebrow", title: "Eyebrow", type: "string" }),
         defineField({ name: "title", title: "Title", type: "string" }),
@@ -20,16 +21,23 @@ export default defineType({
         defineField({ name: "phoneHref", title: "Phone link (tel:...)", type: "string" }),
         defineField({ name: "emailLabel", title: "Email label", type: "string" }),
         defineField({ name: "emailAddress", title: "Email address", type: "string" }),
-        defineField({ name: "buttonLabel", title: "Guidance button label", type: "string" }),
+        defineField({ name: "buttonLabel", title: "Button label (opens popup)", type: "string" }),
+        defineField({
+          name: "buttonHelper",
+          title: "Button helper text",
+          type: "string",
+          description: "Short line under the button to explain that it opens a popup window.",
+        }),
       ],
     }),
     defineField({
       name: "attendanceModal",
-      title: "Attendance guidance modal",
+      title: "Attendance & absence popup content",
       type: "object",
       group: "attendance",
+      description: "These fields control the Attendance & Absence popup window on the Parents page.",
       fields: [
-        defineField({ name: "heading", title: "Main heading", type: "string" }),
+        defineField({ name: "heading", title: "Popup heading", type: "string" }),
         defineField({ name: "whyTitle", title: "Why it matters title", type: "string" }),
         defineField({
           name: "whyParagraphs",

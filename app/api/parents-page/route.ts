@@ -11,7 +11,8 @@ const QUERY = `*[_type == "parentsPage"][0]{
     phoneHref,
     emailLabel,
     emailAddress,
-    buttonLabel
+    buttonLabel,
+    buttonHelper
   },
   attendanceModal{
     heading,

@@ -264,9 +264,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </div>
 
                 <div className="md:pl-4">
-                  <h3 className="sr-only">Find us</h3>
-                  <div className="mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-md">
-                    <div className="hidden md:block h-72 sm:h-80 md:h-[22rem] lg:h-[24rem]">
+                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.25em] text-slate-500">
+                    Find us
+                  </h3>
+                  <p className="mt-2 text-xs text-slate-600">
+                    Interactive map and quick directions to the school.
+                  </p>
+
+                  <div className="mt-3 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg">
+                    <div className="relative h-64 sm:h-72 md:h-[22rem] lg:h-[24rem]">
                       <iframe
                         title="Map showing Morpeth School location"
                         src="https://www.openstreetmap.org/export/embed.html?bbox=-0.052694%2C51.521544%2C-0.042694%2C51.531544&layer=mapnik&marker=51.526544%2C-0.047694"
@@ -275,32 +281,30 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                         referrerPolicy="no-referrer-when-downgrade"
                         allowFullScreen
                       />
-                    </div>
-                    <div className="md:hidden h-56 flex items-center justify-center bg-slate-100">
-                      <div className="px-6 text-center">
-                        <p className="text-sm font-semibold text-morpeth-navy">Map preview</p>
-                        <p className="mt-1 text-xs text-slate-600">
-                          Tap a link below to open directions.
-                        </p>
+                      <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-morpeth-navy shadow-sm">
+                        Morpeth School, E2 0PX
                       </div>
                     </div>
-                    <div className="border-t border-slate-200/70 px-4 py-3 text-xs text-slate-600 flex flex-wrap items-center gap-x-5 gap-y-2">
-                      <Link
-                        href="https://www.google.com/maps?q=51.526544,-0.047694"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-semibold text-morpeth-navy underline underline-offset-4 hover:opacity-80"
-                      >
-                        Open in Google Maps
-                      </Link>
-                      <Link
-                        href="https://maps.apple.com/?q=Morpeth%20School&ll=51.526544,-0.047694"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-semibold text-morpeth-navy underline underline-offset-4 hover:opacity-80"
-                      >
-                        Open in Apple Maps
-                      </Link>
+
+                    <div className="border-t border-slate-200/70 p-3">
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <Link
+                          href="https://www.google.com/maps?q=51.526544,-0.047694"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center rounded-full border border-morpeth-navy/25 bg-morpeth-light/35 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-morpeth-navy transition hover:bg-morpeth-light/55"
+                        >
+                          Open in Google Maps
+                        </Link>
+                        <Link
+                          href="https://maps.apple.com/?q=Morpeth%20School&ll=51.526544,-0.047694"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center rounded-full border border-morpeth-navy/25 bg-morpeth-light/35 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-morpeth-navy transition hover:bg-morpeth-light/55"
+                        >
+                          Open in Apple Maps
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 </div>
