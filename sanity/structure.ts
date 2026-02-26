@@ -39,11 +39,32 @@ export const structure: StructureResolver = (S) =>
                     ])
                 ),
               S.listItem()
+                .title('Teaching & Learning')
+                .child(
+                  S.document()
+                    .schemaType('teachingLearningPage')
+                    .documentId('teachingLearningPage')
+                ),
+              S.listItem()
+                .title('Extracurricular')
+                .child(
+                  S.document()
+                    .schemaType('extracurricularPage')
+                    .documentId('extracurricularPage')
+                ),
+              S.listItem()
                 .title('Parents')
                 .child(
                   S.list()
                     .title('Parents')
                     .items([
+                      S.listItem()
+                        .title('Parents page')
+                        .child(
+                          S.document()
+                            .schemaType('parentsPage')
+                            .documentId('parentsPage')
+                        ),
                       S.documentTypeListItem('letter').title('Letters home'),
                       S.documentTypeListItem('schoolMenu').title('School lunches'),
                     ])

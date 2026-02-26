@@ -66,9 +66,29 @@ export default function ContentAdminPage() {
           </article>
 
           <article className={card}>
-            <h2 className="font-heading text-lg uppercase tracking-[0.14em] text-morpeth-navy">Parents</h2>
-            <p className="mt-2 text-sm text-slate-700">Letters home and school lunch documents.</p>
+            <h2 className="font-heading text-lg uppercase tracking-[0.14em] text-morpeth-navy">Teaching & Learning</h2>
+            <p className="mt-2 text-sm text-slate-700">Hero, KS3 section, subject cards, and support card content.</p>
             <div className="mt-3 flex flex-wrap gap-2">
+              <span className={chip}>Teaching page</span>
+              <span className={chip}>Subject videos</span>
+            </div>
+          </article>
+
+          <article className={card}>
+            <h2 className="font-heading text-lg uppercase tracking-[0.14em] text-morpeth-navy">Extracurricular</h2>
+            <p className="mt-2 text-sm text-slate-700">Hero, enrichment sections, and club video card content.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className={chip}>Extracurricular page</span>
+              <span className={chip}>Club videos</span>
+            </div>
+          </article>
+
+          <article className={card}>
+            <h2 className="font-heading text-lg uppercase tracking-[0.14em] text-morpeth-navy">Parents</h2>
+            <p className="mt-2 text-sm text-slate-700">Letters home, school lunch documents, and attendance guidance content.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className={chip}>Parents page</span>
+              <span className={chip}>Attendance</span>
               <span className={chip}>Letters</span>
               <span className={chip}>School menu</span>
             </div>

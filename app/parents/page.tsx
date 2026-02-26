@@ -23,6 +23,230 @@ const sectionTitle =
   "text-[10px] font-semibold uppercase tracking-[0.28em] text-morpeth-mid";
 
 type QuickLink = { label: string; href: string };
+type AttendanceScaleTone = "brightGreen" | "green" | "amber" | "red";
+
+type AttendanceScaleRow = {
+  judgement: string;
+  attendance: string;
+  daysAbsent: string;
+  tone: AttendanceScaleTone;
+  summaryText?: string;
+};
+
+type ParentsAttendanceContent = {
+  card: {
+    eyebrow: string;
+    title: string;
+    description: string;
+    phoneLabel: string;
+    phoneDisplay: string;
+    phoneHref: string;
+    emailLabel: string;
+    emailAddress: string;
+    buttonLabel: string;
+  };
+  modal: {
+    heading: string;
+    whyTitle: string;
+    whyParagraphs: string[];
+    scaleTitle: string;
+    scaleIntroParagraphs: string[];
+    scaleRows: AttendanceScaleRow[];
+    summaryTitle: string;
+    reportingTitle: string;
+    reportingParagraphs: string[];
+    reportingPhoneLabel: string;
+    reportingPhoneDisplay: string;
+    reportingPhoneHref: string;
+    reportingEmailLabel: string;
+    reportingEmailAddress: string;
+    punctualityTitle: string;
+    punctualityParagraphs: string[];
+    concernTitle: string;
+    concernParagraphs: string[];
+    termTimeTitle: string;
+    termTimeParagraphs: string[];
+    policyTitle: string;
+    policyParagraphs: string[];
+    policyButtonLabel: string;
+    policyButtonHref: string;
+  };
+};
+
+type PartialParentsResponse = Partial<{
+  attendanceCard: Partial<ParentsAttendanceContent["card"]>;
+  attendanceModal: Partial<ParentsAttendanceContent["modal"]>;
+}>;
+
+const DEFAULT_ATTENDANCE_CONTENT: ParentsAttendanceContent = {
+  card: {
+    eyebrow: "Attendance",
+    title: "Attendance & absence",
+    description: "Good attendance is essential for progress. Please report any absence before 8:30am.",
+    phoneLabel: "Phone",
+    phoneDisplay: "020 8898 1000",
+    phoneHref: "tel:02088981000",
+    emailLabel: "Email",
+    emailAddress: "attendance@morpethschool.org.uk",
+    buttonLabel: "Attendance guidance",
+  },
+  modal: {
+    heading: "Attendance & absence",
+    whyTitle: "Why it matters",
+    whyParagraphs: [
+      "We want every child to be in school, on time, every day they are well enough to attend. Good attendance supports learning, friendships and wellbeing.",
+      "Even a few days off each term can quickly add up and mean important learning is missed or hard to catch up on.",
+    ],
+    scaleTitle: "How we judge attendance",
+    scaleIntroParagraphs: [
+      "Good attendance and punctuality underpins academic achievement and wellbeing. Students with great attendance are far more likely to succeed beyond school and be adults who live happy, healthy lives.",
+      "At Morpeth, we judge attendance on the following scale:",
+    ],
+    scaleRows: [
+      {
+        judgement: "Excellent",
+        attendance: "98%+",
+        daysAbsent: "Absent for 4 days or less",
+        tone: "brightGreen",
+        summaryText: "98%+ attendance (absent for 4 days or less in a school year).",
+      },
+      {
+        judgement: "Good",
+        attendance: "95–97%",
+        daysAbsent: "Absent for 9 days or less",
+        tone: "green",
+        summaryText: "95–97% attendance (absent for up to 9 days in a school year).",
+      },
+      {
+        judgement: "Concern",
+        attendance: "90–94%",
+        daysAbsent: "Between 11 and 19 days off school",
+        tone: "amber",
+        summaryText: "90–94% attendance (between 11 and 19 days off school).",
+      },
+      {
+        judgement: "Serious concern",
+        attendance: "Below 90%",
+        daysAbsent: "More than 19 days off school",
+        tone: "red",
+        summaryText: "Below 90% attendance (more than 19 days off school).",
+      },
+    ],
+    summaryTitle: "In summary:",
+    reportingTitle: "Reporting an absence",
+    reportingParagraphs: [
+      "If your child is unwell and cannot attend school, please contact us before 8:30am on each day of absence.",
+      "Please tell us your child's full name, tutor group and the reason for their absence. Let us know how long you expect them to be off and update us if this changes.",
+    ],
+    reportingPhoneLabel: "Phone",
+    reportingPhoneDisplay: "020 8898 1000",
+    reportingPhoneHref: "tel:02088981000",
+    reportingEmailLabel: "Email",
+    reportingEmailAddress: "attendance@morpethschool.org.uk",
+    punctualityTitle: "Punctuality",
+    punctualityParagraphs: [
+      "Arriving on time helps pupils start the day calmly and not miss tutor time or the beginning of lessons.",
+      "Persistent lateness, even by a few minutes, can add up to hours of lost learning over a term and may be recorded as unauthorised absence after the register has closed.",
+    ],
+    concernTitle: "If we are worried about attendance",
+    concernParagraphs: [
+      "We will always try to work with families to remove barriers to good attendance. This might include phone calls, letters, meetings in school and support from our pastoral team.",
+      "Where attendance does not improve and remains low, we may need to involve the local authority Education Welfare Service, and in some cases formal action or penalty notices may be considered.",
+    ],
+    termTimeTitle: "Term-time leave & appointments",
+    termTimeParagraphs: [
+      "Please try to arrange medical and dental appointments outside of the school day wherever possible. If this cannot be avoided, your child should attend school for part of the day before or after the appointment.",
+      "Family holidays should not be taken during term time. Requests for leave can only be authorised in genuinely exceptional circumstances and may require evidence.",
+    ],
+    policyTitle: "Full attendance & punctuality policy",
+    policyParagraphs: [
+      "If you would like more detail about how we monitor, support and celebrate attendance, you can read our full Attendance and Punctuality Policy. It explains our approach, the legal framework and the roles of students, families and staff.",
+      "The policy also sets out the staged intervention process we use to support pupils whose attendance drops, and how we work with the local authority where attendance remains a serious concern.",
+    ],
+    policyButtonLabel: "Download Attendance & Punctuality Policy (PDF)",
+    policyButtonHref: "/Documents/Morpeth-School-Attendance-and-Punctuality-Policy-2024-25.pdf",
+  },
+};
+
+const scaleToneClasses: Record<
+  AttendanceScaleTone,
+  { mobile: string; desktop: string; desktopText: string }
+> = {
+  brightGreen: {
+    mobile: "bg-[#b7f66a] text-slate-900",
+    desktop: "bg-[#b7f66a]",
+    desktopText: "text-slate-900",
+  },
+  green: {
+    mobile: "bg-[#9cd062] text-slate-900",
+    desktop: "bg-[#9cd062]",
+    desktopText: "text-slate-900",
+  },
+  amber: {
+    mobile: "bg-[#f4a05c] text-slate-900",
+    desktop: "bg-[#f4a05c]",
+    desktopText: "text-slate-900",
+  },
+  red: {
+    mobile: "bg-[#f2574f] text-white",
+    desktop: "bg-[#f2574f]",
+    desktopText: "text-white",
+  },
+};
+
+function mergeAttendanceContent(
+  raw: PartialParentsResponse | null | undefined
+): ParentsAttendanceContent {
+  if (!raw) return DEFAULT_ATTENDANCE_CONTENT;
+
+  const card = { ...DEFAULT_ATTENDANCE_CONTENT.card, ...(raw.attendanceCard ?? {}) };
+  const modal = {
+    ...DEFAULT_ATTENDANCE_CONTENT.modal,
+    ...(raw.attendanceModal ?? {}),
+    whyParagraphs:
+      raw.attendanceModal?.whyParagraphs?.length
+        ? raw.attendanceModal.whyParagraphs
+        : DEFAULT_ATTENDANCE_CONTENT.modal.whyParagraphs,
+    scaleIntroParagraphs:
+      raw.attendanceModal?.scaleIntroParagraphs?.length
+        ? raw.attendanceModal.scaleIntroParagraphs
+        : DEFAULT_ATTENDANCE_CONTENT.modal.scaleIntroParagraphs,
+    scaleRows:
+      raw.attendanceModal?.scaleRows?.length
+        ? raw.attendanceModal.scaleRows
+            .filter(
+              (row): row is AttendanceScaleRow =>
+                !!row?.judgement && !!row?.attendance && !!row?.daysAbsent
+            )
+            .map((row) => ({
+              ...row,
+              tone: row.tone || "brightGreen",
+            }))
+        : DEFAULT_ATTENDANCE_CONTENT.modal.scaleRows,
+    reportingParagraphs:
+      raw.attendanceModal?.reportingParagraphs?.length
+        ? raw.attendanceModal.reportingParagraphs
+        : DEFAULT_ATTENDANCE_CONTENT.modal.reportingParagraphs,
+    punctualityParagraphs:
+      raw.attendanceModal?.punctualityParagraphs?.length
+        ? raw.attendanceModal.punctualityParagraphs
+        : DEFAULT_ATTENDANCE_CONTENT.modal.punctualityParagraphs,
+    concernParagraphs:
+      raw.attendanceModal?.concernParagraphs?.length
+        ? raw.attendanceModal.concernParagraphs
+        : DEFAULT_ATTENDANCE_CONTENT.modal.concernParagraphs,
+    termTimeParagraphs:
+      raw.attendanceModal?.termTimeParagraphs?.length
+        ? raw.attendanceModal.termTimeParagraphs
+        : DEFAULT_ATTENDANCE_CONTENT.modal.termTimeParagraphs,
+    policyParagraphs:
+      raw.attendanceModal?.policyParagraphs?.length
+        ? raw.attendanceModal.policyParagraphs
+        : DEFAULT_ATTENDANCE_CONTENT.modal.policyParagraphs,
+  };
+
+  return { card, modal };
+}
 
 type ChipButtonProps = QuickLink & {
   className?: string;
@@ -55,6 +279,32 @@ export default function ParentsPage() {
   // Overlay state
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<QuickLink | null>(null);
+  const [attendanceContent, setAttendanceContent] = useState<ParentsAttendanceContent>(
+    DEFAULT_ATTENDANCE_CONTENT
+  );
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function fetchParentsContent() {
+      try {
+        const response = await fetch("/api/parents-page", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = (await response.json()) as PartialParentsResponse;
+        if (mounted) {
+          setAttendanceContent(mergeAttendanceContent(data));
+        }
+      } catch {
+        // Keep fallback content if Sanity content is unavailable.
+      }
+    }
+
+    fetchParentsContent();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const openOverlay = useCallback((item: QuickLink) => {
     setActive(item);
@@ -383,25 +633,22 @@ export default function ParentsPage() {
         <div className="h-[calc(100%-44px)] w-full overflow-y-auto p-5 md:p-6">
           <div className="mx-auto max-w-3xl space-y-6">
             <h3 className="font-heading text-[15px] uppercase tracking-[0.16em] text-morpeth-navy">
-              Attendance &amp; absence
+              {attendanceContent.modal.heading}
             </h3>
 
             {/* Why attendance matters */}
             <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
               <div className="border-b border-morpeth-navy/10 px-5 py-3">
                 <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
-                  Why it matters
+                  {attendanceContent.modal.whyTitle}
                 </h4>
               </div>
               <div className="px-5 py-4 space-y-3 text-[15px] text-slate-900">
-                <p>
-                  We want every child to be in school, on time, every day they are well enough to
-                  attend. Good attendance supports learning, friendships and wellbeing.
-                </p>
-                <p>
-                  Even a few days off each term can quickly add up and mean important learning is
-                  missed or hard to catch up on.
-                </p>
+                {attendanceContent.modal.whyParagraphs.map((paragraph) => (
+                  <p key={`${attendanceContent.modal.whyTitle}-${paragraph.slice(0, 24)}`}>
+                    {paragraph}
+                  </p>
+                ))}
               </div>
             </section>
 
@@ -409,52 +656,34 @@ export default function ParentsPage() {
             <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
               <div className="border-b border-morpeth-navy/10 px-5 py-3">
                 <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
-                  How we judge attendance
+                  {attendanceContent.modal.scaleTitle}
                 </h4>
               </div>
               <div className="px-5 py-4 space-y-4 text-[15px] text-slate-900">
-                <p>
-                  Good attendance and punctuality underpins academic achievement and wellbeing.
-                  Students with great attendance are far more likely to succeed beyond school and
-                  be adults who live happy, healthy lives.
-                </p>
-                <p>
-                  At Morpeth, we judge attendance on the following scale:
-                </p>
+                {attendanceContent.modal.scaleIntroParagraphs.map((paragraph) => (
+                  <p key={`${attendanceContent.modal.scaleTitle}-${paragraph.slice(0, 24)}`}>
+                    {paragraph}
+                  </p>
+                ))}
 
                 {/* Mobile: stacked scale cards */}
                 <div className="md:hidden space-y-3">
-                  <div className="rounded-2xl border border-slate-200/80 bg-[#b7f66a] p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="font-semibold text-slate-900">Excellent</p>
-                      <p className="text-sm font-semibold text-slate-900">98%+</p>
-                    </div>
-                    <p className="mt-2 text-sm text-slate-900">Absent for 4 days or less (per year)</p>
-                  </div>
+                  {attendanceContent.modal.scaleRows.map((row) => {
+                    const tone = scaleToneClasses[row.tone] ?? scaleToneClasses.brightGreen;
 
-                  <div className="rounded-2xl border border-slate-200/80 bg-[#9cd062] p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="font-semibold text-slate-900">Good</p>
-                      <p className="text-sm font-semibold text-slate-900">95–97%</p>
-                    </div>
-                    <p className="mt-2 text-sm text-slate-900">Absent for 9 days or less (per year)</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-200/80 bg-[#f4a05c] p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="font-semibold text-slate-900">Concern</p>
-                      <p className="text-sm font-semibold text-slate-900">90–94%</p>
-                    </div>
-                    <p className="mt-2 text-sm text-slate-900">Between 11 and 19 days off school (per year)</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-200/80 bg-[#f2574f] p-4 text-white">
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="font-semibold">Serious concern</p>
-                      <p className="text-sm font-semibold">Below 90%</p>
-                    </div>
-                    <p className="mt-2 text-sm">More than 19 days off school (per year)</p>
-                  </div>
+                    return (
+                      <div
+                        key={`mobile-${row.judgement}-${row.attendance}`}
+                        className={`rounded-2xl border border-slate-200/80 p-4 ${tone.mobile}`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="font-semibold">{row.judgement}</p>
+                          <p className="text-sm font-semibold">{row.attendance}</p>
+                        </div>
+                        <p className="mt-2 text-sm">{row.daysAbsent} (per year)</p>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Desktop: table */}
@@ -468,50 +697,34 @@ export default function ParentsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="bg-[#b7f66a]">
-                        <td className="px-4 py-3 font-semibold">Excellent</td>
-                        <td className="px-4 py-3">98%+</td>
-                        <td className="px-4 py-3">Absent for 4 days or less</td>
-                      </tr>
-                      <tr className="bg-[#9cd062]">
-                        <td className="px-4 py-3 font-semibold">Good</td>
-                        <td className="px-4 py-3">95–97%</td>
-                        <td className="px-4 py-3">Absent for 9 days or less</td>
-                      </tr>
-                      <tr className="bg-[#f4a05c]">
-                        <td className="px-4 py-3 font-semibold">Concern</td>
-                        <td className="px-4 py-3">90–94%</td>
-                        <td className="px-4 py-3">Between 11 and 19 days off school</td>
-                      </tr>
-                      <tr className="bg-[#f2574f] text-white">
-                        <td className="px-4 py-3 font-semibold">Serious concern</td>
-                        <td className="px-4 py-3">Below 90%</td>
-                        <td className="px-4 py-3">More than 19 days off school</td>
-                      </tr>
+                      {attendanceContent.modal.scaleRows.map((row) => {
+                        const tone = scaleToneClasses[row.tone] ?? scaleToneClasses.brightGreen;
+
+                        return (
+                          <tr
+                            key={`desktop-${row.judgement}-${row.attendance}`}
+                            className={`${tone.desktop} ${tone.desktopText}`}
+                          >
+                            <td className="px-4 py-3 font-semibold">{row.judgement}</td>
+                            <td className="px-4 py-3">{row.attendance}</td>
+                            <td className="px-4 py-3">{row.daysAbsent}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
 
                 {/* Text version for accessibility */}
                 <div className="text-[14px] leading-relaxed text-slate-900">
-                  <p className="font-semibold">In summary:</p>
+                  <p className="font-semibold">{attendanceContent.modal.summaryTitle}</p>
                   <ul className="mt-1 list-disc space-y-1 pl-5">
-                    <li>
-                      <strong>Excellent</strong> – 98%+ attendance (absent for 4 days or less in a
-                      school year).
-                    </li>
-                    <li>
-                      <strong>Good</strong> – 95–97% attendance (absent for up to 9 days in a school
-                      year).
-                    </li>
-                    <li>
-                      <strong>Concern</strong> – 90–94% attendance (between 11 and 19 days off
-                      school).
-                    </li>
-                    <li>
-                      <strong>Serious concern</strong> – below 90% attendance (more than 19 days off
-                      school).
-                    </li>
+                    {attendanceContent.modal.scaleRows.map((row) => (
+                      <li key={`summary-${row.judgement}-${row.attendance}`}>
+                        <strong>{row.judgement}</strong> –{" "}
+                        {row.summaryText || `${row.attendance} attendance (${row.daysAbsent}).`}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -521,33 +734,36 @@ export default function ParentsPage() {
             <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
               <div className="border-b border-morpeth-navy/10 px-5 py-3">
                 <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
-                  Reporting an absence
+                  {attendanceContent.modal.reportingTitle}
                 </h4>
               </div>
               <div className="px-5 py-4 space-y-3 text-[15px] text-slate-900">
-                <p>
-                  If your child is unwell and cannot attend school, please contact us before
-                  <strong> 8:30am</strong> on each day of absence.
-                </p>
+                {attendanceContent.modal.reportingParagraphs.slice(0, 1).map((paragraph) => (
+                  <p key={`reporting-intro-${paragraph.slice(0, 24)}`}>{paragraph}</p>
+                ))}
                 <ul className="list-disc space-y-2 pl-5">
                   <li>
-                    Phone: <a href="tel:02088981000" className="underline underline-offset-2">020 8898 1000</a>
-                  </li>
-                  <li>
-                    Email: {" "}
+                    {attendanceContent.modal.reportingPhoneLabel}:{" "}
                     <a
-                      href="mailto:attendance@morpethschool.org.uk"
+                      href={attendanceContent.modal.reportingPhoneHref}
                       className="underline underline-offset-2"
                     >
-                      attendance@morpethschool.org.uk
+                      {attendanceContent.modal.reportingPhoneDisplay}
+                    </a>
+                  </li>
+                  <li>
+                    {attendanceContent.modal.reportingEmailLabel}:{" "}
+                    <a
+                      href={`mailto:${attendanceContent.modal.reportingEmailAddress}`}
+                      className="underline underline-offset-2"
+                    >
+                      {attendanceContent.modal.reportingEmailAddress}
                     </a>
                   </li>
                 </ul>
-                <p>
-                  Please tell us your child&apos;s full name, tutor group and the reason for their
-                  absence. Let us know how long you expect them to be off and update us if this
-                  changes.
-                </p>
+                {attendanceContent.modal.reportingParagraphs.slice(1).map((paragraph) => (
+                  <p key={`reporting-body-${paragraph.slice(0, 24)}`}>{paragraph}</p>
+                ))}
               </div>
             </section>
 
@@ -555,19 +771,13 @@ export default function ParentsPage() {
             <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
               <div className="border-b border-morpeth-navy/10 px-5 py-3">
                 <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
-                  Punctuality
+                  {attendanceContent.modal.punctualityTitle}
                 </h4>
               </div>
               <div className="px-5 py-4 space-y-3 text-[15px] text-slate-900">
-                <p>
-                  Arriving on time helps pupils start the day calmly and not miss tutor time or the
-                  beginning of lessons.
-                </p>
-                <p>
-                  Persistent lateness, even by a few minutes, can add up to hours of lost learning
-                  over a term and may be recorded as unauthorised absence after the register has
-                  closed.
-                </p>
+                {attendanceContent.modal.punctualityParagraphs.map((paragraph) => (
+                  <p key={`punctuality-${paragraph.slice(0, 24)}`}>{paragraph}</p>
+                ))}
               </div>
             </section>
 
@@ -575,20 +785,13 @@ export default function ParentsPage() {
             <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
               <div className="border-b border-morpeth-navy/10 px-5 py-3">
                 <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
-                  If we are worried about attendance
+                  {attendanceContent.modal.concernTitle}
                 </h4>
               </div>
               <div className="px-5 py-4 space-y-3 text-[15px] text-slate-900">
-                <p>
-                  We will always try to work with families to remove barriers to good attendance.
-                  This might include phone calls, letters, meetings in school and support from our
-                  pastoral team.
-                </p>
-                <p>
-                  Where attendance does not improve and remains low, we may need to involve the
-                  local authority Education Welfare Service, and in some cases formal action or
-                  penalty notices may be considered.
-                </p>
+                {attendanceContent.modal.concernParagraphs.map((paragraph) => (
+                  <p key={`concern-${paragraph.slice(0, 24)}`}>{paragraph}</p>
+                ))}
               </div>
             </section>
 
@@ -596,19 +799,13 @@ export default function ParentsPage() {
             <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
               <div className="border-b border-morpeth-navy/10 px-5 py-3">
                 <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
-                  Term-time leave &amp; appointments
+                  {attendanceContent.modal.termTimeTitle}
                 </h4>
               </div>
               <div className="px-5 py-4 space-y-3 text-[15px] text-slate-900">
-                <p>
-                  Please try to arrange medical and dental appointments outside of the school day
-                  wherever possible. If this cannot be avoided, your child should attend school for
-                  part of the day before or after the appointment.
-                </p>
-                <p>
-                  Family holidays should not be taken during term time. Requests for leave can only
-                  be authorised in genuinely exceptional circumstances and may require evidence.
-                </p>
+                {attendanceContent.modal.termTimeParagraphs.map((paragraph) => (
+                  <p key={`term-time-${paragraph.slice(0, 24)}`}>{paragraph}</p>
+                ))}
               </div>
             </section>
 
@@ -616,28 +813,21 @@ export default function ParentsPage() {
             <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
               <div className="border-b border-morpeth-navy/10 px-5 py-3">
                 <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
-                  Full attendance &amp; punctuality policy
+                  {attendanceContent.modal.policyTitle}
                 </h4>
               </div>
               <div className="px-5 py-4 space-y-3 text-[15px] text-slate-900">
-                <p>
-                  If you would like more detail about how we monitor, support and celebrate
-                  attendance, you can read our full Attendance and Punctuality Policy. It explains
-                  our approach, the legal framework and the roles of students, families and staff.
-                </p>
-                <p>
-                  The policy also sets out the staged intervention process we use to support pupils
-                  whose attendance drops, and how we work with the local authority where attendance
-                  remains a serious concern.
-                </p>
+                {attendanceContent.modal.policyParagraphs.map((paragraph) => (
+                  <p key={`policy-${paragraph.slice(0, 24)}`}>{paragraph}</p>
+                ))}
                 <div className="mt-2 flex flex-wrap gap-2">
                   <a
-                    href="/Documents/Morpeth-School-Attendance-and-Punctuality-Policy-2024-25.pdf"
+                    href={attendanceContent.modal.policyButtonHref}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
                   >
-                    Download Attendance &amp; Punctuality Policy (PDF)
+                    {attendanceContent.modal.policyButtonLabel}
                   </a>
                 </div>
               </div>
@@ -962,32 +1152,39 @@ export default function ParentsPage() {
 
             {/* Attendance */}
             <article className={card}>
-              <p className={sectionTitle}>Attendance</p>
+              <p className={sectionTitle}>{attendanceContent.card.eyebrow}</p>
               <h2 className="mt-2 font-heading text-lg uppercase tracking-[0.16em] text-morpeth-navy">
-                Attendance &amp; absence
+                {attendanceContent.card.title}
               </h2>
               <p className="mt-2 text-sm text-slate-800">
-                Good attendance is essential for progress. Please report any absence before 8:30am.
+                {attendanceContent.card.description}
               </p>
               <div className="mt-3 text-sm text-slate-800">
                 <p>
-                  Phone:{" "}
-                  <a href="tel:02088981000" className="underline underline-offset-2">
-                    020 8898 1000
+                  {attendanceContent.card.phoneLabel}:{" "}
+                  <a
+                    href={attendanceContent.card.phoneHref}
+                    className="underline underline-offset-2"
+                  >
+                    {attendanceContent.card.phoneDisplay}
                   </a>
                 </p>
                 <p className="mt-1">
-                  Email:{" "}
+                  {attendanceContent.card.emailLabel}:{" "}
                   <a
-                    href="mailto:attendance@morpethschool.org.uk"
+                    href={`mailto:${attendanceContent.card.emailAddress}`}
                     className="underline underline-offset-2"
                   >
-                    attendance@morpethschool.org.uk
+                    {attendanceContent.card.emailAddress}
                   </a>
                 </p>
               </div>
               <div className="mt-4">
-                <ChipButton label="Attendance guidance" href="/attendance" onOpen={openOverlay} />
+                <ChipButton
+                  label={attendanceContent.card.buttonLabel}
+                  href="/attendance"
+                  onOpen={openOverlay}
+                />
               </div>
             </article>
 

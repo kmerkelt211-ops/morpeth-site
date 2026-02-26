@@ -3,6 +3,9 @@ import house from "../schemas/house";
 import houseUpdate from "../schemas/houseUpdate";
 import coachingCircles from "../schemas/coachingCircles";
 import letter from "../schemas/letter";
+import teachingLearningPage from "../schemas/teachingLearningPage";
+import extracurricularPage from "../schemas/extracurricularPage";
+import parentsPage from "../schemas/parentsPage";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -816,5 +819,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     houseUpdate,
     coachingCircles,
     letter,
+    teachingLearningPage,
+    extracurricularPage,
+    parentsPage,
   ],
 };
