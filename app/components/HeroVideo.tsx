@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type HeroPageKey =
   | "home"
@@ -57,10 +57,12 @@ export default function HeroVideo({
     const cached = heroWebmSrcCache.get(`${pageKey}:${src}`);
     return cached || null;
   });
-  const [videoReady, setVideoReady] = useState(!effectivePosterSrc);
+  const [videoVisible, setVideoVisible] = useState(false);
   const overlay = overlayClassName ?? DEFAULT_HERO_OVERLAY;
   const resolvedSrc = remoteSrc || src;
   const resolvedWebmSrc = remoteWebmSrc || webmSrc;
+  const fadeTimerRef = useRef<number | null>(null);
+  const queuedRevealRef = useRef(false);
 
   useEffect(() => {
     if (!pageKey) return;
@@ -97,6 +99,37 @@ export default function HeroVideo({
     };
   }, [pageKey, src]);
 
+  useEffect(() => {
+    return () => {
+      if (fadeTimerRef.current !== null) {
+        window.clearTimeout(fadeTimerRef.current);
+      }
+    };
+  }, []);
+
+  const queueVideoReveal = () => {
+    if (queuedRevealRef.current) return;
+    queuedRevealRef.current = true;
+
+    if (fadeTimerRef.current !== null) {
+      window.clearTimeout(fadeTimerRef.current);
+    }
+
+    fadeTimerRef.current = window.setTimeout(
+      () => setVideoVisible(true),
+      Math.max(0, fadeInDelayMs)
+    );
+  };
+
+  const resetVideoReveal = () => {
+    queuedRevealRef.current = false;
+    setVideoVisible(false);
+    if (fadeTimerRef.current !== null) {
+      window.clearTimeout(fadeTimerRef.current);
+      fadeTimerRef.current = null;
+    }
+  };
+
   return (
     <div
       className={`absolute inset-0 overflow-hidden ${DEFAULT_HERO_BASE_BG} ${containerClassName}`}
@@ -121,19 +154,19 @@ export default function HeroVideo({
       )}
 
       <video
-        key={resolvedSrc}
+        key={`${resolvedWebmSrc || "no-webm"}|${resolvedSrc}`}
         className={`h-full w-full object-cover transition-opacity duration-500 ${
-          videoReady ? "opacity-100" : "opacity-0"
+          videoVisible ? "opacity-100" : "opacity-0"
         } ${videoClassName}`}
-        style={{ transitionDelay: videoReady ? `${fadeInDelayMs}ms` : "0ms" }}
         autoPlay
         muted
         loop
         playsInline
         preload={preload}
-        onLoadStart={() => setVideoReady(false)}
-        onCanPlay={() => setVideoReady(true)}
-        onLoadedData={() => setVideoReady(true)}
+        onLoadStart={resetVideoReveal}
+        onCanPlay={queueVideoReveal}
+        onLoadedData={queueVideoReveal}
+        onPlaying={queueVideoReveal}
         aria-hidden="true"
       >
         {resolvedWebmSrc ? (
