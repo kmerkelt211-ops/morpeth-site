@@ -1,7 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
 import Image from "next/image";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import type { ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/react";
@@ -14,7 +14,6 @@ export const metadata: Metadata = {
 
   // Keep root fallbacks for browser conventions, but point everything else at the tidy folder.
   manifest: "/morpeth-icon-pack/site.webmanifest",
-  themeColor: "#0d2a45",
 
   icons: {
     // Browsers often look for /favicon.ico automatically; we also provide explicit PNG icons.
@@ -39,6 +38,10 @@ export const metadata: Metadata = {
     "msapplication-config": "/morpeth-icon-pack/browserconfig.xml",
     "msapplication-TileColor": "#0d2a45",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0d2a45",
 };
 
 const parentQuickLinks = [
