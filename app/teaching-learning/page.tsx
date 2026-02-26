@@ -292,7 +292,7 @@ export default function TeachingLearningPage() {
     <div className="bg-white">
       {/* Full-width hero matching other pages */}
       <section className="relative overflow-hidden bg-slate-900 text-slate-50">
-        <HeroVideo src="/video/teaching-learning-hero.mp4" />
+        <HeroVideo src="/video/morpeth-drone-hero.mp4" pageKey="teachingLearning" />
 
         {/* Centered text content */}
         <div className="relative mx-auto flex min-h-[520px] max-w-6xl flex-col items-center justify-center px-4 py-24 text-center lg:px-8 lg:py-32">

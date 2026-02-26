@@ -141,6 +141,7 @@ function Hero() {
     <section className="relative bg-morpeth-navy text-morpeth-light">
       <HeroVideo
         src="/video/morpeth-drone-hero.mp4"
+        pageKey="home"
         preload="auto"
       />
       {/* Content on top of video */}

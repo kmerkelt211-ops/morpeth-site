@@ -868,7 +868,7 @@ export default function ParentsPage() {
     <main className="bg-morpeth-offwhite text-slate-900">
       {/* HERO — matches home page design */}
       <section className="relative bg-morpeth-navy text-morpeth-light">
-        <HeroVideo src="/video/parents-hero.mp4" />
+        <HeroVideo src="/video/morpeth-drone-hero.mp4" pageKey="parents" />
 
         {/* Content layer */}
         <div className="relative mx-auto flex min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-16 text-center md:py-24">

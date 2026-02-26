@@ -284,7 +284,35 @@ export const schema: { types: SchemaTypeDefinition[] } = {
       type: "document",
       fields: [
         defineField({ name: "strapline", type: "string" }),
-        defineField({ name: "heroVideoUrl", type: "url" }),
+        defineField({
+          name: "heroVideoUrl",
+          title: "Global hero video URL",
+          type: "url",
+          description:
+            "Default hero video for all pages. Use an MP4/WebM URL. Individual page overrides below are optional.",
+        }),
+        defineField({
+          name: "heroVideoOverrides",
+          title: "Per-page hero overrides (optional)",
+          type: "object",
+          fields: [
+            defineField({ name: "home", title: "Home hero video URL", type: "url" }),
+            defineField({ name: "ourSchool", title: "Our School hero video URL", type: "url" }),
+            defineField({
+              name: "teachingLearning",
+              title: "Teaching & Learning hero video URL",
+              type: "url",
+            }),
+            defineField({ name: "sixthForm", title: "Sixth Form hero video URL", type: "url" }),
+            defineField({
+              name: "extracurricular",
+              title: "Extracurricular hero video URL",
+              type: "url",
+            }),
+            defineField({ name: "parents", title: "Parents hero video URL", type: "url" }),
+            defineField({ name: "staff", title: "Staff hero video URL", type: "url" }),
+          ],
+        }),
         // NEW: Year 5 film fields
         defineField({
           name: "recruitmentVideoUrl",

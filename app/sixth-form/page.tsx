@@ -17,7 +17,7 @@ export default function SixthFormPage() {
     <main className="min-h-screen bg-slate-50">
       {/* HERO – matches main site hero pattern */}
       <section className="relative bg-morpeth-navy text-morpeth-light">
-        <HeroVideo src="/video/sixth-form-hero.mp4" />
+        <HeroVideo src="/video/morpeth-drone-hero.mp4" pageKey="sixthForm" />
 
         {/* Content layer */}
         <div className="relative z-10 mx-auto flex min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-16 text-center md:py-24">

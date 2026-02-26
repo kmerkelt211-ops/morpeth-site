@@ -148,7 +148,7 @@ export default function OurSchoolPage() {
     <main className="min-h-screen">
       {/* HERO */}
       <section className="relative bg-morpeth-navy text-morpeth-light">
-        <HeroVideo src="/video/our-school-hero.mp4" />
+        <HeroVideo src="/video/morpeth-drone-hero.mp4" pageKey="ourSchool" />
         <div className="relative mx-auto flex min-h-[60vh] md:min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-14 text-center md:py-24">
           <p className="text-xs uppercase tracking-[0.25em] text-morpeth-light/80">
             Morpeth School · Our School

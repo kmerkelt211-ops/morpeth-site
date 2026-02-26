@@ -140,7 +140,7 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
     <main className="bg-morpeth-offwhite text-slate-900">
       {/* HERO — matches the site hero pattern */}
       <section className="relative bg-morpeth-navy text-morpeth-light">
-        <HeroVideo src="/video/hero-staff.mp4" />
+        <HeroVideo src="/video/morpeth-drone-hero.mp4" pageKey="staff" />
 
         <div className="relative mx-auto flex min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-16 text-center md:py-24">
           <p className="text-xs uppercase tracking-[0.25em] text-morpeth-light/80">

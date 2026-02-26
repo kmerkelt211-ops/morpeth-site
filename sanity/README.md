@@ -23,6 +23,14 @@ Gallery content is managed on the external gallery website, not in this Studio.
 
 If you need raw access, use **All Document Types**.
 
+## Hero video editing
+
+In **Site settings**:
+
+- `Global hero video URL` sets the default hero video used across the website.
+- `Per-page hero overrides` lets you change specific pages without affecting others.
+  Leave an override blank to use the global default.
+
 ## Developer notes
 
 - Application Sanity client: `sanity/client.ts`
