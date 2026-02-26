@@ -8,7 +8,7 @@ export default defineType({
   fields: [
     defineField({
       name: "attendanceCard",
-      title: "Attendance card (Parents page)",
+      title: "Attendance card",
       type: "object",
       group: "attendance",
       description: "This card appears on the Parents page before the popup opens.",
