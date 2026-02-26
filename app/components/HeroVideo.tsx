@@ -23,11 +23,13 @@ type HeroVideoProps = {
   posterAlt?: string;
   preload?: "none" | "metadata" | "auto";
   priorityPoster?: boolean;
+  fadeInDelayMs?: number;
 };
 
 const DEFAULT_HERO_OVERLAY =
   "pointer-events-none bg-gradient-to-b from-black/55 via-morpeth-navy/65 to-morpeth-navy/85";
-const DEFAULT_HERO_POSTER = "/images/morpeth-old-0.jpg";
+const DEFAULT_HERO_BASE_BG =
+  "bg-gradient-to-r from-morpeth-navy via-[#12355b] to-[#3b6fb6]";
 const heroSrcCache = new Map<string, string>();
 const heroWebmSrcCache = new Map<string, string>();
 
@@ -42,8 +44,9 @@ export default function HeroVideo({
   posterAlt = "",
   preload = "metadata",
   priorityPoster = false,
+  fadeInDelayMs = 1800,
 }: HeroVideoProps) {
-  const effectivePosterSrc = posterSrc ?? DEFAULT_HERO_POSTER;
+  const effectivePosterSrc = posterSrc;
   const [remoteSrc, setRemoteSrc] = useState<string | null>(() => {
     if (!pageKey) return null;
     const cached = heroSrcCache.get(`${pageKey}:${src}`);
@@ -95,7 +98,14 @@ export default function HeroVideo({
   }, [pageKey, src]);
 
   return (
-    <div className={`absolute inset-0 overflow-hidden bg-morpeth-navy ${containerClassName}`}>
+    <div
+      className={`absolute inset-0 overflow-hidden ${DEFAULT_HERO_BASE_BG} ${containerClassName}`}
+    >
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/35"
+        aria-hidden="true"
+      />
+
       {effectivePosterSrc && (
         <Image
           src={effectivePosterSrc}
@@ -113,13 +123,15 @@ export default function HeroVideo({
       <video
         key={resolvedSrc}
         className={`h-full w-full object-cover transition-opacity duration-500 ${
-          videoReady || !posterSrc ? "opacity-100" : "opacity-0"
+          videoReady ? "opacity-100" : "opacity-0"
         } ${videoClassName}`}
+        style={{ transitionDelay: videoReady ? `${fadeInDelayMs}ms` : "0ms" }}
         autoPlay
         muted
         loop
         playsInline
         preload={preload}
+        onLoadStart={() => setVideoReady(false)}
         onCanPlay={() => setVideoReady(true)}
         onLoadedData={() => setVideoReady(true)}
         aria-hidden="true"
