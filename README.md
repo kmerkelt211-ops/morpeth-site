@@ -20,6 +20,27 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Staff Login Setup (Google)
+
+The `/staff` section is protected by Google OAuth and a signed staff session cookie.
+
+Add these variables to `.env.local` and your hosting environment:
+
+```bash
+STAFF_GOOGLE_CLIENT_ID=
+STAFF_GOOGLE_CLIENT_SECRET=
+STAFF_GOOGLE_REDIRECT_URI=
+STAFF_ALLOWED_GOOGLE_DOMAINS=
+STAFF_AUTH_SECRET=
+```
+
+Notes:
+
+- `STAFF_GOOGLE_REDIRECT_URI` should match your Google OAuth redirect URL exactly (for example `https://www.morpeth.school/api/staff-auth/callback`).
+- `STAFF_ALLOWED_GOOGLE_DOMAINS` accepts one or more comma-separated Workspace domains (for example `morpeth.school,morpeth.towerhamlets.sch.uk`).
+- `STAFF_AUTH_SECRET` should be a long random secret used to sign session cookies.
+- If these values are missing, `/staff` redirects to `/staff/login` with a configuration warning.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

@@ -1,6 +1,8 @@
 import { client } from "../../sanity/client";
 import DirectoryClient from "./DirectoryClient";
 import HeroVideo from "../components/HeroVideo";
+import { cookies } from "next/headers";
+import { readStaffSessionFromStore } from "../../lib/staffAuth";
 
 export const revalidate = 60;
 
@@ -49,6 +51,9 @@ async function getStaff(): Promise<StaffMember[]> {
 
 export default async function StaffPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const staff = await getStaff();
+  const cookieStore = await cookies();
+  const sessionSecret = process.env.STAFF_AUTH_SECRET || "";
+  const session = sessionSecret ? await readStaffSessionFromStore(cookieStore, sessionSecret) : null;
 
   // --- search & filtering from URL params (server-side, no JS needed) ---
   const params = await searchParams;
@@ -152,6 +157,22 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
           <p className="mt-5 max-w-2xl text-sm md:text-base text-morpeth-light/90">
             Meet the dedicated team who make Morpeth School a thriving and supportive community for every student.
           </p>
+        </div>
+      </section>
+
+      <section className="bg-white border-b border-slate-200">
+        <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-4 text-sm text-slate-700 md:flex-row md:items-center md:justify-between">
+          <p>
+            Signed in as <span className="font-semibold text-morpeth-navy">{session?.email || "Staff user"}</span>
+          </p>
+          <form action="/api/staff-auth/logout" method="post">
+            <button
+              type="submit"
+              className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 transition hover:bg-slate-100"
+            >
+              Sign out
+            </button>
+          </form>
         </div>
       </section>
 
