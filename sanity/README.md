@@ -30,6 +30,7 @@ In **Site settings**:
 - `Global hero video URL` sets the default hero video used across the website.
 - `Per-page hero overrides` lets you change specific pages without affecting others.
   Leave an override blank to use the global default.
+- `Global hero video WebM URL` and `Per-page hero WebM overrides` are optional, but recommended for faster load.
 
 ## Developer notes
 

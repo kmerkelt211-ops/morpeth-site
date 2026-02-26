@@ -142,6 +142,7 @@ function Hero() {
       <HeroVideo
         src="/video/morpeth-drone-hero.mp4"
         pageKey="home"
+        priorityPoster
         preload="auto"
       />
       {/* Content on top of video */}

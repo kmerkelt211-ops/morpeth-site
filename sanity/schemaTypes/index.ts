@@ -292,6 +292,13 @@ export const schema: { types: SchemaTypeDefinition[] } = {
             "Default hero video for all pages. Use an MP4/WebM URL. Individual page overrides below are optional.",
         }),
         defineField({
+          name: "heroVideoWebmUrl",
+          title: "Global hero video WebM URL (optional)",
+          type: "url",
+          description:
+            "Optional WebM source used before MP4 for faster delivery on supported browsers.",
+        }),
+        defineField({
           name: "heroVideoOverrides",
           title: "Per-page hero overrides (optional)",
           type: "object",
@@ -311,6 +318,28 @@ export const schema: { types: SchemaTypeDefinition[] } = {
             }),
             defineField({ name: "parents", title: "Parents hero video URL", type: "url" }),
             defineField({ name: "staff", title: "Staff hero video URL", type: "url" }),
+          ],
+        }),
+        defineField({
+          name: "heroVideoWebmOverrides",
+          title: "Per-page hero WebM overrides (optional)",
+          type: "object",
+          fields: [
+            defineField({ name: "home", title: "Home hero WebM URL", type: "url" }),
+            defineField({ name: "ourSchool", title: "Our School hero WebM URL", type: "url" }),
+            defineField({
+              name: "teachingLearning",
+              title: "Teaching & Learning hero WebM URL",
+              type: "url",
+            }),
+            defineField({ name: "sixthForm", title: "Sixth Form hero WebM URL", type: "url" }),
+            defineField({
+              name: "extracurricular",
+              title: "Extracurricular hero WebM URL",
+              type: "url",
+            }),
+            defineField({ name: "parents", title: "Parents hero WebM URL", type: "url" }),
+            defineField({ name: "staff", title: "Staff hero WebM URL", type: "url" }),
           ],
         }),
         // NEW: Year 5 film fields

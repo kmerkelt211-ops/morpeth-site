@@ -17,12 +17,24 @@ type PageKey = (typeof PAGE_KEYS)[number];
 
 type HeroSettings = {
   heroVideoUrl?: string;
+  heroVideoWebmUrl?: string;
   heroVideoOverrides?: Partial<Record<PageKey, string>>;
+  heroVideoWebmOverrides?: Partial<Record<PageKey, string>>;
 };
 
 const QUERY = `*[_type == "siteSettings"][0]{
   heroVideoUrl,
+  heroVideoWebmUrl,
   heroVideoOverrides{
+    home,
+    ourSchool,
+    teachingLearning,
+    sixthForm,
+    extracurricular,
+    parents,
+    staff
+  },
+  heroVideoWebmOverrides{
     home,
     ourSchool,
     teachingLearning,
@@ -50,9 +62,13 @@ export async function GET(req: Request) {
       settings?.heroVideoOverrides?.[page] ||
       settings?.heroVideoUrl ||
       null;
+    const webmSrc =
+      settings?.heroVideoWebmOverrides?.[page] ||
+      settings?.heroVideoWebmUrl ||
+      null;
 
-    return NextResponse.json({ src }, { status: 200 });
+    return NextResponse.json({ src, webmSrc }, { status: 200 });
   } catch {
-    return NextResponse.json({ src: null }, { status: 200 });
+    return NextResponse.json({ src: null, webmSrc: null }, { status: 200 });
   }
 }
