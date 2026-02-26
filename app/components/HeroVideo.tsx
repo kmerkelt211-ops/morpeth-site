@@ -146,7 +146,7 @@ export default function HeroVideo({
           fill
           priority={priorityPoster}
           className={`object-cover transition-opacity duration-500 ${
-            videoReady ? "opacity-0" : "opacity-100"
+            videoVisible ? "opacity-0" : "opacity-100"
           }`}
           sizes="100vw"
           aria-hidden="true"
