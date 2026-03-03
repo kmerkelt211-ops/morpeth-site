@@ -2,8 +2,18 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import HeroVideo from "../components/HeroVideo"
+
+type SixthFormMedia = {
+  whyJoinVideoSrc: string | null
+  whyJoinVideoPoster: string | null
+}
+
+const DEFAULT_SIXTH_FORM_MEDIA: SixthFormMedia = {
+  whyJoinVideoSrc: null,
+  whyJoinVideoPoster: null,
+}
 
 export default function SixthFormPage() {
   const [welcomeExpanded, setWelcomeExpanded] = useState(false)
@@ -12,6 +22,36 @@ export default function SixthFormPage() {
   const [supportExpanded, setSupportExpanded] = useState(false)
   const [lifeExpanded, setLifeExpanded] = useState(false)
   const [applyExpanded, setApplyExpanded] = useState(false)
+  const [media, setMedia] = useState<SixthFormMedia>(DEFAULT_SIXTH_FORM_MEDIA)
+  const [whyJoinVideoErrorSrc, setWhyJoinVideoErrorSrc] = useState<string | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadMedia = async () => {
+      try {
+        const response = await fetch("/api/sixth-form-media", { cache: "force-cache" })
+        if (!response.ok) return
+        const data = (await response.json()) as SixthFormMedia
+        if (!isMounted || !data) return
+        setMedia({
+          whyJoinVideoSrc: data.whyJoinVideoSrc ?? null,
+          whyJoinVideoPoster: data.whyJoinVideoPoster ?? null,
+        })
+      } catch {
+        // Keep graceful empty state if media is unavailable.
+      }
+    }
+
+    loadMedia()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const whyJoinVideoSrc = media.whyJoinVideoSrc
+  const whyJoinVideoPoster = media.whyJoinVideoPoster || "/images/welcome.webp"
+  const whyJoinVideoLoadError = Boolean(whyJoinVideoSrc && whyJoinVideoErrorSrc === whyJoinVideoSrc)
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -165,16 +205,29 @@ export default function SixthFormPage() {
           <div className="grid items-center gap-6 md:grid-cols-2">
             {/* Video panel */}
             <div className="relative aspect-video overflow-hidden rounded-3xl bg-black shadow-sm ring-1 ring-slate-900/10">
-              <video
-                className="h-full w-full object-cover rounded-3xl"
-                controls
-                playsInline
-                preload="metadata"
-                controlsList="nodownload"
-                poster="/images/sixth-form-why-join-poster.webp"
-              >
-                <source src="/video/sixth-form-why-join.mp4" type="video/mp4" />
-              </video>
+              {!whyJoinVideoSrc || whyJoinVideoLoadError ? (
+                <div className="flex h-full w-full flex-col items-center justify-center px-5 text-center">
+                  <p className="text-sm text-slate-300">Sixth Form video coming soon</p>
+                  {whyJoinVideoLoadError ? (
+                    <p className="mt-2 text-xs text-slate-400">
+                      The configured video source could not be loaded.
+                    </p>
+                  ) : null}
+                </div>
+              ) : (
+                <video
+                  key={whyJoinVideoSrc}
+                  className="h-full w-full object-cover rounded-3xl"
+                  controls
+                  playsInline
+                  preload="metadata"
+                  controlsList="nodownload"
+                  poster={whyJoinVideoPoster}
+                  onError={() => setWhyJoinVideoErrorSrc(whyJoinVideoSrc)}
+                >
+                  <source src={whyJoinVideoSrc} type="video/mp4" />
+                </video>
+              )}
               <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-white/10" />
             </div>
 

@@ -74,7 +74,10 @@ export async function getCalendarEvents(limit?: number): Promise<CalendarEvent[]
   const safeLimit = clampLimit(limit);
 
   try {
-    const response = await fetch(ICS_URL, { cache: "no-store", redirect: "follow" });
+    const response = await fetch(ICS_URL, {
+      next: { revalidate: 300 },
+      redirect: "follow",
+    });
     if (!response.ok) throw new Error(`Calendar fetch failed: ${response.status}`);
 
     const text = await response.text();

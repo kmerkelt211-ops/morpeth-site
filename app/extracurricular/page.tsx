@@ -106,8 +106,6 @@ const DEFAULT_CONTENT: ExtracurricularContent = {
       "Students talk about why they chose particular activities, what they've learned and how taking part has helped them feel more confident and connected to the school.",
       "We regularly refresh the Flexible Learning Timetable so that there is a mix of long-running opportunities and new experiences for students to try across the year.",
     ],
-    videoUrl: "/video/extracurricular-enrichment.mp4",
-    videoPosterUrl: "/images/extracurricular-enrichment-poster.webp",
   },
   clubVideos: {
     eyebrow: "Club videos",
@@ -119,43 +117,31 @@ const DEFAULT_CONTENT: ExtracurricularContent = {
         title: "Music & bands",
         description:
           "Rehearsals, performances and practice sessions in our music spaces. Students talk about why they enjoy making music together.",
-        videoUrl: "/video/club-music.mp4",
-        videoPosterUrl: "/images/club-music-poster.webp",
       },
       {
         title: "Sport & teams",
         description:
           "Training sessions, matches and fixtures that show how students represent Morpeth and support one another on and off the pitch.",
-        videoUrl: "/video/club-sport.mp4",
-        videoPosterUrl: "/images/club-sport-poster.webp",
       },
       {
         title: "Creative & academic clubs",
         description:
           "From art and drama to STEM, debate and languages, these clips will highlight the range of clubs on offer across the year.",
-        videoUrl: "/video/club-creative.mp4",
-        videoPosterUrl: "/images/club-creative-poster.webp",
       },
       {
         title: "Drama & performance",
         description:
           "Work in progress from drama clubs and performance projects, including rehearsals and short showcases.",
-        videoUrl: "/video/club-drama.mp4",
-        videoPosterUrl: "/images/club-drama-poster.webp",
       },
       {
         title: "STEM & robotics",
         description:
           "Clips from science, computing and robotics clubs, highlighting problem-solving and teamwork in action.",
-        videoUrl: "/video/club-stem.mp4",
-        videoPosterUrl: "/images/club-stem-poster.webp",
       },
       {
         title: "Reading & study support",
         description:
           "A look inside reading groups, homework clubs and quiet study spaces that support learning beyond lessons.",
-        videoUrl: "/video/club-reading.mp4",
-        videoPosterUrl: "/images/club-reading-poster.webp",
       },
     ],
     footerText:
@@ -306,13 +292,19 @@ function resolveVideoSource(card: { videoFileUrl?: string; videoUrl?: string }):
 export default function ExtracurricularPage() {
   const [content, setContent] = useState<ExtracurricularContent>(DEFAULT_CONTENT);
   const [activeVideo, setActiveVideo] = useState<{ src: string; title: string; poster?: string } | null>(null);
+  const [whyExpanded, setWhyExpanded] = useState(false);
+  const [enrichmentExpanded, setEnrichmentExpanded] = useState(false);
+  const [timetableExpanded, setTimetableExpanded] = useState(false);
+  const [lifeIntroExpanded, setLifeIntroExpanded] = useState(false);
+  const [lifeCardExpanded, setLifeCardExpanded] = useState<Record<string, boolean>>({});
+  const [enrichmentVideoErrorSrc, setEnrichmentVideoErrorSrc] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
 
     async function fetchContent() {
       try {
-        const response = await fetch("/api/extracurricular", { cache: "no-store" });
+        const response = await fetch("/api/extracurricular");
         if (!response.ok) return;
         const data = (await response.json()) as PartialExtracurricularContent;
         if (mounted) {
@@ -333,6 +325,7 @@ export default function ExtracurricularPage() {
   const enrichmentVideoSrc = resolveVideoSource(content.enrichmentVideo);
   const enrichmentIsYoutube = enrichmentVideoSrc ? isYoutubeUrl(enrichmentVideoSrc) : false;
   const activeIsYoutube = activeVideo ? isYoutubeUrl(activeVideo.src) : false;
+  const enrichmentVideoLoadError = Boolean(enrichmentVideoSrc && enrichmentVideoErrorSrc === enrichmentVideoSrc);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -368,10 +361,24 @@ export default function ExtracurricularPage() {
               <div className="md:col-span-2">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-700">{content.whyEnrichment.eyebrow}</p>
                 <h2 className="mt-1 font-heading text-xl uppercase tracking-[0.12em] text-morpeth-navy md:text-2xl">{content.whyEnrichment.title}</h2>
-                <div className="mt-3 space-y-3 text-sm leading-relaxed text-slate-700">
-                  {content.whyEnrichment.paragraphs.map((paragraph) => (
-                    <p key={paragraph.slice(0, 30)}>{paragraph}</p>
+                <div className="relative mt-3 space-y-3 text-sm leading-relaxed text-slate-700">
+                  {content.whyEnrichment.paragraphs.map((paragraph, index) => (
+                    <p key={paragraph.slice(0, 30)} className={index === 0 || whyExpanded ? "" : "hidden sm:block"}>
+                      {paragraph}
+                    </p>
                   ))}
+                  {!whyExpanded && content.whyEnrichment.paragraphs.length > 1 ? (
+                    <div className="pointer-events-none absolute bottom-10 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-white sm:hidden" />
+                  ) : null}
+                  {content.whyEnrichment.paragraphs.length > 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => setWhyExpanded((value) => !value)}
+                      className="mt-2 inline-flex items-center rounded-full bg-morpeth-light/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5 sm:hidden"
+                    >
+                      {whyExpanded ? "Show less" : "Read more"}
+                    </button>
+                  ) : null}
                 </div>
               </div>
 
@@ -393,8 +400,15 @@ export default function ExtracurricularPage() {
         <div className="mx-auto max-w-6xl px-4 py-10 md:py-14">
           <div className="grid items-center gap-6 md:grid-cols-2">
             <div className="relative aspect-video overflow-hidden rounded-3xl bg-black shadow-sm ring-1 ring-slate-900/10">
-              {!enrichmentVideoSrc ? (
-                <div className="flex h-full w-full items-center justify-center text-sm text-slate-300">Enrichment video coming soon</div>
+              {!enrichmentVideoSrc || enrichmentVideoLoadError ? (
+                <div className="flex h-full w-full flex-col items-center justify-center px-5 text-center">
+                  <p className="text-sm text-slate-300">Enrichment video coming soon</p>
+                  {enrichmentVideoLoadError ? (
+                    <p className="mt-2 text-xs text-slate-400">
+                      The configured video source could not be loaded.
+                    </p>
+                  ) : null}
+                </div>
               ) : enrichmentIsYoutube ? (
                 <iframe
                   src={toYoutubeEmbedUrl(enrichmentVideoSrc)}
@@ -402,6 +416,7 @@ export default function ExtracurricularPage() {
                   className="h-full w-full rounded-3xl"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
+                  onError={() => setEnrichmentVideoErrorSrc(enrichmentVideoSrc)}
                 />
               ) : (
                 <video
@@ -411,6 +426,7 @@ export default function ExtracurricularPage() {
                   preload="metadata"
                   controlsList="nodownload"
                   poster={content.enrichmentVideo.videoPosterUrl}
+                  onError={() => setEnrichmentVideoErrorSrc(enrichmentVideoSrc)}
                 >
                   <source src={enrichmentVideoSrc} type="video/mp4" />
                 </video>
@@ -421,10 +437,24 @@ export default function ExtracurricularPage() {
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-700">{content.enrichmentVideo.eyebrow}</p>
               <h2 className="mt-2 font-heading text-xl uppercase tracking-[0.12em] text-morpeth-navy md:text-2xl">{content.enrichmentVideo.title}</h2>
-              <div className="mt-3 space-y-3 text-sm leading-relaxed text-slate-700">
-                {content.enrichmentVideo.paragraphs.map((paragraph) => (
-                  <p key={paragraph.slice(0, 30)}>{paragraph}</p>
+              <div className="relative mt-3 space-y-3 text-sm leading-relaxed text-slate-700">
+                {content.enrichmentVideo.paragraphs.map((paragraph, index) => (
+                  <p key={paragraph.slice(0, 30)} className={index === 0 || enrichmentExpanded ? "" : "hidden sm:block"}>
+                    {paragraph}
+                  </p>
                 ))}
+                {!enrichmentExpanded && content.enrichmentVideo.paragraphs.length > 1 ? (
+                  <div className="pointer-events-none absolute bottom-10 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-slate-50 sm:hidden" />
+                ) : null}
+                {content.enrichmentVideo.paragraphs.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => setEnrichmentExpanded((value) => !value)}
+                    className="mt-2 inline-flex items-center rounded-full bg-morpeth-light/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5 sm:hidden"
+                  >
+                    {enrichmentExpanded ? "Show less" : "Read more"}
+                  </button>
+                ) : null}
               </div>
             </div>
           </div>
@@ -445,52 +475,62 @@ export default function ExtracurricularPage() {
                 const videoSrc = resolveVideoSource(card);
                 const cardIsYoutube = videoSrc ? isYoutubeUrl(videoSrc) : false;
 
+                if (videoSrc) {
+                  return (
+                    <button
+                      key={`${card.title}-${card.description.slice(0, 12)}`}
+                      type="button"
+                      onClick={() => {
+                        setActiveVideo({ src: videoSrc, title: card.title, poster: card.videoPosterUrl });
+                      }}
+                      className="group flex min-w-[320px] max-w-sm snap-center flex-col rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                    >
+                      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
+                        {cardIsYoutube ? (
+                          <>
+                            {card.videoPosterUrl ? (
+                              <Image
+                                src={card.videoPosterUrl}
+                                alt={card.title}
+                                fill
+                                className="object-cover opacity-90 transition group-hover:opacity-100"
+                              />
+                            ) : (
+                              <div className="h-full w-full bg-slate-800" />
+                            )}
+                            <div className="pointer-events-none absolute inset-0 bg-black/35" />
+                          </>
+                        ) : (
+                          <video
+                            className="h-full w-full object-cover opacity-90 transition group-hover:opacity-100"
+                            playsInline
+                            muted
+                            preload="metadata"
+                            poster={card.videoPosterUrl}
+                          >
+                            <source src={videoSrc} type="video/mp4" />
+                          </video>
+                        )}
+                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
+                          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-xs font-semibold uppercase tracking-[0.18em] text-slate-900">
+                            Play
+                          </span>
+                        </div>
+                      </div>
+                      <h3 className="mt-3 text-base font-semibold tracking-tight text-slate-900">{card.title}</h3>
+                      <p className="mt-1 text-sm leading-relaxed text-slate-700">{card.description}</p>
+                    </button>
+                  );
+                }
+
                 return (
                   <article
                     key={`${card.title}-${card.description.slice(0, 12)}`}
                     className="flex min-w-[320px] max-w-sm snap-center flex-col rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-100"
                   >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (!videoSrc) return;
-                        setActiveVideo({ src: videoSrc, title: card.title, poster: card.videoPosterUrl });
-                      }}
-                      className="group relative aspect-video w-full overflow-hidden rounded-2xl bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-                    >
-                      {!videoSrc ? (
-                        <div className="flex h-full w-full items-center justify-center text-xs text-slate-300">Video coming soon</div>
-                      ) : cardIsYoutube ? (
-                        <>
-                          {card.videoPosterUrl ? (
-                            <Image
-                              src={card.videoPosterUrl}
-                              alt={card.title}
-                              fill
-                              className="object-cover opacity-90 transition group-hover:opacity-100"
-                            />
-                          ) : (
-                            <div className="h-full w-full bg-slate-800" />
-                          )}
-                          <div className="pointer-events-none absolute inset-0 bg-black/35" />
-                        </>
-                      ) : (
-                        <video
-                          className="h-full w-full object-cover opacity-90 transition group-hover:opacity-100"
-                          playsInline
-                          muted
-                          preload="metadata"
-                          poster={card.videoPosterUrl}
-                        >
-                          <source src={videoSrc} type="video/mp4" />
-                        </video>
-                      )}
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
-                        <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-xs font-semibold uppercase tracking-[0.18em] text-slate-900">
-                          Play
-                        </span>
-                      </div>
-                    </button>
+                    <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
+                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-300">Video coming soon</div>
+                    </div>
                     <h3 className="mt-3 text-base font-semibold tracking-tight text-slate-900">{card.title}</h3>
                     <p className="mt-1 text-sm leading-relaxed text-slate-700">{card.description}</p>
                   </article>
@@ -509,10 +549,24 @@ export default function ExtracurricularPage() {
             <div className="md:col-span-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-700">{content.flexibleTimetable.eyebrow}</p>
               <h2 className="mt-1 font-heading text-xl uppercase tracking-[0.12em] text-morpeth-navy md:text-2xl">{content.flexibleTimetable.title}</h2>
-              <div className="mt-3 space-y-3 text-sm leading-relaxed text-slate-700">
-                {content.flexibleTimetable.paragraphs.map((paragraph) => (
-                  <p key={paragraph.slice(0, 30)}>{paragraph}</p>
+              <div className="relative mt-3 space-y-3 text-sm leading-relaxed text-slate-700">
+                {content.flexibleTimetable.paragraphs.map((paragraph, index) => (
+                  <p key={paragraph.slice(0, 30)} className={index === 0 || timetableExpanded ? "" : "hidden sm:block"}>
+                    {paragraph}
+                  </p>
                 ))}
+                {!timetableExpanded && content.flexibleTimetable.paragraphs.length > 1 ? (
+                  <div className="pointer-events-none absolute bottom-10 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-slate-50 sm:hidden" />
+                ) : null}
+                {content.flexibleTimetable.paragraphs.length > 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => setTimetableExpanded((value) => !value)}
+                    className="mt-2 inline-flex items-center rounded-full bg-morpeth-light/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5 sm:hidden"
+                  >
+                    {timetableExpanded ? "Show less" : "Read more"}
+                  </button>
+                ) : null}
               </div>
             </div>
 
@@ -563,16 +617,62 @@ export default function ExtracurricularPage() {
           <header className="max-w-3xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-700">{content.lifeBeyondLessons.eyebrow}</p>
             <h2 className="mt-1 font-heading text-xl uppercase tracking-[0.12em] text-morpeth-navy md:text-2xl">{content.lifeBeyondLessons.title}</h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-700">{content.lifeBeyondLessons.description}</p>
+            <div className="relative mt-3">
+              <p
+                className={`text-sm leading-relaxed text-slate-700 ${
+                  lifeIntroExpanded ? "" : "max-h-[7.25rem] overflow-hidden sm:max-h-none"
+                }`}
+              >
+                {content.lifeBeyondLessons.description}
+              </p>
+              {!lifeIntroExpanded ? (
+                <div className="pointer-events-none absolute bottom-10 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-morpeth-offwhite sm:hidden" />
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setLifeIntroExpanded((value) => !value)}
+                className="mt-2 inline-flex items-center rounded-full bg-morpeth-light/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5 sm:hidden"
+              >
+                {lifeIntroExpanded ? "Show less" : "Read more"}
+              </button>
+            </div>
           </header>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {content.lifeBeyondLessons.cards.map((card) => (
-              <article key={card.title} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+            {content.lifeBeyondLessons.cards.map((card, index) => {
+              const cardKey = `${card.title}-${index}`;
+              const isExpanded = Boolean(lifeCardExpanded[cardKey]);
+
+              return (
+                <article key={card.title} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
                 <h3 className="text-base font-semibold tracking-tight text-slate-900">{card.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-700">{card.description}</p>
+                <div className="relative mt-2">
+                  <p
+                    className={`text-sm leading-relaxed text-slate-700 ${
+                      isExpanded ? "" : "max-h-[9rem] overflow-hidden sm:max-h-none"
+                    }`}
+                  >
+                    {card.description}
+                  </p>
+                  {!isExpanded ? (
+                    <div className="pointer-events-none absolute bottom-10 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-white sm:hidden" />
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLifeCardExpanded((prev) => ({
+                        ...prev,
+                        [cardKey]: !prev[cardKey],
+                      }))
+                    }
+                    className="mt-2 inline-flex items-center rounded-full bg-morpeth-light/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy shadow-card ring-1 ring-slate-200/60 transition hover:-translate-y-0.5 sm:hidden"
+                  >
+                    {isExpanded ? "Show less" : "Read more"}
+                  </button>
+                </div>
               </article>
-            ))}
+              );
+            })}
           </div>
 
           <p className="mt-4 text-xs text-slate-500">{content.lifeBeyondLessons.footerText}</p>

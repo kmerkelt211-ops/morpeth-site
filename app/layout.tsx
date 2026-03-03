@@ -475,6 +475,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
     menuLinks.forEach((link) => {
       link.addEventListener('click', () => {
+        const href = link.getAttribute('href') || '';
+        if (href.startsWith('/') && !href.includes('#')) {
+          try {
+            window.sessionStorage.setItem('morpethForceTopNextNav', '1');
+          } catch {}
+        }
         // Allow Next.js navigation to proceed; just close the menu UI
         closeMenu();
       });
@@ -583,6 +589,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const onLocationChange = () => {
     setActive();
     closeMenu();
+    try {
+      if (window.sessionStorage.getItem('morpethForceTopNextNav') === '1') {
+        window.sessionStorage.removeItem('morpethForceTopNextNav');
+        window.requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
+      }
+    } catch {}
     scheduleRevealInit();
   };
 

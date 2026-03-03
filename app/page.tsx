@@ -142,8 +142,10 @@ function Hero() {
       <HeroVideo
         src="/video/morpeth-drone-hero.mp4"
         pageKey="home"
+        posterSrc="/images/welcome.webp"
+        posterAlt="Morpeth School campus"
         priorityPoster
-        preload="auto"
+        preload="metadata"
       />
       {/* Content on top of video */}
       <div className="relative z-30 mx-auto flex min-h-[60vh] md:min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-16 text-center md:py-24">
@@ -225,7 +227,7 @@ function UpcomingEvents() {
   useEffect(() => {
     const getEvents = async () => {
       try {
-        const res = await fetch("/api/events?limit=6", { cache: "no-store" });
+        const res = await fetch("/api/events?limit=6");
         if (!res.ok) throw new Error("Failed to load events");
         const data = (await res.json()) as CalendarEvent[];
         setEvents(Array.isArray(data) ? data : []);

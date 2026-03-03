@@ -24,14 +24,24 @@ type HeroVideoProps = {
   preload?: "none" | "metadata" | "auto";
   priorityPoster?: boolean;
   fadeInDelayMs?: number;
+  disableVideoOnMobile?: boolean;
+  disableVideoOnConstrainedNetwork?: boolean;
 };
 
 const DEFAULT_HERO_OVERLAY =
   "pointer-events-none bg-gradient-to-b from-black/55 via-morpeth-navy/65 to-morpeth-navy/85";
 const DEFAULT_HERO_BASE_BG =
   "bg-gradient-to-r from-morpeth-navy via-[#12355b] to-[#3b6fb6]";
+const DEFAULT_HERO_POSTER = "/images/welcome.webp";
 const heroSrcCache = new Map<string, string>();
 const heroWebmSrcCache = new Map<string, string>();
+
+type ConnectionInfo = {
+  saveData?: boolean;
+  effectiveType?: string;
+  addEventListener?: (type: "change", listener: () => void) => void;
+  removeEventListener?: (type: "change", listener: () => void) => void;
+};
 
 export default function HeroVideo({
   src,
@@ -45,8 +55,10 @@ export default function HeroVideo({
   preload = "metadata",
   priorityPoster = false,
   fadeInDelayMs = 1800,
+  disableVideoOnMobile = true,
+  disableVideoOnConstrainedNetwork = true,
 }: HeroVideoProps) {
-  const effectivePosterSrc = posterSrc;
+  const effectivePosterSrc = posterSrc ?? DEFAULT_HERO_POSTER;
   const [remoteSrc, setRemoteSrc] = useState<string | null>(() => {
     if (!pageKey) return null;
     const cached = heroSrcCache.get(`${pageKey}:${src}`);
@@ -57,21 +69,81 @@ export default function HeroVideo({
     const cached = heroWebmSrcCache.get(`${pageKey}:${src}`);
     return cached || null;
   });
+  const [canPlayVideo, setCanPlayVideo] = useState(false);
   const [videoVisible, setVideoVisible] = useState(false);
   const overlay = overlayClassName ?? DEFAULT_HERO_OVERLAY;
   const resolvedSrc = remoteSrc || src;
   const resolvedWebmSrc = remoteWebmSrc || webmSrc;
+  const shouldRenderVideo = canPlayVideo;
   const fadeTimerRef = useRef<number | null>(null);
   const queuedRevealRef = useRef(false);
 
   useEffect(() => {
-    if (!pageKey) return;
+    if (typeof window === "undefined") return;
+
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const reducedDataQuery = window.matchMedia("(prefers-reduced-data: reduce)");
+    const mobileQuery = window.matchMedia("(max-width: 767px)");
+    const nav = navigator as Navigator & { connection?: ConnectionInfo };
+    const connection = nav.connection;
+
+    const updateVideoPolicy = () => {
+      const shouldSkipOnMobile = disableVideoOnMobile && mobileQuery.matches;
+      const shouldSkipForPreference =
+        reducedMotionQuery.matches || reducedDataQuery.matches;
+      const shouldSkipForConnection =
+        Boolean(connection?.saveData) ||
+        ["slow-2g", "2g", "3g"].includes(connection?.effectiveType || "");
+      const constrained =
+        disableVideoOnConstrainedNetwork &&
+        (shouldSkipForPreference || shouldSkipForConnection);
+      if (shouldSkipOnMobile || constrained) {
+        queuedRevealRef.current = false;
+        if (fadeTimerRef.current !== null) {
+          window.clearTimeout(fadeTimerRef.current);
+          fadeTimerRef.current = null;
+        }
+      }
+      setCanPlayVideo(!(shouldSkipOnMobile || constrained));
+    };
+
+    const addMqlListener = (mql: MediaQueryList, listener: () => void) => {
+      if (typeof mql.addEventListener === "function") {
+        mql.addEventListener("change", listener);
+        return;
+      }
+      mql.addListener(listener);
+    };
+    const removeMqlListener = (mql: MediaQueryList, listener: () => void) => {
+      if (typeof mql.removeEventListener === "function") {
+        mql.removeEventListener("change", listener);
+        return;
+      }
+      mql.removeListener(listener);
+    };
+
+    updateVideoPolicy();
+    addMqlListener(reducedMotionQuery, updateVideoPolicy);
+    addMqlListener(reducedDataQuery, updateVideoPolicy);
+    addMqlListener(mobileQuery, updateVideoPolicy);
+    connection?.addEventListener?.("change", updateVideoPolicy);
+
+    return () => {
+      removeMqlListener(reducedMotionQuery, updateVideoPolicy);
+      removeMqlListener(reducedDataQuery, updateVideoPolicy);
+      removeMqlListener(mobileQuery, updateVideoPolicy);
+      connection?.removeEventListener?.("change", updateVideoPolicy);
+    };
+  }, [disableVideoOnConstrainedNetwork, disableVideoOnMobile]);
+
+  useEffect(() => {
+    if (!pageKey || !shouldRenderVideo) return;
 
     const cacheKey = `${pageKey}:${src}`;
     if (heroSrcCache.has(cacheKey)) return;
 
     let active = true;
-    fetch(`/api/hero-video?page=${pageKey}`, { cache: "no-store" })
+    fetch(`/api/hero-video?page=${pageKey}`, { cache: "force-cache" })
       .then(async (res) => (res.ok ? res.json() : null))
       .then((data: { src?: string | null; webmSrc?: string | null } | null) => {
         if (!active) return;
@@ -97,7 +169,7 @@ export default function HeroVideo({
     return () => {
       active = false;
     };
-  }, [pageKey, src]);
+  }, [pageKey, shouldRenderVideo, src]);
 
   useEffect(() => {
     return () => {
@@ -106,6 +178,17 @@ export default function HeroVideo({
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (shouldRenderVideo) return;
+    queuedRevealRef.current = false;
+    if (fadeTimerRef.current !== null) {
+      window.clearTimeout(fadeTimerRef.current);
+      fadeTimerRef.current = null;
+    }
+    const id = window.requestAnimationFrame(() => setVideoVisible(false));
+    return () => window.cancelAnimationFrame(id);
+  }, [shouldRenderVideo]);
 
   const queueVideoReveal = () => {
     if (queuedRevealRef.current) return;
@@ -146,34 +229,36 @@ export default function HeroVideo({
           fill
           priority={priorityPoster}
           className={`object-cover transition-opacity duration-500 ${
-            videoVisible ? "opacity-0" : "opacity-100"
+            shouldRenderVideo && videoVisible ? "opacity-0" : "opacity-100"
           }`}
           sizes="100vw"
           aria-hidden="true"
         />
       )}
 
-      <video
-        key={`${resolvedWebmSrc || "no-webm"}|${resolvedSrc}`}
-        className={`h-full w-full object-cover transition-opacity duration-500 ${
-          videoVisible ? "opacity-100" : "opacity-0"
-        } ${videoClassName}`}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload={preload}
-        onLoadStart={resetVideoReveal}
-        onCanPlay={queueVideoReveal}
-        onLoadedData={queueVideoReveal}
-        onPlaying={queueVideoReveal}
-        aria-hidden="true"
-      >
-        {resolvedWebmSrc ? (
-          <source src={resolvedWebmSrc} type="video/webm" />
-        ) : null}
-        <source src={resolvedSrc} type="video/mp4" />
-      </video>
+      {shouldRenderVideo ? (
+        <video
+          key={`${resolvedWebmSrc || "no-webm"}|${resolvedSrc}`}
+          className={`h-full w-full object-cover transition-opacity duration-500 ${
+            videoVisible ? "opacity-100" : "opacity-0"
+          } ${videoClassName}`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload={preload}
+          onLoadStart={resetVideoReveal}
+          onCanPlay={queueVideoReveal}
+          onLoadedData={queueVideoReveal}
+          onPlaying={queueVideoReveal}
+          aria-hidden="true"
+        >
+          {resolvedWebmSrc ? (
+            <source src={resolvedWebmSrc} type="video/webm" />
+          ) : null}
+          <source src={resolvedSrc} type="video/mp4" />
+        </video>
+      ) : null}
 
       {overlay ? (
         <div className={`absolute inset-0 ${overlay}`} aria-hidden="true" />

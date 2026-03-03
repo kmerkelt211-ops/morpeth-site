@@ -5,26 +5,32 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { createClient } from '@sanity/client'
 import { motion } from 'framer-motion'
 import HeroVideo from '../components/HeroVideo'
 import { EXTERNAL_GALLERY_URL } from '../../lib/siteLinks'
 
-const sanityClient = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-  apiVersion: '2025-02-19',
-  useCdn: true,
-})
+type RecruitmentMedia = {
+  videoSrc: string | null
+  loopSrc: string | null
+  posterSrc: string | null
+}
+
+const DEFAULT_RECRUITMENT_MEDIA: RecruitmentMedia = {
+  videoSrc: null,
+  loopSrc: null,
+  posterSrc: null,
+}
 
 export default function OurSchoolPage() {
   const [isRecruitmentVideoOpen, setIsRecruitmentVideoOpen] = useState(false)
   const [resultsDeckIndex, setResultsDeckIndex] = useState(0)
+  const [recruitmentMedia, setRecruitmentMedia] = useState<RecruitmentMedia>(DEFAULT_RECRUITMENT_MEDIA)
+  const [recruitmentVideoError, setRecruitmentVideoError] = useState(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const valuesTrackRef = useRef<HTMLDivElement | null>(null)
   const resultsDeckRef = useRef<HTMLDivElement | null>(null)
   const resultsTabsRef = useRef<HTMLDivElement | null>(null)
-  const [recruitmentLoopSrc, setRecruitmentLoopSrc] = useState<string | null>(null)
+  const hasInitialResultsTabSync = useRef(false)
 
   useEffect(() => {
     if (!isRecruitmentVideoOpen) return
@@ -32,6 +38,7 @@ export default function OurSchoolPage() {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Close modal with Escape
       if (event.key === 'Escape') {
+        setRecruitmentVideoError(false)
         setIsRecruitmentVideoOpen(false)
         return
       }
@@ -75,23 +82,23 @@ export default function OurSchoolPage() {
   useEffect(() => {
     let isMounted = true
 
-    async function fetchLoopSrc() {
+    const loadRecruitmentMedia = async () => {
       try {
-        const data = await sanityClient.fetch<{ loop: string | null }>(`
-          *[_type == "siteSettings"][0]{
-            "loop": coalesce(recruitmentLoopUrl, recruitmentLoopFile.asset->url)
-          }
-        `)
-        if (isMounted) {
-          setRecruitmentLoopSrc(data?.loop || null)
-        }
-      } catch (error) {
-        console.error('Failed to load recruitment loop from Sanity', error)
+        const response = await fetch('/api/recruitment-video', { cache: 'force-cache' })
+        if (!response.ok) return
+        const data = (await response.json()) as RecruitmentMedia
+        if (!isMounted || !data) return
+        setRecruitmentMedia({
+          videoSrc: data.videoSrc ?? null,
+          loopSrc: data.loopSrc ?? null,
+          posterSrc: data.posterSrc ?? null,
+        })
+      } catch {
+        // Keep safe local fallback if the API is unavailable.
       }
     }
 
-    fetchLoopSrc()
-
+    loadRecruitmentMedia()
     return () => {
       isMounted = false
     }
@@ -134,6 +141,10 @@ export default function OurSchoolPage() {
   useEffect(() => {
     const el = resultsTabsRef.current
     if (!el) return
+    if (!hasInitialResultsTabSync.current) {
+      hasInitialResultsTabSync.current = true
+      return
+    }
 
     const btn = el.querySelector<HTMLElement>(`[data-results-tab="${resultsDeckIndex}"]`)
     if (!btn) return
@@ -144,11 +155,23 @@ export default function OurSchoolPage() {
       // no-op
     }
   }, [resultsDeckIndex])
+
+  const recruitmentPoster = recruitmentMedia.posterSrc || '/images/welcome.webp'
+  const recruitmentPreviewSrc = recruitmentMedia.loopSrc || recruitmentMedia.videoSrc || null
+  const recruitmentVideoSrc = recruitmentMedia.videoSrc || null
+
   return (
     <main className="min-h-screen">
       {/* HERO */}
       <section className="relative bg-morpeth-navy text-morpeth-light">
-        <HeroVideo src="/video/morpeth-drone-hero.mp4" pageKey="ourSchool" />
+        <HeroVideo
+          src="/video/morpeth-drone-hero.mp4"
+          pageKey="ourSchool"
+          posterSrc="/images/welcome.webp"
+          posterAlt="Morpeth School students"
+          priorityPoster
+          preload="metadata"
+        />
         <div className="relative mx-auto flex min-h-[60vh] md:min-h-[70vh] max-w-6xl flex-col items-center justify-center px-4 py-14 text-center md:py-24">
           <p className="text-xs uppercase tracking-[0.25em] text-morpeth-light/80">
             Morpeth School · Our School
@@ -434,18 +457,37 @@ export default function OurSchoolPage() {
               <div className="mt-3">
                 <button
                   type="button"
-                  onClick={() => setIsRecruitmentVideoOpen(true)}
-                  className="group relative w-full overflow-hidden rounded-2xl ring-1 ring-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                  onClick={() => {
+                    if (!recruitmentVideoSrc) return
+                    setRecruitmentVideoError(false)
+                    setIsRecruitmentVideoOpen(true)
+                  }}
+                  className="group relative aspect-video w-full overflow-hidden rounded-2xl ring-1 ring-slate-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                  aria-label={recruitmentVideoSrc ? 'Watch the Year 5 film' : 'Year 5 film currently unavailable'}
+                  disabled={!recruitmentVideoSrc}
                 >
-                  <video
-                    className="h-auto w-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    src={recruitmentLoopSrc ?? '/video/recruitment.mp4'}
-                  />
+                  {recruitmentPreviewSrc ? (
+                    <video
+                      className="h-full w-full object-cover"
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      poster={recruitmentPoster}
+                      src={recruitmentPreviewSrc}
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <Image
+                      src={recruitmentPoster}
+                      alt=""
+                      fill
+                      sizes="(min-width: 768px) 40vw, 100vw"
+                      className="object-cover"
+                      aria-hidden="true"
+                    />
+                  )}
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
                     <div className="flex items-center gap-3 rounded-full bg-black/70 px-4 py-2">
                       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90">
@@ -458,7 +500,7 @@ export default function OurSchoolPage() {
                         </svg>
                       </span>
                       <span className="text-xs font-semibold uppercase tracking-[0.16em] text-white">
-                        Watch the Year 5 film
+                        {recruitmentVideoSrc ? 'Watch the Year 5 film' : 'Film unavailable'}
                       </span>
                     </div>
                   </div>
@@ -1073,7 +1115,10 @@ export default function OurSchoolPage() {
           role="dialog"
           aria-modal="true"
           aria-label="Year 5 recruitment film"
-          onClick={() => setIsRecruitmentVideoOpen(false)}
+          onClick={() => {
+            setRecruitmentVideoError(false)
+            setIsRecruitmentVideoOpen(false)
+          }}
         >
           <div
             className="relative w-full max-w-5xl"
@@ -1081,19 +1126,33 @@ export default function OurSchoolPage() {
           >
             <button
               type="button"
-              onClick={() => setIsRecruitmentVideoOpen(false)}
+              onClick={() => {
+                setRecruitmentVideoError(false)
+                setIsRecruitmentVideoOpen(false)
+              }}
               className="absolute top-3 right-3 z-10 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-900 shadow-md hover:bg-white"
             >
               Close
             </button>
             <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
-              <video
-                ref={videoRef}
-                src="/video/recruitment.mp4"
-                className="h-full w-full object-contain"
-                controls
-                autoPlay
-              />
+              {recruitmentVideoSrc && !recruitmentVideoError ? (
+                <video
+                  ref={videoRef}
+                  src={recruitmentVideoSrc}
+                  className="h-full w-full object-contain"
+                  controls
+                  autoPlay
+                  preload="metadata"
+                  playsInline
+                  poster={recruitmentPoster}
+                  onError={() => setRecruitmentVideoError(true)}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center px-6 text-center text-sm text-white/85">
+                  This film is currently unavailable. Please check Site settings in Sanity and set
+                  <span className="mx-1 font-semibold">Year 5 film (URL/upload)</span>.
+                </div>
+              )}
             </div>
           </div>
         </div>
