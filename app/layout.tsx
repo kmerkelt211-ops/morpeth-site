@@ -6,8 +6,18 @@ import Script from "next/script";
 import type { ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import ContinuousImprovementTracker from "./components/ContinuousImprovementTracker";
+
+const metadataBase = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://morpeth-site.vercel.app");
+  } catch {
+    return new URL("https://morpeth-site.vercel.app");
+  }
+})();
 
 export const metadata: Metadata = {
+  metadataBase,
   title: "Morpeth School | Bethnal Green, London",
   description:
     "Morpeth School is a vibrant, creative secondary school and sixth form in Bethnal Green, London.",
@@ -54,6 +64,7 @@ const parentQuickLinks = [
 
 const mainNav = [
   { href: "/", label: "Home" },
+  { href: "/#ask-morpeth", label: "Ask Morpeth" },
   { href: "/our-school", label: "Our School" },
   { href: "/teaching-learning", label: "Teaching & Learning" },
   { href: "/sixth-form", label: "Sixth Form" },
@@ -69,12 +80,19 @@ const socialLinks = [
   { label: "YouTube", href: "https://www.youtube.com/@MorpethSch" },
 ];
 
+const clarityProjectId = (process.env.NEXT_PUBLIC_CLARITY_ID || "").trim();
+const hotjarSiteId = (process.env.NEXT_PUBLIC_HOTJAR_ID || "").trim();
+const hotjarSnippetVersion = (process.env.NEXT_PUBLIC_HOTJAR_SNIPPET_VERSION || "6").trim();
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   const currentYear = new Date().getFullYear();
 
   return (
     <html lang="en">
       <body className="bg-morpeth-offwhite text-morpeth-navy">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <div className="flex min-h-screen flex-col">
           {/* Global header / navigation */}
           <header
@@ -219,11 +237,50 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   ))}
                 </div>
               </div>
+
+              <div className="mt-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  Accessibility
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button type="button" className="site-pref-toggle" data-pref-toggle="lowBandwidth" data-label-on="Low-bandwidth: On" data-label-off="Low-bandwidth: Off">
+                    Low-bandwidth: Off
+                  </button>
+                  <button type="button" className="site-pref-toggle" data-pref-toggle="readableText" data-label-on="Readable text: On" data-label-off="Readable text: Off">
+                    Readable text: Off
+                  </button>
+                  <button type="button" className="site-pref-toggle" data-pref-toggle="highContrast" data-label-on="High contrast: On" data-label-off="High contrast: Off">
+                    High contrast: Off
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  Translate this page
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <button type="button" className="mobile-drawer__chip" data-translate-lang="bn">
+                    Bengali
+                  </button>
+                  <button type="button" className="mobile-drawer__chip" data-translate-lang="so">
+                    Somali
+                  </button>
+                  <button type="button" className="mobile-drawer__chip" data-translate-lang="ar">
+                    Arabic
+                  </button>
+                  <button type="button" className="mobile-drawer__chip" data-translate-lang="tr">
+                    Turkish
+                  </button>
+                </div>
+              </div>
             </aside>
           </div>
 
           {/* Main page content */}
-          <main className="flex-1">{children}</main>
+          <div id="main-content" className="flex-1">
+            {children}
+          </div>
 
           {/* Global footer */}
           <footer className="mt-16 bg-morpeth-offwhite text-morpeth-navy md:mt-24">
@@ -274,6 +331,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <div className="mt-3 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg">
                     <div className="relative h-64 sm:h-72 md:h-[22rem] lg:h-[24rem]">
                       <iframe
+                        data-low-bandwidth-map="true"
                         title="Map showing Morpeth School location"
                         src="https://www.openstreetmap.org/export/embed.html?bbox=-0.052694%2C51.521544%2C-0.042694%2C51.531544&layer=mapnik&marker=51.526544%2C-0.047694"
                         className="h-full w-full border-0"
@@ -281,6 +339,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                         referrerPolicy="no-referrer-when-downgrade"
                         allowFullScreen
                       />
+                      <div
+                        data-low-bandwidth-map-fallback="true"
+                        className="hidden h-full w-full items-center justify-center bg-slate-100 px-6 text-center"
+                      >
+                        <p className="text-sm text-slate-700">
+                          Low-bandwidth mode is on, so the embedded map is hidden to save data.
+                        </p>
+                      </div>
                       <div className="pointer-events-none absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-morpeth-navy shadow-sm">
                         Morpeth School, E2 0PX
                       </div>
@@ -355,6 +421,40 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 ))}
               </div>
 
+              <div className="mx-auto mt-8 max-w-4xl rounded-2xl border border-slate-200 bg-white/85 p-4">
+                <h3 className="text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
+                  Accessibility & Language
+                </h3>
+                <div className="mt-3 flex flex-wrap justify-center gap-2">
+                  <button type="button" className="site-pref-toggle" data-pref-toggle="lowBandwidth" data-label-on="Low-bandwidth: On" data-label-off="Low-bandwidth: Off">
+                    Low-bandwidth: Off
+                  </button>
+                  <button type="button" className="site-pref-toggle" data-pref-toggle="readableText" data-label-on="Readable text: On" data-label-off="Readable text: Off">
+                    Readable text: Off
+                  </button>
+                  <button type="button" className="site-pref-toggle" data-pref-toggle="highContrast" data-label-on="High contrast: On" data-label-off="High contrast: Off">
+                    High contrast: Off
+                  </button>
+                </div>
+                <div className="mt-3 flex flex-wrap justify-center gap-2">
+                  <button type="button" className="site-pref-toggle" data-translate-lang="bn">
+                    Translate: Bengali
+                  </button>
+                  <button type="button" className="site-pref-toggle" data-translate-lang="so">
+                    Translate: Somali
+                  </button>
+                  <button type="button" className="site-pref-toggle" data-translate-lang="ar">
+                    Translate: Arabic
+                  </button>
+                  <button type="button" className="site-pref-toggle" data-translate-lang="tr">
+                    Translate: Turkish
+                  </button>
+                </div>
+                <p className="mt-3 text-center text-xs text-slate-600">
+                  Need support in another language? Call school reception and we will arrange interpreter support.
+                </p>
+              </div>
+
               <div className="mt-5 text-center">
                 <Link
                   href="/content"
@@ -370,8 +470,34 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
           </footer>
 
+          <ContinuousImprovementTracker />
           <Analytics />
           <SpeedInsights />
+          {clarityProjectId ? (
+            <Script id="morpeth-clarity" strategy="afterInteractive">
+              {`
+                (function(c,l,a,r,i,t,y){
+                    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+                    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+                    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+                })(window, document, "clarity", "script", "${clarityProjectId}");
+              `}
+            </Script>
+          ) : null}
+          {hotjarSiteId ? (
+            <Script id="morpeth-hotjar" strategy="afterInteractive">
+              {`
+                (function(h,o,t,j,a,r){
+                    h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+                    h._hjSettings={hjid:${Number.parseInt(hotjarSiteId, 10) || 0},hjsv:${Number.parseInt(hotjarSnippetVersion, 10) || 6}};
+                    a=o.getElementsByTagName('head')[0];
+                    r=o.createElement('script');r.async=1;
+                    r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+                    a.appendChild(r);
+                })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+              `}
+            </Script>
+          ) : null}
           <Script id="morpeth-ui" strategy="afterInteractive">
             {`
 (function(){
@@ -380,6 +506,78 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   window.__morpethUIInit = true;
 
   const root = document.documentElement;
+  const PREFS = {
+    lowBandwidth: { storage: 'morpeth_pref_low_bandwidth', dataset: 'lowBandwidth' },
+    readableText: { storage: 'morpeth_pref_readable_text', dataset: 'readableText' },
+    highContrast: { storage: 'morpeth_pref_high_contrast', dataset: 'highContrast' }
+  };
+
+  const getPref = (name) => {
+    const config = PREFS[name];
+    if (!config) return false;
+    try {
+      return window.localStorage.getItem(config.storage) === '1';
+    } catch {
+      return false;
+    }
+  };
+
+  const setPref = (name, value) => {
+    const config = PREFS[name];
+    if (!config) return;
+    try {
+      window.localStorage.setItem(config.storage, value ? '1' : '0');
+    } catch {}
+  };
+
+  const syncPrefButtons = (name, value) => {
+    document.querySelectorAll('[data-pref-toggle="' + name + '"]').forEach((button) => {
+      button.setAttribute('aria-pressed', value ? 'true' : 'false');
+      button.setAttribute('data-active', value ? 'true' : 'false');
+      const onLabel = button.getAttribute('data-label-on');
+      const offLabel = button.getAttribute('data-label-off');
+      if (onLabel && offLabel) button.textContent = value ? onLabel : offLabel;
+    });
+  };
+
+  const applyPrefs = () => {
+    Object.keys(PREFS).forEach((name) => {
+      const value = getPref(name);
+      const config = PREFS[name];
+      if (value) root.dataset[config.dataset] = 'true';
+      else delete root.dataset[config.dataset];
+      syncPrefButtons(name, value);
+    });
+    window.dispatchEvent(new Event('morpeth:preferences-changed'));
+  };
+
+  const bindPrefButtons = () => {
+    document.querySelectorAll('[data-pref-toggle]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const name = button.getAttribute('data-pref-toggle');
+        if (!name || !PREFS[name]) return;
+        const nextValue = !getPref(name);
+        setPref(name, nextValue);
+        applyPrefs();
+      });
+    });
+  };
+
+  const bindTranslateButtons = () => {
+    document.querySelectorAll('[data-translate-lang]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const lang = button.getAttribute('data-translate-lang');
+        if (!lang) return;
+        const currentUrl = window.location.href;
+        const target = 'https://translate.google.com/translate?sl=auto&tl=' + encodeURIComponent(lang) + '&u=' + encodeURIComponent(currentUrl);
+        window.open(target, '_blank', 'noopener,noreferrer');
+      });
+    });
+  };
+
+  applyPrefs();
+  bindPrefButtons();
+  bindTranslateButtons();
 
   // Sticky header scroll-state and hide-on-scroll
   let lastScroll = window.scrollY;

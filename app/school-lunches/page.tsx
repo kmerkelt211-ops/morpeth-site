@@ -9,7 +9,7 @@ export default function SchoolLunchesPage() {
   const chip =
     "inline-flex items-center rounded-full bg-morpeth-light/60 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy transition hover:-translate-y-0.5 hover:shadow-md hover:bg-morpeth-light/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-morpeth-mid";
   const docsChip =
-    "inline-flex min-w-[260px] justify-center items-center rounded-full bg-morpeth-light/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-light transition hover:-translate-y-0.5 hover:bg-morpeth-light/20 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-morpeth-navy focus-visible:ring-morpeth-light";
+    "inline-flex min-w-[220px] justify-center items-center rounded-full bg-morpeth-light/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-light transition hover:-translate-y-0.5 hover:bg-morpeth-light/20 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-morpeth-navy focus-visible:ring-morpeth-light sm:min-w-[260px]";
 
   const card =
     "rounded-2xl bg-white/90 p-5 shadow-card transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg md:hover:scale-[1.01] will-change-transform border border-morpeth-navy/10";
@@ -338,7 +338,7 @@ export default function SchoolLunchesPage() {
                   className="block overflow-hidden rounded-xl"
                   aria-label="Open menu image"
                 >
-                  <div className="relative flex h-[520px] w-full items-center justify-center rounded-xl bg-white/5">
+                  <div className="relative flex h-[55vh] max-h-[520px] min-h-[340px] w-full items-center justify-center rounded-xl bg-white/5 md:h-[520px]">
                     <Image
                       src={activeMenuImage.url}
                       alt={activeMenuImage.alt || "Menu"}
@@ -378,7 +378,7 @@ export default function SchoolLunchesPage() {
                 </div>
 
                 {menuImages.length > 1 ? (
-                  <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                  <div className="mt-3 flex gap-2 overflow-x-auto pb-1 no-scrollbar touch-pan-x">
                     {menuImages.map((img, idx) => (
                       <button
                         key={img.url + idx}
@@ -405,7 +405,7 @@ export default function SchoolLunchesPage() {
                 ) : null}
               </div>
             ) : (
-              <div className="flex h-[520px] items-center justify-center rounded-xl border border-white/10 bg-white/5 p-4 text-center text-sm text-morpeth-light/70">
+              <div className="flex h-[55vh] max-h-[520px] min-h-[340px] items-center justify-center rounded-xl border border-white/10 bg-white/5 p-4 text-center text-sm text-morpeth-light/70 md:h-[520px]">
                 Add menu images in Sanity to show a preview carousel here.
               </div>
             )}

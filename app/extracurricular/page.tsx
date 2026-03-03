@@ -291,7 +291,7 @@ function resolveVideoSource(card: { videoFileUrl?: string; videoUrl?: string }):
 
 export default function ExtracurricularPage() {
   const [content, setContent] = useState<ExtracurricularContent>(DEFAULT_CONTENT);
-  const [activeVideo, setActiveVideo] = useState<{ src: string; title: string; poster?: string } | null>(null);
+  const [expandedClub, setExpandedClub] = useState<{ card: VideoCard; src: string; isYoutube: boolean } | null>(null);
   const [whyExpanded, setWhyExpanded] = useState(false);
   const [enrichmentExpanded, setEnrichmentExpanded] = useState(false);
   const [timetableExpanded, setTimetableExpanded] = useState(false);
@@ -324,8 +324,20 @@ export default function ExtracurricularPage() {
 
   const enrichmentVideoSrc = resolveVideoSource(content.enrichmentVideo);
   const enrichmentIsYoutube = enrichmentVideoSrc ? isYoutubeUrl(enrichmentVideoSrc) : false;
-  const activeIsYoutube = activeVideo ? isYoutubeUrl(activeVideo.src) : false;
   const enrichmentVideoLoadError = Boolean(enrichmentVideoSrc && enrichmentVideoErrorSrc === enrichmentVideoSrc);
+
+  useEffect(() => {
+    if (!expandedClub) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setExpandedClub(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [expandedClub]);
 
   return (
     <main className="min-h-screen bg-slate-50">
@@ -469,40 +481,39 @@ export default function ExtracurricularPage() {
             <p className="mt-3 text-base leading-relaxed text-slate-700">{content.clubVideos.description}</p>
           </header>
 
-          <div className="-mx-4 overflow-x-auto pb-2">
-            <div className="flex snap-x snap-mandatory gap-4 px-4">
+          <div className="-mx-4 overflow-x-auto pb-2 no-scrollbar touch-pan-x">
+            <div className="flex snap-x snap-mandatory gap-4 px-4 scroll-px-4">
               {content.clubVideos.cards.map((card) => {
                 const videoSrc = resolveVideoSource(card);
                 const cardIsYoutube = videoSrc ? isYoutubeUrl(videoSrc) : false;
-
-                if (videoSrc) {
-                  return (
-                    <button
-                      key={`${card.title}-${card.description.slice(0, 12)}`}
-                      type="button"
-                      onClick={() => {
-                        setActiveVideo({ src: videoSrc, title: card.title, poster: card.videoPosterUrl });
-                      }}
-                      className="group flex min-w-[320px] max-w-sm snap-center flex-col rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
-                    >
-                      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
-                        {cardIsYoutube ? (
+                return (
+                  <button
+                    key={`${card.title}-${card.description.slice(0, 12)}`}
+                    type="button"
+                    onClick={() => {
+                      setExpandedClub({ card, src: videoSrc, isYoutube: cardIsYoutube });
+                    }}
+                    className="group relative z-0 flex min-w-[84vw] max-w-sm snap-center flex-col rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-100 transition duration-300 ease-out hover:z-10 hover:-translate-y-1 hover:scale-[1.015] hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 sm:min-w-[320px]"
+                  >
+                    <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
+                      {videoSrc ? (
+                        cardIsYoutube ? (
                           <>
                             {card.videoPosterUrl ? (
                               <Image
                                 src={card.videoPosterUrl}
                                 alt={card.title}
                                 fill
-                                className="object-cover opacity-90 transition group-hover:opacity-100"
+                                className="object-cover opacity-90 transition duration-300 group-hover:opacity-100"
                               />
                             ) : (
                               <div className="h-full w-full bg-slate-800" />
                             )}
-                            <div className="pointer-events-none absolute inset-0 bg-black/35" />
+                            <div className="pointer-events-none absolute inset-0 bg-black/35 transition group-hover:bg-black/25" />
                           </>
                         ) : (
                           <video
-                            className="h-full w-full object-cover opacity-90 transition group-hover:opacity-100"
+                            className="h-full w-full object-cover opacity-90 transition duration-300 group-hover:opacity-100"
                             playsInline
                             muted
                             preload="metadata"
@@ -510,30 +521,19 @@ export default function ExtracurricularPage() {
                           >
                             <source src={videoSrc} type="video/mp4" />
                           </video>
-                        )}
-                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
-                          <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-xs font-semibold uppercase tracking-[0.18em] text-slate-900">
-                            Play
-                          </span>
-                        </div>
+                        )
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-xs text-slate-300">Video coming soon</div>
+                      )}
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20 transition group-hover:bg-black/10">
+                        <span className="inline-flex min-w-24 items-center justify-center rounded-full bg-white/90 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-900">
+                          Expand
+                        </span>
                       </div>
-                      <h3 className="mt-3 text-base font-semibold tracking-tight text-slate-900">{card.title}</h3>
-                      <p className="mt-1 text-sm leading-relaxed text-slate-700">{card.description}</p>
-                    </button>
-                  );
-                }
-
-                return (
-                  <article
-                    key={`${card.title}-${card.description.slice(0, 12)}`}
-                    className="flex min-w-[320px] max-w-sm snap-center flex-col rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-100"
-                  >
-                    <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black">
-                      <div className="flex h-full w-full items-center justify-center text-xs text-slate-300">Video coming soon</div>
                     </div>
                     <h3 className="mt-3 text-base font-semibold tracking-tight text-slate-900">{card.title}</h3>
                     <p className="mt-1 text-sm leading-relaxed text-slate-700">{card.description}</p>
-                  </article>
+                  </button>
                 );
               })}
             </div>
@@ -679,34 +679,47 @@ export default function ExtracurricularPage() {
         </div>
       </section>
 
-      {activeVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="relative w-full max-w-4xl">
+      {expandedClub && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setExpandedClub(null)}
+          role="presentation"
+        >
+          <div className="relative w-full max-w-4xl" onClick={(event) => event.stopPropagation()}>
             <div className="aspect-video overflow-hidden rounded-2xl bg-black">
-              {activeIsYoutube ? (
-                <iframe
-                  src={toYoutubeEmbedUrl(activeVideo.src)}
-                  title={activeVideo.title}
-                  className="h-full w-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
+              {expandedClub.src ? (
+                expandedClub.isYoutube ? (
+                  <iframe
+                    src={toYoutubeEmbedUrl(expandedClub.src)}
+                    title={expandedClub.card.title}
+                    className="h-full w-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <video
+                    key={expandedClub.src}
+                    className="h-full w-full object-contain"
+                    controls
+                    autoPlay
+                    playsInline
+                    poster={expandedClub.card.videoPosterUrl}
+                  >
+                    <source src={expandedClub.src} type="video/mp4" />
+                  </video>
+                )
               ) : (
-                <video
-                  key={activeVideo.src}
-                  className="h-full w-full object-contain"
-                  controls
-                  autoPlay
-                  playsInline
-                  poster={activeVideo.poster}
-                >
-                  <source src={activeVideo.src} type="video/mp4" />
-                </video>
+                <div className="flex h-full w-full items-center justify-center text-sm text-slate-300">Video coming soon</div>
               )}
+            </div>
+            <div className="mt-3 rounded-2xl bg-white p-5 shadow-lg ring-1 ring-slate-200">
+              <h3 className="text-lg font-semibold tracking-tight text-slate-900">{expandedClub.card.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-700">{expandedClub.card.description}</p>
+              {!expandedClub.src ? <p className="mt-3 text-xs text-slate-500">We are adding this video soon.</p> : null}
             </div>
             <button
               type="button"
-              onClick={() => setActiveVideo(null)}
+              onClick={() => setExpandedClub(null)}
               className="absolute -right-2 -top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-sm font-semibold text-slate-900 shadow-md"
               aria-label="Close video"
             >

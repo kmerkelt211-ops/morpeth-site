@@ -59,6 +59,7 @@ export default function HeroVideo({
   disableVideoOnConstrainedNetwork = true,
 }: HeroVideoProps) {
   const effectivePosterSrc = posterSrc ?? DEFAULT_HERO_POSTER;
+  const [forceLowBandwidth, setForceLowBandwidth] = useState(false);
   const [remoteSrc, setRemoteSrc] = useState<string | null>(() => {
     if (!pageKey) return null;
     const cached = heroSrcCache.get(`${pageKey}:${src}`);
@@ -81,6 +82,25 @@ export default function HeroVideo({
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const applyStoredPrefs = () => {
+      const fromStorage = window.localStorage.getItem("morpeth_pref_low_bandwidth") === "1";
+      const fromRoot = document.documentElement.dataset.lowBandwidth === "true";
+      setForceLowBandwidth(fromStorage || fromRoot);
+    };
+
+    applyStoredPrefs();
+    window.addEventListener("storage", applyStoredPrefs);
+    window.addEventListener("morpeth:preferences-changed", applyStoredPrefs as EventListener);
+
+    return () => {
+      window.removeEventListener("storage", applyStoredPrefs);
+      window.removeEventListener("morpeth:preferences-changed", applyStoredPrefs as EventListener);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const reducedDataQuery = window.matchMedia("(prefers-reduced-data: reduce)");
     const mobileQuery = window.matchMedia("(max-width: 767px)");
@@ -97,14 +117,15 @@ export default function HeroVideo({
       const constrained =
         disableVideoOnConstrainedNetwork &&
         (shouldSkipForPreference || shouldSkipForConnection);
-      if (shouldSkipOnMobile || constrained) {
+      const shouldSkipForLowBandwidth = forceLowBandwidth;
+      if (shouldSkipOnMobile || constrained || shouldSkipForLowBandwidth) {
         queuedRevealRef.current = false;
         if (fadeTimerRef.current !== null) {
           window.clearTimeout(fadeTimerRef.current);
           fadeTimerRef.current = null;
         }
       }
-      setCanPlayVideo(!(shouldSkipOnMobile || constrained));
+      setCanPlayVideo(!(shouldSkipOnMobile || constrained || shouldSkipForLowBandwidth));
     };
 
     const addMqlListener = (mql: MediaQueryList, listener: () => void) => {
@@ -134,7 +155,7 @@ export default function HeroVideo({
       removeMqlListener(mobileQuery, updateVideoPolicy);
       connection?.removeEventListener?.("change", updateVideoPolicy);
     };
-  }, [disableVideoOnConstrainedNetwork, disableVideoOnMobile]);
+  }, [disableVideoOnConstrainedNetwork, disableVideoOnMobile, forceLowBandwidth]);
 
   useEffect(() => {
     if (!pageKey || !shouldRenderVideo) return;
@@ -238,6 +259,7 @@ export default function HeroVideo({
 
       {shouldRenderVideo ? (
         <video
+          data-ornamental-video="true"
           key={`${resolvedWebmSrc || "no-webm"}|${resolvedSrc}`}
           className={`h-full w-full object-cover transition-opacity duration-500 ${
             videoVisible ? "opacity-100" : "opacity-0"
