@@ -6,6 +6,8 @@ import letter from "../schemas/letter";
 import teachingLearningPage from "../schemas/teachingLearningPage";
 import extracurricularPage from "../schemas/extracurricularPage";
 import parentsPage from "../schemas/parentsPage";
+import admissionsEnquiry from "../schemas/admissionsEnquiry";
+import studentSpotlight from "../schemas/studentSpotlight";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -842,5 +844,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     teachingLearningPage,
     extracurricularPage,
     parentsPage,
+    admissionsEnquiry,
+    studentSpotlight,
   ],
 };

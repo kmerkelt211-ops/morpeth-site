@@ -6,15 +6,17 @@ import type { TypedObject } from "@portabletext/types";
 import { client } from "../../../sanity/client";
 import Image from "next/image";
 import imageUrlBuilder from "@sanity/image-url";
+import type { Metadata } from "next";
 
 const builder = imageUrlBuilder(client);
 const urlFor = (source: Record<string, unknown>) => builder.image(source);
 
 export const revalidate = 60;
 export const dynamicParams = true;
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://morpeth-site.vercel.app";
 
 const QUERY = `
-*[_type == "post" && slug.current == $slug][0]{
+*[_type in ["post", "newsPost"] && slug.current == $slug && !(_id in path("drafts.**"))][0]{
   title,
   "date": coalesce(publishedAt, _createdAt),
   excerpt,
@@ -44,24 +46,74 @@ type Post = {
   };
 };
 
+function normaliseSlug(rawSlug: string | string[] | undefined) {
+  return decodeURIComponent((Array.isArray(rawSlug) ? rawSlug[0] : rawSlug) || "").trim();
+}
+
+async function getPostBySlug(slug: string) {
+  let post = await client.fetch<Post | null>(QUERY, { slug });
+
+  // Guard against accidental case mismatches.
+  if (!post && slug && slug !== slug.toLowerCase()) {
+    post = await client.fetch<Post | null>(QUERY, { slug: slug.toLowerCase() });
+  }
+
+  return post;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug: rawSlug } = await params;
+  const slug = normaliseSlug(rawSlug);
+  const post = slug ? await getPostBySlug(slug) : null;
+
+  if (!post) {
+    return {
+      title: "News | Morpeth School",
+      description: "Latest updates, stories and achievements from Morpeth School.",
+    };
+  }
+
+  const storyPath = `/news/${slug}`;
+  const imageUrl = `${SITE_URL}${storyPath}/opengraph-image`;
+
+  return {
+    title: `${post.title} | Morpeth School`,
+    description: post.excerpt || "Latest updates and stories from Morpeth School.",
+    openGraph: {
+      type: "article",
+      url: `${SITE_URL}${storyPath}`,
+      title: post.title,
+      description: post.excerpt || "Latest updates and stories from Morpeth School.",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: `${post.title} - Morpeth School`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt || "Latest updates and stories from Morpeth School.",
+      images: [imageUrl],
+    },
+  };
+}
+
 export default async function NewsPostPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  // Unwrap Next.js 16 promise-based params and normalise the slug
   const { slug: rawSlug } = await params;
-  const resolvedSlug = decodeURIComponent(
-    (Array.isArray(rawSlug) ? rawSlug[0] : rawSlug) || ""
-  ).trim();
-
-  // Try exact match first
-  let post = await client.fetch<Post>(QUERY, { slug: resolvedSlug });
-
-  // Fallback: try lower-cased slug (guards against accidental case differences)
-  if (!post && resolvedSlug && resolvedSlug !== resolvedSlug.toLowerCase()) {
-    post = await client.fetch<Post>(QUERY, { slug: resolvedSlug.toLowerCase() });
-  }
+  const resolvedSlug = normaliseSlug(rawSlug);
+  const post = await getPostBySlug(resolvedSlug);
 
   if (!post) return notFound();
 
@@ -120,7 +172,7 @@ export default async function NewsPostPage({
 // (Optional) prebuild slugs for SSG
 export async function generateStaticParams() {
   const slugs = await client.fetch<{ slug: string }[]>(
-    `*[_type == "post" && defined(slug.current)]{ "slug": slug.current }`
+    `*[_type in ["post", "newsPost"] && defined(slug.current) && !(_id in path("drafts.**"))]{ "slug": slug.current }`
   );
   return slugs.map((s) => ({ slug: s.slug }));
 }
