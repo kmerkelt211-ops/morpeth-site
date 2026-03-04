@@ -1,5 +1,5 @@
 export const runtime = "nodejs";
-export const revalidate = 3600;
+export const revalidate = 60;
 
 import { NextResponse } from "next/server";
 import { client } from "../../../sanity/client";
@@ -16,14 +16,28 @@ const DEFAULT_IMAGE_SRC = "/images/sixthform-hero.jpg";
 const DEFAULT_IMAGE_ALT = "Morpeth Sixth Form students";
 
 const QUERY = `coalesce(
-  *[_type == "homeSixthFormHighlightSettings"][0]{
+  *[_type == "homeSixthFormHighlightSettings" && _id == "homeSixthFormHighlightSettings"][0]{
     homeSixthFormHighlightVideoUrl,
     "homeSixthFormHighlightVideoFileUrl": homeSixthFormHighlightVideoFile.asset->url,
     "homeSixthFormHighlightPosterUrl": homeSixthFormHighlightPoster.asset->url,
     "homeSixthFormHighlightImageUrl": homeSixthFormHighlightImage.asset->url,
     "homeSixthFormHighlightImageAlt": homeSixthFormHighlightImage.alt
   },
-  *[_type == "siteSettings"][0]{
+  *[_type == "homeSixthFormHighlightSettings"] | order(_updatedAt desc)[0]{
+    homeSixthFormHighlightVideoUrl,
+    "homeSixthFormHighlightVideoFileUrl": homeSixthFormHighlightVideoFile.asset->url,
+    "homeSixthFormHighlightPosterUrl": homeSixthFormHighlightPoster.asset->url,
+    "homeSixthFormHighlightImageUrl": homeSixthFormHighlightImage.asset->url,
+    "homeSixthFormHighlightImageAlt": homeSixthFormHighlightImage.alt
+  },
+  *[_type == "siteSettings" && _id == "siteSettings"][0]{
+    homeSixthFormHighlightVideoUrl,
+    "homeSixthFormHighlightVideoFileUrl": homeSixthFormHighlightVideoFile.asset->url,
+    "homeSixthFormHighlightPosterUrl": homeSixthFormHighlightPoster.asset->url,
+    "homeSixthFormHighlightImageUrl": homeSixthFormHighlightImage.asset->url,
+    "homeSixthFormHighlightImageAlt": homeSixthFormHighlightImage.alt
+  },
+  *[_type == "siteSettings"] | order(_updatedAt desc)[0]{
     homeSixthFormHighlightVideoUrl,
     "homeSixthFormHighlightVideoFileUrl": homeSixthFormHighlightVideoFile.asset->url,
     "homeSixthFormHighlightPosterUrl": homeSixthFormHighlightPoster.asset->url,
@@ -53,7 +67,7 @@ export async function GET() {
       },
       {
         headers: {
-          "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+          "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=300",
         },
       }
     );
@@ -68,7 +82,7 @@ export async function GET() {
       {
         status: 200,
         headers: {
-          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=3600",
+          "Cache-Control": "public, max-age=10, s-maxage=30, stale-while-revalidate=120",
         },
       }
     );

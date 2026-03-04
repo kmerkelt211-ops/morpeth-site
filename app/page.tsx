@@ -456,7 +456,7 @@ function SchoolPulse() {
           sanityFetch<NoticePulse | null>(PULSE_NOTICE_QUERY),
           sanityFetch<LunchPulse | null>(PULSE_LUNCH_QUERY),
           sanityFetch<AttendancePulse | null>(PULSE_ATTENDANCE_QUERY),
-          fetch("/api/pulse-media", { cache: "force-cache" }),
+          fetch("/api/pulse-media", { cache: "no-store" }),
         ]);
 
         if (!mounted) return;
@@ -1989,7 +1989,7 @@ function SixthFormHighlight() {
 
     const loadMedia = async () => {
       try {
-        const response = await fetch("/api/home-sixth-form-media", { cache: "force-cache" });
+        const response = await fetch("/api/home-sixth-form-media", { cache: "no-store" });
         if (!response.ok || !mounted) return;
 
         const mediaBody = (await response.json()) as Partial<HomeSixthFormMedia>;

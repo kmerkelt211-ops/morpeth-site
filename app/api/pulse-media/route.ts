@@ -1,5 +1,5 @@
 export const runtime = "nodejs";
-export const revalidate = 3600;
+export const revalidate = 60;
 
 import { NextResponse } from "next/server";
 import { client } from "../../../sanity/client";
@@ -22,7 +22,7 @@ type PulseMediaSettings = {
 };
 
 const QUERY = `coalesce(
-  *[_type == "homeSchoolPulseSettings"][0]{
+  *[_type == "homeSchoolPulseSettings" && _id == "homeSchoolPulseSettings"][0]{
     pulseMediaTitle,
     pulseMediaDescription,
     pulseMediaCtaLabel,
@@ -36,7 +36,35 @@ const QUERY = `coalesce(
       caption
     }
   },
-  *[_type == "siteSettings"][0]{
+  *[_type == "homeSchoolPulseSettings"] | order(_updatedAt desc)[0]{
+    pulseMediaTitle,
+    pulseMediaDescription,
+    pulseMediaCtaLabel,
+    pulseMediaCtaHref,
+    pulseMediaLoopUrl,
+    "pulseMediaLoopFileUrl": pulseMediaLoopFile.asset->url,
+    "pulseMediaPosterUrl": pulseMediaPoster.asset->url,
+    "pulseMediaSlides": coalesce(pulseMediaSlides, [])[]{
+      "imageSrc": image.asset->url,
+      alt,
+      caption
+    }
+  },
+  *[_type == "siteSettings" && _id == "siteSettings"][0]{
+    pulseMediaTitle,
+    pulseMediaDescription,
+    pulseMediaCtaLabel,
+    pulseMediaCtaHref,
+    pulseMediaLoopUrl,
+    "pulseMediaLoopFileUrl": pulseMediaLoopFile.asset->url,
+    "pulseMediaPosterUrl": pulseMediaPoster.asset->url,
+    "pulseMediaSlides": coalesce(pulseMediaSlides, [])[]{
+      "imageSrc": image.asset->url,
+      alt,
+      caption
+    }
+  },
+  *[_type == "siteSettings"] | order(_updatedAt desc)[0]{
     pulseMediaTitle,
     pulseMediaDescription,
     pulseMediaCtaLabel,
@@ -82,7 +110,7 @@ export async function GET() {
       },
       {
         headers: {
-          "Cache-Control": "public, max-age=300, s-maxage=3600, stale-while-revalidate=86400",
+          "Cache-Control": "public, max-age=30, s-maxage=60, stale-while-revalidate=300",
         },
       }
     );
@@ -100,7 +128,7 @@ export async function GET() {
       {
         status: 200,
         headers: {
-          "Cache-Control": "public, max-age=60, s-maxage=300, stale-while-revalidate=3600",
+          "Cache-Control": "public, max-age=10, s-maxage=30, stale-while-revalidate=120",
         },
       }
     );

@@ -195,6 +195,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
       name: "homeSchoolPulseSettings",
       title: "Home: School Pulse media",
       type: "document",
+      liveEdit: true,
       fields: [
         defineField({
           name: "pulseMediaTitle",
@@ -295,6 +296,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
       name: "homeSixthFormHighlightSettings",
       title: "Home: Sixth Form highlight media",
       type: "document",
+      liveEdit: true,
       fields: [
         defineField({
           name: "homeSixthFormHighlightVideoFile",

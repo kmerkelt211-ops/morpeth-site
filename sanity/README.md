@@ -44,6 +44,7 @@ In **Website Pages** -> **Home** -> **School Pulse media (homepage)**, use the `
 - Add `School Pulse media loop (upload)` or `School Pulse media loop (URL)` for a looping video panel.
 - If no loop is set, `School Pulse media slides` will rotate as a photo carousel.
 - Use title, description and CTA fields to control the text and button shown on the panel.
+- This document uses live edit, so changes are applied directly (no separate Publish step).
 
 ## Homepage Sixth Form highlight media
 
@@ -52,6 +53,7 @@ In **Website Pages** -> **Home** -> **Sixth Form highlight media (homepage)**:
 - Add `Sixth Form highlight video (upload)` or `Sixth Form highlight video (URL)` to show a video in that homepage strip.
 - Use `Sixth Form highlight video poster` as the preview frame.
 - Use `Sixth Form highlight photo` as the fallback image when no video is set.
+- This document uses live edit, so changes are applied directly (no separate Publish step).
 
 ## Teaching & Learning + Extracurricular editing
 
