@@ -15,13 +15,22 @@ type HomeSixthFormMediaSettings = {
 const DEFAULT_IMAGE_SRC = "/images/sixthform-hero.jpg";
 const DEFAULT_IMAGE_ALT = "Morpeth Sixth Form students";
 
-const QUERY = `*[_type == "siteSettings"][0]{
-  homeSixthFormHighlightVideoUrl,
-  "homeSixthFormHighlightVideoFileUrl": homeSixthFormHighlightVideoFile.asset->url,
-  "homeSixthFormHighlightPosterUrl": homeSixthFormHighlightPoster.asset->url,
-  "homeSixthFormHighlightImageUrl": homeSixthFormHighlightImage.asset->url,
-  "homeSixthFormHighlightImageAlt": homeSixthFormHighlightImage.alt
-}`;
+const QUERY = `coalesce(
+  *[_type == "homeSixthFormHighlightSettings"][0]{
+    homeSixthFormHighlightVideoUrl,
+    "homeSixthFormHighlightVideoFileUrl": homeSixthFormHighlightVideoFile.asset->url,
+    "homeSixthFormHighlightPosterUrl": homeSixthFormHighlightPoster.asset->url,
+    "homeSixthFormHighlightImageUrl": homeSixthFormHighlightImage.asset->url,
+    "homeSixthFormHighlightImageAlt": homeSixthFormHighlightImage.alt
+  },
+  *[_type == "siteSettings"][0]{
+    homeSixthFormHighlightVideoUrl,
+    "homeSixthFormHighlightVideoFileUrl": homeSixthFormHighlightVideoFile.asset->url,
+    "homeSixthFormHighlightPosterUrl": homeSixthFormHighlightPoster.asset->url,
+    "homeSixthFormHighlightImageUrl": homeSixthFormHighlightImage.asset->url,
+    "homeSixthFormHighlightImageAlt": homeSixthFormHighlightImage.alt
+  }
+)`;
 
 function cleanText(value?: string | null): string {
   return typeof value === "string" ? value.trim() : "";

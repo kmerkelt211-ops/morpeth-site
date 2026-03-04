@@ -21,20 +21,36 @@ type PulseMediaSettings = {
   pulseMediaSlides?: PulseSlide[] | null;
 };
 
-const QUERY = `*[_type == "siteSettings"][0]{
-  pulseMediaTitle,
-  pulseMediaDescription,
-  pulseMediaCtaLabel,
-  pulseMediaCtaHref,
-  pulseMediaLoopUrl,
-  "pulseMediaLoopFileUrl": pulseMediaLoopFile.asset->url,
-  "pulseMediaPosterUrl": pulseMediaPoster.asset->url,
-  "pulseMediaSlides": coalesce(pulseMediaSlides, [])[]{
-    "imageSrc": image.asset->url,
-    alt,
-    caption
+const QUERY = `coalesce(
+  *[_type == "homeSchoolPulseSettings"][0]{
+    pulseMediaTitle,
+    pulseMediaDescription,
+    pulseMediaCtaLabel,
+    pulseMediaCtaHref,
+    pulseMediaLoopUrl,
+    "pulseMediaLoopFileUrl": pulseMediaLoopFile.asset->url,
+    "pulseMediaPosterUrl": pulseMediaPoster.asset->url,
+    "pulseMediaSlides": coalesce(pulseMediaSlides, [])[]{
+      "imageSrc": image.asset->url,
+      alt,
+      caption
+    }
+  },
+  *[_type == "siteSettings"][0]{
+    pulseMediaTitle,
+    pulseMediaDescription,
+    pulseMediaCtaLabel,
+    pulseMediaCtaHref,
+    pulseMediaLoopUrl,
+    "pulseMediaLoopFileUrl": pulseMediaLoopFile.asset->url,
+    "pulseMediaPosterUrl": pulseMediaPoster.asset->url,
+    "pulseMediaSlides": coalesce(pulseMediaSlides, [])[]{
+      "imageSrc": image.asset->url,
+      alt,
+      caption
+    }
   }
-}`;
+)`;
 
 function cleanText(value?: string | null): string {
   return typeof value === "string" ? value.trim() : "";

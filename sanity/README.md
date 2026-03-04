@@ -39,7 +39,7 @@ In **Site settings** -> **Hero videos (all pages)** (or inside `Site settings`, 
 
 ## Homepage School Pulse media
 
-In **Website Pages** -> **Home** -> **School Pulse media (homepage)** (or inside `Site settings`, `Home: School Pulse` tab), use the `School Pulse media ...` fields:
+In **Website Pages** -> **Home** -> **School Pulse media (homepage)**, use the `School Pulse media ...` fields:
 
 - Add `School Pulse media loop (upload)` or `School Pulse media loop (URL)` for a looping video panel.
 - If no loop is set, `School Pulse media slides` will rotate as a photo carousel.
@@ -47,7 +47,7 @@ In **Website Pages** -> **Home** -> **School Pulse media (homepage)** (or inside
 
 ## Homepage Sixth Form highlight media
 
-In **Website Pages** -> **Home** -> **Sixth Form highlight media (homepage)** (or inside `Site settings`, `Home: Sixth Form highlight` tab):
+In **Website Pages** -> **Home** -> **Sixth Form highlight media (homepage)**:
 
 - Add `Sixth Form highlight video (upload)` or `Sixth Form highlight video (URL)` to show a video in that homepage strip.
 - Use `Sixth Form highlight video poster` as the preview frame.

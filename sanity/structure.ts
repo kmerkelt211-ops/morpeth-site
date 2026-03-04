@@ -71,16 +71,16 @@ export const structure: StructureResolver = (S) => {
                         .title("School Pulse media (homepage)")
                         .child(
                           S.document()
-                            .schemaType("siteSettings")
-                            .documentId("siteSettings")
+                            .schemaType("homeSchoolPulseSettings")
+                            .documentId("homeSchoolPulseSettings")
                             .title("School Pulse media (homepage)")
                         ),
                       S.listItem()
                         .title("Sixth Form highlight media (homepage)")
                         .child(
                           S.document()
-                            .schemaType("siteSettings")
-                            .documentId("siteSettings")
+                            .schemaType("homeSixthFormHighlightSettings")
+                            .documentId("homeSixthFormHighlightSettings")
                             .title("Sixth Form highlight media (homepage)")
                         ),
                       S.documentTypeListItem("studentSpotlight").title("Student spotlights"),
