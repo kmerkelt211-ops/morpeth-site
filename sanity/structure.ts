@@ -52,22 +52,6 @@ export const structure: StructureResolver = (S) => {
                     .documentId("siteSettings")
                     .title("Hero videos (all pages)")
                 ),
-              S.listItem()
-                .title("Home media: School Pulse")
-                .child(
-                  S.document()
-                    .schemaType("siteSettings")
-                    .documentId("siteSettings")
-                    .title("Home media: School Pulse")
-                ),
-              S.listItem()
-                .title("Home media: Sixth Form highlight")
-                .child(
-                  S.document()
-                    .schemaType("siteSettings")
-                    .documentId("siteSettings")
-                    .title("Home media: Sixth Form highlight")
-                ),
             ])
         ),
       S.divider(),
@@ -83,6 +67,22 @@ export const structure: StructureResolver = (S) => {
                   S.list()
                     .title("Home")
                     .items([
+                      S.listItem()
+                        .title("School Pulse media (homepage)")
+                        .child(
+                          S.document()
+                            .schemaType("siteSettings")
+                            .documentId("siteSettings")
+                            .title("School Pulse media (homepage)")
+                        ),
+                      S.listItem()
+                        .title("Sixth Form highlight media (homepage)")
+                        .child(
+                          S.document()
+                            .schemaType("siteSettings")
+                            .documentId("siteSettings")
+                            .title("Sixth Form highlight media (homepage)")
+                        ),
                       S.documentTypeListItem("studentSpotlight").title("Student spotlights"),
                       S.documentTypeListItem("post").title("News posts"),
                       S.documentTypeListItem("event").title("Calendar events"),

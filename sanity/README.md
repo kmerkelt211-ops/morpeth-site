@@ -12,8 +12,8 @@ The site uses Sanity Studio at `/studio`.
 
 In Studio, use:
 
-- `Site settings`: `General settings & contact`, `Hero videos (all pages)`, `Home media: School Pulse`, `Home media: Sixth Form highlight`
-- `Website Pages` -> `Home`: `Student spotlights`, `News posts`, `Events`
+- `Site settings`: `General settings & contact`, `Hero videos (all pages)`
+- `Website Pages` -> `Home`: `School Pulse media (homepage)`, `Sixth Form highlight media (homepage)`, `Student spotlights`, `News posts`, `Events`
 - `Our School`: `GCSE results`, `Sixth Form results`, `Houses`, `House updates`, `Coaching Circles`
 - `Teaching & Learning`: `Teaching & Learning page`
 - `Extracurricular`: `Extracurricular page`
@@ -39,7 +39,7 @@ In **Site settings** -> **Hero videos (all pages)** (or inside `Site settings`, 
 
 ## Homepage School Pulse media
 
-In **Site settings** -> **Home media: School Pulse** (or inside `Site settings`, `Home: School Pulse` tab), use the `School Pulse media ...` fields:
+In **Website Pages** -> **Home** -> **School Pulse media (homepage)** (or inside `Site settings`, `Home: School Pulse` tab), use the `School Pulse media ...` fields:
 
 - Add `School Pulse media loop (upload)` or `School Pulse media loop (URL)` for a looping video panel.
 - If no loop is set, `School Pulse media slides` will rotate as a photo carousel.
@@ -47,7 +47,7 @@ In **Site settings** -> **Home media: School Pulse** (or inside `Site settings`,
 
 ## Homepage Sixth Form highlight media
 
-In **Site settings** -> **Home media: Sixth Form highlight** (or inside `Site settings`, `Home: Sixth Form highlight` tab):
+In **Website Pages** -> **Home** -> **Sixth Form highlight media (homepage)** (or inside `Site settings`, `Home: Sixth Form highlight` tab):
 
 - Add `Sixth Form highlight video (upload)` or `Sixth Form highlight video (URL)` to show a video in that homepage strip.
 - Use `Sixth Form highlight video poster` as the preview frame.
