@@ -59,39 +59,6 @@ type CalendarEvent = {
   url?: string;
 };
 
-const NEWS_QUERY = `
-*[_type in ["post", "newsPost"] && defined(slug.current) && !(_id in path("drafts.**"))]
-| order(coalesce(publishedAt, _createdAt) desc)[0...3]{
-  title,
-  "href": "/news/" + slug.current,
-  "date": coalesce(publishedAt, _createdAt),
-  excerpt,
-  "imageUrl": coalesce(mainImage.asset->url, coverImage.asset->url, image.asset->url),
-  "imageAlt": coalesce(mainImage.alt, coverImage.alt, title)
-}
-`;
-
-const SPOTLIGHT_QUERY = `
-*[_type in ["post", "newsPost"] && defined(slug.current) && !(_id in path("drafts.**"))]
-| order(coalesce(publishedAt, _createdAt) desc)[0...8]{
-  title,
-  "href": "/news/" + slug.current,
-  "date": coalesce(publishedAt, _createdAt),
-  excerpt,
-  "imageUrl": coalesce(
-    mainImage.asset->url,
-    heroImage.asset->url,
-    coverImage.asset->url,
-    featuredImage.asset->url,
-    leadImage.asset->url,
-    image.asset->url,
-    images[0].asset->url,
-    gallery[0].asset->url
-  ),
-  "imageAlt": coalesce(mainImage.alt, coverImage.alt, title)
-}
-`;
-
 const STUDENT_SPOTLIGHT_QUERY = `
 *[_type == "studentSpotlight" && coalesce(featured, true) == true && coalesce(publishedAt, _createdAt) <= now() && !(_id in path("drafts.**"))]
 | order(coalesce(publishedAt, _createdAt) desc)[0...8]{
@@ -452,9 +419,9 @@ function SchoolPulse() {
 
     const loadPulse = async () => {
       try {
-        const [eventsResponse, newsResponse, noticeResponse, lunchResponse, attendanceResponse, mediaResponse] = await Promise.all([
+        const [eventsResponse, instagramResponse, noticeResponse, lunchResponse, attendanceResponse, mediaResponse] = await Promise.all([
           fetch("/api/events?limit=4"),
-          sanityFetch<NewsCard[]>(NEWS_QUERY),
+          fetch("/api/events/instagram?limit=3", { cache: "no-store" }),
           sanityFetch<NoticePulse | null>(PULSE_NOTICE_QUERY),
           sanityFetch<LunchPulse | null>(PULSE_LUNCH_QUERY),
           sanityFetch<AttendancePulse | null>(PULSE_ATTENDANCE_QUERY),
@@ -470,7 +437,12 @@ function SchoolPulse() {
           setEvents([]);
         }
 
-        setPosts(Array.isArray(newsResponse) ? newsResponse : []);
+        if (instagramResponse.ok) {
+          const parsedInstagram = (await instagramResponse.json()) as NewsCard[];
+          setPosts(Array.isArray(parsedInstagram) ? parsedInstagram : []);
+        } else {
+          setPosts([]);
+        }
         setNotice(noticeResponse || null);
         setLunchMenu(lunchResponse || null);
         setAttendance(attendanceResponse || null);
@@ -550,6 +522,7 @@ function SchoolPulse() {
 
   const firstEvent = events[0];
   const latestStory = posts[0];
+  const latestStoryIsExternal = latestStory ? /^https?:\/\//.test(latestStory.href) : false;
   const safeSlideIndex = pulseMedia.slides.length > 0 ? activeSlideIndex % pulseMedia.slides.length : 0;
   const activeSlide = pulseMedia.slides[safeSlideIndex];
   const latestStoryDate = latestStory?.date
@@ -694,15 +667,29 @@ function SchoolPulse() {
                       {latestStoryDate ? (
                         <p className="text-[11px] uppercase tracking-[0.12em] text-slate-500">{latestStoryDate}</p>
                       ) : null}
-                      <Link
-                        href={latestStory?.href || "/news"}
-                        className="inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
-                        onClick={() =>
-                          trackCta("homepage_cta_click", { section: "school_pulse", cta: "open_achievement_story" })
-                        }
-                      >
-                        View story
-                      </Link>
+                      {latestStoryIsExternal ? (
+                        <a
+                          href={latestStory.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
+                          onClick={() =>
+                            trackCta("homepage_cta_click", { section: "school_pulse", cta: "open_achievement_story" })
+                          }
+                        >
+                          Open on Instagram
+                        </a>
+                      ) : (
+                        <Link
+                          href={latestStory?.href || "/news"}
+                          className="inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
+                          onClick={() =>
+                            trackCta("homepage_cta_click", { section: "school_pulse", cta: "open_achievement_story" })
+                          }
+                        >
+                          Open on Instagram
+                        </Link>
+                      )}
                     </div>
                   </article>
                 </Reveal>
@@ -895,14 +882,9 @@ function SpotlightWall() {
 
     const loadStories = async () => {
       try {
-        const [spotlightsData, fallbackNewsData] = await Promise.all([
-          sanityFetch<SpotlightCard[]>(STUDENT_SPOTLIGHT_QUERY),
-          sanityFetch<SpotlightCard[]>(SPOTLIGHT_QUERY),
-        ]);
+        const spotlightsData = await sanityFetch<SpotlightCard[]>(STUDENT_SPOTLIGHT_QUERY);
         if (!mounted) return;
-        const hasSpotlights = Array.isArray(spotlightsData) && spotlightsData.length > 0;
-        const sourceData = hasSpotlights ? spotlightsData : Array.isArray(fallbackNewsData) ? fallbackNewsData : [];
-        setPosts(sourceData);
+        setPosts(Array.isArray(spotlightsData) ? spotlightsData : []);
       } catch {
         if (!mounted) return;
         setPosts([]);

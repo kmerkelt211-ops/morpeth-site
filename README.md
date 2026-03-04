@@ -61,8 +61,27 @@ Notes:
 The homepage now powers motion sections from real CMS data:
 
 - **School Pulse**: latest notices, lunches, attendance guidance, and key events.
-- **Live achievement wall**: first uses `studentSpotlight` documents, then falls back to latest news if none exist.
+- **School Pulse achievement card**: latest Instagram post.
+- **Live achievement wall**: `studentSpotlight` documents only.
 - **Milestone timeline**: upcoming `event` documents with links to `/events/[slug]` pages.
+
+## Instagram News Feed Setup
+
+The `/news` page now pulls posts directly from Instagram via the Graph API.
+
+Add these variables to `.env.local` and your hosting environment:
+
+```bash
+INSTAGRAM_ACCESS_TOKEN=
+INSTAGRAM_USER_ID=
+```
+
+Notes:
+
+- `INSTAGRAM_ACCESS_TOKEN` is required. Use a long-lived token with `instagram_basic`.
+- `INSTAGRAM_USER_ID` is optional. If omitted, the feed uses the `me` endpoint.
+- The page and API route use incremental revalidation every 5 minutes.
+- API route for debugging/integrations: `/api/events/instagram`
 
 Event and news pages also generate dynamic social images:
 

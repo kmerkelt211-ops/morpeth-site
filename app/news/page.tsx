@@ -1,42 +1,11 @@
 // app/news/page.tsx
-import Link from "next/link";
 import Image from "next/image";
-import { client } from "../../sanity/client";
+import { fetchInstagramNewsPosts } from "../../lib/instagramFeed";
 
-export const revalidate = 60;
-
-// Query both possible types, ignore drafts, and include a robust image fallback
-const QUERY = `
-*[_type in ["post","newsPost"] && defined(slug.current) && !(_id in path("drafts.**"))]
-| order(coalesce(publishedAt, _createdAt) desc)[0...12]{
-  title,
-  "slug": slug.current,
-  "date": coalesce(publishedAt, _createdAt),
-  excerpt,
-  // try common image fields and pull direct URLs
-  "imageUrl": coalesce(
-    mainImage.asset->url,
-    heroImage.asset->url,
-    coverImage.asset->url,
-    featuredImage.asset->url,
-    leadImage.asset->url,
-    image.asset->url,
-    images[0].asset->url,
-    gallery[0].asset->url
-  )
-}
-`;
-
-type Post = {
-  title: string;
-  slug: string;
-  date: string;
-  excerpt?: string;
-  imageUrl?: string | null;
-};
+export const revalidate = 300;
 
 export default async function NewsIndex() {
-  const posts = await client.fetch<Post[]>(QUERY);
+  const posts = await fetchInstagramNewsPosts({ limit: 200, revalidateSeconds: revalidate });
 
   return (
     <main className="bg-white pb-16 md:pb-24">
@@ -44,14 +13,19 @@ export default async function NewsIndex() {
         <h1 className="text-lg md:text-2xl font-heading uppercase tracking-[0.18em] text-morpeth-navy">
           Latest News
         </h1>
+        <p className="mt-2 text-sm text-slate-600">
+          Live feed from Instagram.
+        </p>
 
         {posts.length === 0 ? (
-          <p className="mt-6 text-slate-600">No news posts yet.</p>
+          <p className="mt-6 text-slate-600">
+            No Instagram posts available right now.
+          </p>
         ) : (
           <div className="mt-6 mb-12 md:mb-16 grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {posts.map((p) => (
               <article
-                key={p.slug}
+                key={p.id}
                 className="group relative overflow-hidden rounded-lg bg-morpeth-offwhite shadow-card"
               >
                 {p.imageUrl ? (
@@ -79,9 +53,7 @@ export default async function NewsIndex() {
                   </p>
 
                   <h2 className="mt-1 text-base md:text-lg font-heading uppercase tracking-[0.14em] text-morpeth-navy line-clamp-2">
-                    <Link href={`/news/${p.slug}`} className="hover:underline">
-                      {p.title}
-                    </Link>
+                    {p.title}
                   </h2>
 
                   {p.excerpt && (
@@ -89,12 +61,14 @@ export default async function NewsIndex() {
                   )}
 
                   <div className="mt-3 md:mt-4">
-                    <Link
-                      href={`/news/${p.slug}`}
+                    <a
+                      href={p.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="text-xs md:text-sm font-medium text-morpeth-navy underline-offset-4 hover:underline"
                     >
-                      Read more →
-                    </Link>
+                      Open on Instagram →
+                    </a>
                   </div>
                 </div>
               </article>
