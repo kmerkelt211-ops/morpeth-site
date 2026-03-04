@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = answerSchoolQuestion(question);
+    const result = await answerSchoolQuestion(question);
     return NextResponse.json(result);
   } catch {
     return NextResponse.json(

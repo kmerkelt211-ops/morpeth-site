@@ -136,7 +136,7 @@ export default function SchoolLunchesPage() {
           <Link href="/parents" className={chip}>
             Back to Parents
           </Link>
-          <Link href="/payments" className={chip}>
+          <Link href="/parents" className={chip}>
             Payments
           </Link>
           <Link href="/contact" className={chip}>
@@ -211,7 +211,7 @@ export default function SchoolLunchesPage() {
                   Learn about biometrics (CRB Cunninghams)
                 </a>
                 <a
-                  href="/Documents/Biometrics-Policy.pdf"
+                  href="/policies#data"
                   target="_blank"
                   rel="noopener noreferrer"
                   className={chip}

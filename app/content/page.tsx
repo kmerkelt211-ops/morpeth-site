@@ -85,9 +85,10 @@ export default function ContentAdminPage() {
 
           <article className={card}>
             <h2 className="font-heading text-lg uppercase tracking-[0.14em] text-morpeth-navy">Parents</h2>
-            <p className="mt-2 text-sm text-slate-700">Letters home, school lunch documents, and attendance guidance content.</p>
+            <p className="mt-2 text-sm text-slate-700">Policies, letters home, school lunch documents, and attendance guidance content.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className={chip}>Parents page</span>
+              <span className={chip}>Policies</span>
               <span className={chip}>Attendance</span>
               <span className={chip}>Letters</span>
               <span className={chip}>School menu</span>

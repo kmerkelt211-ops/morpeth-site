@@ -56,7 +56,7 @@ export const viewport: Viewport = {
 
 const parentQuickLinks = [
   { href: "/term-dates", label: "Term dates" },
-  { href: "/uniform", label: "Uniform" },
+  { href: "/parents#essentials", label: "Uniform" },
   { href: "/letters-home", label: "Letters home" },
   { href: "/edulink", label: "Edulink" },
   { href: "/school-lunches", label: "School lunches" },
@@ -66,6 +66,7 @@ const mainNav = [
   { href: "/", label: "Home" },
   { href: "/#ask-morpeth", label: "Ask Morpeth" },
   { href: "/our-school", label: "Our School" },
+  { href: "/news", label: "News" },
   { href: "/teaching-learning", label: "Teaching & Learning" },
   { href: "/sixth-form", label: "Sixth Form" },
   { href: "/extracurricular", label: "Extracurricular" },
@@ -99,18 +100,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             className="site-header sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur transition-transform duration-300 will-change-transform"
             data-header
           >
-            <div className="site-header-inner mx-auto flex max-w-6xl items-center justify-between px-4 py-3 md:py-4">
+            <div className="site-header-inner mx-auto flex max-w-[1320px] items-center justify-between px-4 py-3 md:px-6">
               <Link href="/" className="flex items-center gap-3">
                 <Image
                   src="/morpeth-logo.png"
                   alt="Morpeth School logo"
-                  width={44}
-                  height={44}
-                  className="h-11 w-auto"
+                  width={42}
+                  height={42}
+                  className="h-10 w-auto md:h-11"
                   priority
                 />
                 <div className="leading-tight">
-                  <div className="font-heading text-xs uppercase tracking-[0.25em] text-morpeth-navy md:text-sm">
+                  <div className="font-heading text-xs uppercase tracking-[0.18em] text-morpeth-navy md:text-sm">
                     Morpeth School
                   </div>
                   <div className="text-[11px] text-slate-500">
@@ -119,14 +120,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </div>
               </Link>
 
-              <nav className="hidden gap-6 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-700 md:flex">
+              <nav className="hidden items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.1em] text-slate-700 lg:flex xl:gap-6">
                 {mainNav.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
                     data-nav-link
                     data-href={item.href}
-                    className="nav-link relative hover:text-morpeth-navy"
+                    className="nav-link relative whitespace-nowrap pb-1 hover:text-morpeth-navy"
                   >
                     {item.label}
                   </Link>
@@ -135,7 +136,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/70 text-slate-800 shadow-sm transition hover:bg-white md:hidden touch-manipulation"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/70 text-slate-800 shadow-sm transition hover:bg-white lg:hidden touch-manipulation"
                 aria-label="Open menu"
                 aria-controls="mobile-drawer"
                 aria-expanded="false"

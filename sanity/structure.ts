@@ -31,6 +31,47 @@ export const structure: StructureResolver = (S) => {
         ),
       S.divider(),
       S.listItem()
+        .title("Site settings")
+        .child(
+          S.list()
+            .title("Site settings")
+            .items([
+              S.listItem()
+                .title("General settings & contact")
+                .child(
+                  S.document()
+                    .schemaType("siteSettings")
+                    .documentId("siteSettings")
+                    .title("General settings & contact")
+                ),
+              S.listItem()
+                .title("Hero videos (all pages)")
+                .child(
+                  S.document()
+                    .schemaType("siteSettings")
+                    .documentId("siteSettings")
+                    .title("Hero videos (all pages)")
+                ),
+              S.listItem()
+                .title("Home media: School Pulse")
+                .child(
+                  S.document()
+                    .schemaType("siteSettings")
+                    .documentId("siteSettings")
+                    .title("Home media: School Pulse")
+                ),
+              S.listItem()
+                .title("Home media: Sixth Form highlight")
+                .child(
+                  S.document()
+                    .schemaType("siteSettings")
+                    .documentId("siteSettings")
+                    .title("Home media: Sixth Form highlight")
+                ),
+            ])
+        ),
+      S.divider(),
+      S.listItem()
         .title("Website Pages")
         .child(
           S.list()
@@ -42,9 +83,6 @@ export const structure: StructureResolver = (S) => {
                   S.list()
                     .title("Home")
                     .items([
-                      S.listItem()
-                        .title("Site settings")
-                        .child(S.document().schemaType("siteSettings").documentId("siteSettings")),
                       S.documentTypeListItem("studentSpotlight").title("Student spotlights"),
                       S.documentTypeListItem("post").title("News posts"),
                       S.documentTypeListItem("event").title("Calendar events"),
@@ -58,8 +96,41 @@ export const structure: StructureResolver = (S) => {
                     .items([
                       S.documentTypeListItem("gcseResults").title("GCSE results"),
                       S.documentTypeListItem("sixthFormResults").title("Sixth Form results"),
-                      S.documentTypeListItem("house").title("Houses"),
-                      S.documentTypeListItem("houseUpdate").title("House updates"),
+                      S.listItem()
+                        .title("House pages (for house leads)")
+                        .child(
+                          S.documentTypeList("house")
+                            .title("House pages (select your house)")
+                            .defaultOrdering([
+                              { field: "order", direction: "asc" },
+                              { field: "title", direction: "asc" },
+                            ])
+                            .child((houseId) =>
+                              S.list()
+                                .title("House page manager")
+                                .items([
+                                  S.listItem()
+                                    .title("Edit house page content")
+                                    .child(
+                                      S.document()
+                                        .schemaType("house")
+                                        .documentId(houseId)
+                                    ),
+                                  S.listItem()
+                                    .title("House updates for this house")
+                                    .child(
+                                      S.documentTypeList("houseUpdate")
+                                        .title("House updates")
+                                        .filter('_type == "houseUpdate" && house._ref == $houseId')
+                                        .params({ houseId })
+                                        .defaultOrdering([
+                                          { field: "publishedAt", direction: "desc" },
+                                        ])
+                                    ),
+                                ])
+                            )
+                        ),
+                      S.documentTypeListItem("houseUpdate").title("All house updates"),
                       S.documentTypeListItem("coachingCircles").title("Coaching Circles"),
                     ])
                 ),
@@ -82,13 +153,11 @@ export const structure: StructureResolver = (S) => {
                       S.listItem()
                         .title("Parents page")
                         .child(S.document().schemaType("parentsPage").documentId("parentsPage")),
+                      S.documentTypeListItem("policyDocument").title("Policies"),
                       S.documentTypeListItem("letter").title("Letters home"),
                       S.documentTypeListItem("schoolMenu").title("School lunches"),
                     ])
                 ),
-              S.listItem()
-                .title("Morpeth TV")
-                .child(S.documentTypeList("morpethTvVideo").title("Morpeth TV videos")),
               S.listItem()
                 .title("Staff")
                 .child(S.documentTypeList("staffMember").title("Staff directory")),

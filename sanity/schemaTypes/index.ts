@@ -8,6 +8,7 @@ import extracurricularPage from "../schemas/extracurricularPage";
 import parentsPage from "../schemas/parentsPage";
 import admissionsEnquiry from "../schemas/admissionsEnquiry";
 import studentSpotlight from "../schemas/studentSpotlight";
+import policyDocument from "../schemas/policyDocument";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
@@ -158,99 +159,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
       ],
     }),
 
-    // MORPETH TV VIDEOS (features + news episodes)
-    defineType({
-      name: "morpethTvVideo",
-      title: "Morpeth TV video",
-      type: "document",
-      fields: [
-        defineField({
-          name: "title",
-          title: "Title",
-          type: "string",
-          validation: (r) => r.required(),
-        }),
-        defineField({
-          name: "category",
-          title: "Category",
-          type: "string",
-          options: {
-            layout: "radio",
-            list: [
-              { title: "Feature", value: "feature" },
-              { title: "News episode", value: "news" },
-            ],
-          },
-          validation: (r) => r.required(),
-        }),
-        defineField({
-          name: "youtubeId",
-          title: "YouTube URL or ID",
-          type: "string",
-          description:
-            "Paste a full YouTube URL (recommended) or just the video ID (e.g. dQw4w9WgXcQ).",
-          validation: (r) =>
-            r
-              .required()
-              .min(6)
-              .custom((val) => {
-                if (!val) return true
-                const s = String(val).trim()
-                const looksLikeId = /^[a-zA-Z0-9_-]{6,}$/.test(s)
-                const looksLikeYouTubeUrl = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//.test(s)
-                if (looksLikeId || looksLikeYouTubeUrl) return true
-                return "Please paste a YouTube URL (youtube.com / youtu.be) or the video ID."
-              }),
-        }),
-        defineField({
-          name: "strapline",
-          title: "Short description (optional)",
-          type: "text",
-          rows: 3,
-        }),
-        defineField({
-          name: "dateLabel",
-          title: "Label / badge (optional)",
-          type: "string",
-          description: "e.g. Latest feature, New, Trending, Latest episode",
-        }),
-        defineField({
-          name: "order",
-          title: "Order (optional)",
-          type: "number",
-          description:
-            "Lower numbers appear first. Leave blank to sort by newest.",
-        }),
-        defineField({
-          name: "featured",
-          title: "Featured",
-          type: "boolean",
-          initialValue: true,
-        }),
-      ],
-      preview: {
-        select: {
-          title: "title",
-          category: "category",
-          dateLabel: "dateLabel",
-          youtubeId: "youtubeId",
-        },
-        prepare(selection) {
-          const { title, category, dateLabel, youtubeId } = selection as {
-            title?: string
-            category?: string
-            dateLabel?: string
-            youtubeId?: string
-          }
-          const cat = category === "news" ? "News" : "Feature"
-          const badge = dateLabel ? ` • ${dateLabel}` : ""
-          return {
-            title: title || "Untitled",
-            subtitle: `${cat}${badge}${youtubeId ? ` • ${youtubeId}` : ""}`,
-          }
-        },
-      },
-    }),
     // STAFF DIRECTORY
     defineType({
       name: "staffMember",
@@ -287,12 +195,21 @@ export const schema: { types: SchemaTypeDefinition[] } = {
       name: "siteSettings",
       title: "Site settings",
       type: "document",
+      groups: [
+        { name: "general", title: "General" },
+        { name: "homePulse", title: "Home: School Pulse" },
+        { name: "homeSixthForm", title: "Home: Sixth Form highlight" },
+        { name: "heroMedia", title: "Hero videos" },
+        { name: "pageMedia", title: "Page media" },
+        { name: "contactDetails", title: "Contact" },
+      ],
       fields: [
-        defineField({ name: "strapline", type: "string" }),
+        defineField({ name: "strapline", type: "string", group: "general" }),
         defineField({
           name: "heroVideoUrl",
           title: "Global hero video URL",
           type: "url",
+          group: "heroMedia",
           description:
             "Default hero video for all pages. Use an MP4/WebM URL. Individual page overrides below are optional.",
         }),
@@ -300,6 +217,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           name: "heroVideoFile",
           title: "Global hero video file (upload)",
           type: "file",
+          group: "heroMedia",
           options: { accept: "video/*", storeOriginalFilename: true },
           description:
             "Upload a global hero video file. If set, this is preferred over the global URL.",
@@ -308,6 +226,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           name: "heroVideoWebmUrl",
           title: "Global hero video WebM URL (optional)",
           type: "url",
+          group: "heroMedia",
           description:
             "Optional WebM source used before MP4 for faster delivery on supported browsers.",
         }),
@@ -315,6 +234,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           name: "heroVideoWebmFile",
           title: "Global hero video WebM file (upload, optional)",
           type: "file",
+          group: "heroMedia",
           options: { accept: "video/webm", storeOriginalFilename: true },
           description:
             "Upload a global WebM file for faster delivery. If set, this is preferred over the global WebM URL.",
@@ -323,6 +243,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           name: "heroVideoOverrides",
           title: "Per-page hero overrides (optional)",
           type: "object",
+          group: "heroMedia",
           fields: [
             defineField({ name: "home", title: "Home hero video URL", type: "url" }),
             defineField({ name: "ourSchool", title: "Our School hero video URL", type: "url" }),
@@ -345,6 +266,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           name: "heroVideoFileOverrides",
           title: "Per-page hero file overrides (upload, optional)",
           type: "object",
+          group: "heroMedia",
           fields: [
             defineField({
               name: "home",
@@ -394,6 +316,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           name: "heroVideoWebmOverrides",
           title: "Per-page hero WebM overrides (optional)",
           type: "object",
+          group: "heroMedia",
           fields: [
             defineField({ name: "home", title: "Home hero WebM URL", type: "url" }),
             defineField({ name: "ourSchool", title: "Our School hero WebM URL", type: "url" }),
@@ -416,6 +339,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           name: "heroVideoWebmFileOverrides",
           title: "Per-page hero WebM file overrides (upload, optional)",
           type: "object",
+          group: "heroMedia",
           fields: [
             defineField({
               name: "home",
@@ -461,17 +385,19 @@ export const schema: { types: SchemaTypeDefinition[] } = {
             }),
           ],
         }),
-        // NEW: Year 5 film fields
+        // Year 5 film fields (used on the Our School page)
         defineField({
           name: "recruitmentVideoUrl",
           title: "Year 5 film (URL)",
           type: "url",
+          group: "pageMedia",
           description: "Paste a public MP4 or direct playable URL.",
         }),
         defineField({
           name: "recruitmentVideoFile",
           title: "Year 5 film (upload)",
           type: "file",
+          group: "pageMedia",
           options: { accept: "video/*", storeOriginalFilename: true },
           description: "Upload the recruitment film to Sanity if you prefer hosting here.",
         }),
@@ -479,12 +405,14 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           name: "recruitmentPoster",
           title: "Year 5 film poster",
           type: "image",
+          group: "pageMedia",
           options: { hotspot: true },
         }),
         defineField({
           name: "recruitmentLoopFile",
           title: "Year 5 loop (upload)",
           type: "file",
+          group: "pageMedia",
           options: { accept: "video/*", storeOriginalFilename: true },
           description: "Short looping teaser version of the Year 5 film.",
         }),
@@ -492,18 +420,159 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           name: "recruitmentLoopUrl",
           title: "Year 5 loop (URL)",
           type: "url",
+          group: "pageMedia",
           description: "Optional external URL for the looping teaser clip.",
+        }),
+        // School Pulse media panel (homepage right column)
+        defineField({
+          name: "pulseMediaTitle",
+          title: "School Pulse media title",
+          type: "string",
+          group: "homePulse",
+          description: "Short heading shown over the media panel on the homepage.",
+        }),
+        defineField({
+          name: "pulseMediaDescription",
+          title: "School Pulse media description",
+          type: "text",
+          group: "homePulse",
+          rows: 3,
+          description: "Support text for the media panel.",
+        }),
+        defineField({
+          name: "pulseMediaCtaLabel",
+          title: "School Pulse media button label",
+          type: "string",
+          group: "homePulse",
+          description: "e.g. Explore school life",
+        }),
+        defineField({
+          name: "pulseMediaCtaHref",
+          title: "School Pulse media button link",
+          type: "string",
+          group: "homePulse",
+          description: "Internal path or full URL, e.g. /our-school",
+        }),
+        defineField({
+          name: "pulseMediaLoopFile",
+          title: "School Pulse media loop (upload)",
+          type: "file",
+          group: "homePulse",
+          options: { accept: "video/*", storeOriginalFilename: true },
+          description: "If set, this looping video is shown instead of the photo carousel.",
+        }),
+        defineField({
+          name: "pulseMediaLoopUrl",
+          title: "School Pulse media loop (URL)",
+          type: "url",
+          group: "homePulse",
+          description: "Optional external loop video URL used when no upload is provided.",
+        }),
+        defineField({
+          name: "pulseMediaPoster",
+          title: "School Pulse media poster",
+          type: "image",
+          group: "homePulse",
+          options: { hotspot: true },
+          description: "Poster frame for the media loop.",
+        }),
+        defineField({
+          name: "pulseMediaSlides",
+          title: "School Pulse media slides",
+          type: "array",
+          group: "homePulse",
+          description: "Used as a rotating photo carousel when no loop video is set.",
+          of: [
+            defineField({
+              name: "slide",
+              title: "Slide",
+              type: "object",
+              fields: [
+                defineField({
+                  name: "image",
+                  title: "Image",
+                  type: "image",
+                  options: { hotspot: true },
+                  validation: (r) => r.required(),
+                }),
+                defineField({
+                  name: "alt",
+                  title: "Alt text",
+                  type: "string",
+                }),
+                defineField({
+                  name: "caption",
+                  title: "Caption",
+                  type: "string",
+                }),
+              ],
+              preview: {
+                select: {
+                  title: "caption",
+                  subtitle: "alt",
+                  media: "image",
+                },
+                prepare(selection) {
+                  return {
+                    title: selection.title || "Pulse slide",
+                    subtitle: selection.subtitle || "No alt text",
+                    media: selection.media,
+                  };
+                },
+              },
+            }),
+          ],
+        }),
+        defineField({
+          name: "homeSixthFormHighlightVideoFile",
+          title: "Sixth Form highlight video (upload)",
+          type: "file",
+          group: "homeSixthForm",
+          options: { accept: "video/*", storeOriginalFilename: true },
+          description: "Homepage strip media under School Pulse. Upload a video to show instead of a photo.",
+        }),
+        defineField({
+          name: "homeSixthFormHighlightVideoUrl",
+          title: "Sixth Form highlight video (URL)",
+          type: "url",
+          group: "homeSixthForm",
+          description: "Optional external video URL for the homepage Sixth Form strip.",
+        }),
+        defineField({
+          name: "homeSixthFormHighlightPoster",
+          title: "Sixth Form highlight video poster",
+          type: "image",
+          group: "homeSixthForm",
+          options: { hotspot: true },
+          description: "Poster image shown before the video plays.",
+        }),
+        defineField({
+          name: "homeSixthFormHighlightImage",
+          title: "Sixth Form highlight photo",
+          type: "image",
+          group: "homeSixthForm",
+          options: { hotspot: true },
+          description: "Fallback image used when no video is set.",
+          fields: [
+            defineField({
+              name: "alt",
+              title: "Alt text",
+              type: "string",
+            }),
+          ],
         }),
         defineField({
           name: "sixthFormWhyJoinVideoUrl",
           title: "Sixth Form: Why join video (URL)",
           type: "url",
+          group: "pageMedia",
           description: "Optional direct playable URL for the Why join Sixth Form video.",
         }),
         defineField({
           name: "sixthFormWhyJoinVideoFile",
           title: "Sixth Form: Why join video (upload)",
           type: "file",
+          group: "pageMedia",
           options: { accept: "video/*", storeOriginalFilename: true },
           description: "Upload the Why join Sixth Form video to Sanity.",
         }),
@@ -511,12 +580,13 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           name: "sixthFormWhyJoinVideoPoster",
           title: "Sixth Form: Why join video poster",
           type: "image",
+          group: "pageMedia",
           options: { hotspot: true },
           description: "Poster image shown before the video plays.",
         }),
-        defineField({ name: "contactEmail", type: "string" }),
-        defineField({ name: "contactPhone", type: "string" }),
-        defineField({ name: "address", type: "text" }),
+        defineField({ name: "contactEmail", type: "string", group: "contactDetails" }),
+        defineField({ name: "contactPhone", type: "string", group: "contactDetails" }),
+        defineField({ name: "address", type: "text", group: "contactDetails" }),
       ],
     }),
 
@@ -846,5 +916,6 @@ export const schema: { types: SchemaTypeDefinition[] } = {
     parentsPage,
     admissionsEnquiry,
     studentSpotlight,
+    policyDocument,
   ],
 };

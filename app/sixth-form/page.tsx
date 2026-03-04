@@ -330,7 +330,7 @@ export default function SixthFormPage() {
                 <li>• Preparation for university-level learning</li>
               </ul>
               <Link
-                href="/sixth-form/courses"
+                href="/sixth-form#courses"
                 className="mt-4 inline-flex rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
               >
                 View course list
@@ -350,7 +350,7 @@ export default function SixthFormPage() {
                 <li>• Progression to university, apprenticeships or work</li>
               </ul>
               <Link
-                href="/sixth-form/courses"
+                href="/sixth-form#courses"
                 className="mt-4 inline-flex rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
               >
                 View course list
@@ -370,7 +370,7 @@ export default function SixthFormPage() {
                 <li>• Support to choose the right mix</li>
               </ul>
               <Link
-                href="/sixth-form/courses"
+                href="/sixth-form#courses"
                 className="mt-4 inline-flex rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
               >
                 View course list
@@ -429,7 +429,7 @@ export default function SixthFormPage() {
                   applications, personal statements and interviews.
                 </p>
                 <Link
-                  href="/sixth-form/support"
+                  href="/sixth-form#support"
                   className="inline-flex rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
                 >
                   Support &amp; guidance
@@ -487,7 +487,7 @@ export default function SixthFormPage() {
                 <li>• Student leadership and mentoring</li>
               </ul>
               <Link
-                href="/sixth-form/enrichment"
+                href="/extracurricular"
                 className="mt-4 inline-flex rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
               >
                 Enrichment in Sixth Form
@@ -562,7 +562,7 @@ export default function SixthFormPage() {
                 <li>• Employment with training</li>
               </ul>
               <Link
-                href="/sixth-form/destinations"
+                href="/our-school/results"
                 className="mt-4 inline-flex rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
               >
                 Destinations overview
@@ -615,13 +615,13 @@ export default function SixthFormPage() {
 
             <div className="mt-5 flex flex-wrap gap-3">
               <Link
-                href="/sixth-form/apply"
+                href="/contact#message"
                 className="rounded-full bg-morpeth-navy px-5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition hover:-translate-y-0.5 hover:shadow-lg"
               >
                 Apply online
               </Link>
               <a
-                href="/Documents/sixth-form-prospectus.pdf"
+                href="/Documents/prospectus.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"

@@ -80,11 +80,10 @@ export default function TermDatesPage() {
           {/* Action row */}
           <div className="flex flex-wrap items-center gap-2">
             <Link
-              href="/files/Term-Dates-2025-26.pdf"
-              target="_blank"
+              href="/contact#message"
               className="rounded-full border border-morpeth-navy/30 bg-white/70 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-morpeth-navy hover:bg-morpeth-light/50"
             >
-              Download PDF
+              Request PDF copy
             </Link>
 
             <a
@@ -127,18 +126,17 @@ export default function TermDatesPage() {
         </section>
 
         <section className="mt-10 rounded-2xl border border-morpeth-navy/20 bg-white/90 shadow-sm px-6 py-6">
-          <h2 className="font-heading text-[14px] uppercase tracking-[0.18em] text-morpeth-navy md:text-[15px] mb-2">
-            PDF Copy
+          <h2 className="mb-2 font-heading text-[14px] uppercase tracking-[0.18em] text-morpeth-navy md:text-[15px]">
+            Need a PDF copy?
           </h2>
           <p className="mb-4 text-sm text-morpeth-navy/80">
-            Please click the link below to download a PDF copy:
+            Contact the school office and we can share a printable term dates copy.
           </p>
           <Link
-            href="/files/Term-Dates-2025-26.pdf"
+            href="/contact#message"
             className="inline-block rounded-full border border-morpeth-navy/30 bg-white/70 px-6 py-3 text-[13px] font-semibold uppercase tracking-[0.18em] text-morpeth-navy hover:bg-morpeth-light/50"
-            target="_blank"
           >
-            2025-26 TERM DATES
+            Request term dates PDF
           </Link>
         </section>
 

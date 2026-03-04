@@ -10,16 +10,16 @@ The site uses Sanity Studio at `/studio`.
 
 ## How content is organised
 
-In Studio, use the **Website Pages** section:
+In Studio, use:
 
-- `Home`: `Site settings`, `News posts`, `Events`
+- `Site settings`: `General settings & contact`, `Hero videos (all pages)`, `Home media: School Pulse`, `Home media: Sixth Form highlight`
+- `Website Pages` -> `Home`: `Student spotlights`, `News posts`, `Events`
 - `Our School`: `GCSE results`, `Sixth Form results`, `Houses`, `House updates`, `Coaching Circles`
 - `Teaching & Learning`: `Teaching & Learning page`
 - `Extracurricular`: `Extracurricular page`
-- `Parents`: `Parents page`, `Letters home`, `School menu`
+- `Parents`: `Parents page`, `Policies`, `Letters home`, `School menu`
 - `Staff`: `Staff directory`
 - `Jobs`: `Vacancies`
-- `Morpeth TV`: `Morpeth TV videos`
 
 Gallery content is managed on the external gallery website, not in this Studio.
 
@@ -27,7 +27,7 @@ If you need raw access, use **All Document Types**.
 
 ## Hero video editing
 
-In **Site settings**:
+In **Site settings** -> **Hero videos (all pages)** (or inside `Site settings`, `Hero videos` tab):
 
 - `Global hero video URL` sets the default hero video used across the website.
 - `Global hero video file (upload)` can be used instead of URL, and takes priority over global URL.
@@ -36,6 +36,22 @@ In **Site settings**:
 - `Per-page hero file overrides (upload)` can override global settings for individual pages.
 - `Global hero video WebM URL` and `Per-page hero WebM overrides` are optional, but recommended for faster load.
 - `Global hero video WebM file (upload)` and `Per-page hero WebM file overrides` are optional upload-based WebM equivalents.
+
+## Homepage School Pulse media
+
+In **Site settings** -> **Home media: School Pulse** (or inside `Site settings`, `Home: School Pulse` tab), use the `School Pulse media ...` fields:
+
+- Add `School Pulse media loop (upload)` or `School Pulse media loop (URL)` for a looping video panel.
+- If no loop is set, `School Pulse media slides` will rotate as a photo carousel.
+- Use title, description and CTA fields to control the text and button shown on the panel.
+
+## Homepage Sixth Form highlight media
+
+In **Site settings** -> **Home media: Sixth Form highlight** (or inside `Site settings`, `Home: Sixth Form highlight` tab):
+
+- Add `Sixth Form highlight video (upload)` or `Sixth Form highlight video (URL)` to show a video in that homepage strip.
+- Use `Sixth Form highlight video poster` as the preview frame.
+- Use `Sixth Form highlight photo` as the fallback image when no video is set.
 
 ## Teaching & Learning + Extracurricular editing
 
@@ -54,6 +70,13 @@ In **Site settings**:
   - attendance scale rows and colour tone,
   - reporting phone/email details,
   - policy button label and link.
+
+## Policies editing
+
+- Open `Parents` -> `Policies`.
+- Add one `Policy document` per file/link and set a category.
+- Upload a PDF in `Policy file` or provide `External URL`.
+- The `/policies` page groups documents by category automatically.
 
 ## Developer notes
 

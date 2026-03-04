@@ -29,7 +29,7 @@ const starterPrompts = [
   "What are the term dates this year?",
   "How do I apply for Year 7?",
   "Where can I find uniform guidance?",
-  "How do I access Edulink?",
+  "Tell me about Digital Media",
 ];
 
 export default function SchoolAssistantSection() {
@@ -38,7 +38,7 @@ export default function SchoolAssistantSection() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      text: "Ask me about admissions, term dates, uniform, transport, clubs, lunches and parent information. I only answer from school-published information.",
+      text: "Ask me about admissions, term dates, uniform, transport, clubs, lunches, Edulink, and school subjects. I only answer from school-published information.",
       status: "answered",
     },
   ]);

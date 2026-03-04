@@ -243,8 +243,8 @@ html[data-scrolled="true"] .site-header-inner {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -10px;
-  height: 2px;
+  bottom: -8px;
+  height: 1.5px;
   border-radius: 999px;
   background: currentColor;
   transform: scaleX(0);
@@ -253,7 +253,7 @@ html[data-scrolled="true"] .site-header-inner {
   opacity: 0.85;
 }
 .nav-link:hover::after {
-  transform: scaleX(0.55);
+  transform: scaleX(0.65);
 }
 .nav-link.is-active::after {
   transform: scaleX(1);

@@ -7,7 +7,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import HeroVideo from '../components/HeroVideo'
-import { EXTERNAL_GALLERY_URL } from '../../lib/siteLinks'
+import { EXTERNAL_GALLERY_URL, EXTERNAL_MUSIC_URL } from '../../lib/siteLinks'
 
 type RecruitmentMedia = {
   videoSrc: string | null
@@ -440,12 +440,10 @@ export default function OurSchoolPage() {
                   Tower Hamlets Admissions
                 </a>
                 <a
-                  href="/Documents/open-events-2025.pdf"
+                  href="/contact#message"
                   className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
-                  target="_blank"
-                  rel="noopener noreferrer"
                 >
-                  Open Events flyer 2025
+                  Ask about open events
                 </a>
               </div>
             </article>
@@ -632,12 +630,10 @@ export default function OurSchoolPage() {
                       Exam information
                     </Link>
                     <a
-                      href="/Documents/exam-timetable.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href="/our-school/exams"
                       className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
                     >
-                      Latest timetable (PDF)
+                      Assessment guidance
                     </a>
                   </div>
                 </article>
@@ -670,18 +666,16 @@ export default function OurSchoolPage() {
                   </p>
                   <div className="mt-4 flex flex-wrap gap-3">
                     <a
-                      href="#"
+                      href="/policies"
                       className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
                     >
-                      Read more
+                      Policy hub
                     </a>
                     <a
-                      href="/Documents/pupil-premium-2023-24.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href="/policies"
                       className="rounded-full bg-morpeth-navy px-5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white"
                     >
-                      2023–24 Strategy (PDF)
+                      Pupil Premium information
                     </a>
                   </div>
                 </article>
@@ -774,12 +768,10 @@ export default function OurSchoolPage() {
                   Exam information
                 </Link>
                 <a
-                  href="/Documents/exam-timetable.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/our-school/exams"
                   className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
                 >
-                  Latest timetable (PDF)
+                  Assessment guidance
                 </a>
               </div>
             </article>
@@ -806,18 +798,16 @@ export default function OurSchoolPage() {
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <a
-                  href="#"
+                  href="/policies"
                   className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
                 >
-                  Read more
+                  Policy hub
                 </a>
                 <a
-                  href="/Documents/pupil-premium-2023-24.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/policies"
                   className="rounded-full bg-morpeth-navy px-5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white hover:-translate-y-0.5 hover:shadow-lg transition"
                 >
-                  2023–24 Strategy (PDF)
+                  Pupil Premium information
                 </a>
               </div>
             </article>
@@ -877,12 +867,10 @@ export default function OurSchoolPage() {
                   Coaching Circles provide regular, structured time with a trusted adult to reflect on learning and wellbeing, set goals and build the habits that lead to success.
                 </p>
                 <a
-                  href="/Documents/coaching-circles-parent-guide.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="/our-school/coaching-circles"
                   className="inline-flex rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
                 >
-                  Coaching Circles — Parent guide (PDF)
+                  Coaching Circles guide
                 </a>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <Link
@@ -950,6 +938,35 @@ export default function OurSchoolPage() {
               >
                 Explore our history
               </Link>
+            </div>
+          </article>
+
+          {/* Music split card (mirrored) */}
+          <article className="group relative grid overflow-hidden rounded-3xl bg-white ring-1 ring-slate-100 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md md:grid-cols-5">
+            <div className="p-5 md:col-span-3 md:p-6">
+              <h2 className="font-heading text-xl text-morpeth-navy uppercase tracking-[0.1em]">
+                Morpeth Music
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-slate-700">
+                Discover performances, ensembles, recordings and music opportunities on the dedicated Morpeth Music site.
+              </p>
+              <a
+                href={EXTERNAL_MUSIC_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
+              >
+                Visit Morpeth Music
+              </a>
+            </div>
+            <div className="relative aspect-[16/10] md:col-span-2 md:aspect-auto md:h-full">
+              <Image
+                src="/images/music.webp"
+                alt="Morpeth music department"
+                fill
+                className="object-cover"
+                sizes="(min-width: 1024px) 40vw, 100vw"
+              />
             </div>
           </article>
 
@@ -1102,8 +1119,8 @@ export default function OurSchoolPage() {
                 Email: <a className="text-sky-700 hover:underline" href="mailto:enquiries@morpeth.towerhamlets.sch.uk">enquiries@morpeth.towerhamlets.sch.uk</a>
               </p>
               <div className="mt-3 flex flex-wrap gap-3">
-                <a href="/Documents/governors-code-of-conduct.pdf" target="_blank" rel="noopener noreferrer" className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100">Governors&apos; Code of Conduct</a>
-                <a href="/Documents/governors-meeting-calendar.pdf" target="_blank" rel="noopener noreferrer" className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100">Meeting calendar</a>
+                <a href="/policies#governance" className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100">Governors&apos; Code of Conduct</a>
+                <a href="/policies#governance" className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100">Meeting calendar</a>
               </div>
             </div>
           </article>

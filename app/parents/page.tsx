@@ -358,6 +358,140 @@ export default function ParentsPage() {
       return (
         <div className="h-[calc(100%-44px)] w-full overflow-y-auto p-5 md:p-6">
           <div className="mx-auto max-w-3xl space-y-6">
+            <h3 className="font-heading text-[15px] uppercase tracking-[0.16em] text-morpeth-navy">
+              Supporting your child
+            </h3>
+
+            <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
+              <div className="border-b border-morpeth-navy/10 px-5 py-3">
+                <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
+                  Day-to-day support at home
+                </h4>
+              </div>
+              <div className="px-5 py-4 space-y-3 text-[15px] text-slate-900">
+                <ul className="list-disc space-y-2 pl-5">
+                  <li>Check Edulink daily for messages, homework and timetable changes.</li>
+                  <li>Help your child maintain regular sleep, attendance and study routines.</li>
+                  <li>Use the calendar and letters pages to stay ahead of deadlines and events.</li>
+                </ul>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href="/edulink"
+                    className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
+                  >
+                    Open Edulink guide
+                  </a>
+                  <a
+                    href="/letters-home"
+                    className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
+                  >
+                    Letters home
+                  </a>
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
+              <div className="border-b border-morpeth-navy/10 px-5 py-3">
+                <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
+                  Wellbeing, safeguarding and advice
+                </h4>
+              </div>
+              <div className="px-5 py-4 space-y-3 text-[15px] text-slate-900">
+                <p>
+                  If you are concerned about your child&apos;s wellbeing, attendance, behaviour or online safety,
+                  please contact the school so we can help quickly.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href="/contact#message"
+                    className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
+                  >
+                    Contact pastoral team
+                  </a>
+                  <a
+                    href="/policies#safeguarding"
+                    className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
+                  >
+                    Safeguarding policies
+                  </a>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      );
+    }
+
+    if (item.href === "/forms") {
+      return (
+        <div className="h-[calc(100%-44px)] w-full overflow-y-auto p-5 md:p-6">
+          <div className="mx-auto max-w-3xl space-y-6">
+            <h3 className="font-heading text-[15px] uppercase tracking-[0.16em] text-morpeth-navy">
+              Useful forms
+            </h3>
+
+            <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
+              <div className="border-b border-morpeth-navy/10 px-5 py-3">
+                <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
+                  Common parent requests
+                </h4>
+              </div>
+              <div className="px-5 py-4 space-y-3 text-[15px] text-slate-900">
+                <p>
+                  Use the links below for common requests. If you are not sure which form you need, contact the
+                  school office and we will route it correctly.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href="https://benefitforms.towerhamlets.gov.uk/VictoriaForms/Viewer-VicForms.asp?user=anon&Form=Free%20School%20Meals%20(1.1).wdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
+                  >
+                    Free School Meals application
+                  </a>
+                  <a
+                    href="/contact#message"
+                    className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
+                  >
+                    Medical updates / trip queries
+                  </a>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      );
+    }
+
+    if (item.href === "/data-protection") {
+      return (
+        <div className="h-[calc(100%-44px)] w-full overflow-y-auto p-5 md:p-6">
+          <div className="mx-auto max-w-3xl space-y-6">
+            <h3 className="font-heading text-[15px] uppercase tracking-[0.16em] text-morpeth-navy">
+              Data protection
+            </h3>
+            <section className="rounded-2xl border border-morpeth-navy/15 bg-white/90 shadow-sm">
+              <div className="border-b border-morpeth-navy/10 px-5 py-3">
+                <h4 className="font-heading text-[13px] uppercase tracking-[0.16em] text-morpeth-navy/90">
+                  Policy documents
+                </h4>
+              </div>
+              <div className="px-5 py-4 space-y-3 text-[15px] text-slate-900">
+                <p>
+                  Read all current data and safeguarding policy documents in the policy hub.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href="/policies#data"
+                    className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
+                  >
+                    Open data protection policies
+                  </a>
+                </div>
+              </div>
+            </section>
           </div>
         </div>
       );
@@ -619,7 +753,7 @@ export default function ParentsPage() {
                     Learn about biometrics (CRB Cunninghams)
                   </a>
                   <a
-                    href="/data-protection"
+                    href="/policies#data"
                     className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
                   >
                     View Morpeth School&apos;s Biometrics Policy
@@ -1035,7 +1169,7 @@ export default function ParentsPage() {
                     View all school policies
                   </a>
                   <a
-                    href="/data-protection"
+                    href="/policies#data"
                     className="inline-flex items-center rounded-full border border-morpeth-navy/30 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy hover:bg-morpeth-light/40"
                   >
                     Data protection information
@@ -1356,7 +1490,7 @@ export default function ParentsPage() {
               </div>
               <div className="flex items-center gap-2">
                 {/* fallback open in a new tab if needed */}
-                {!["/uniform", "/payments", "/attendance", "/safeguarding"].includes(active.href) ? (
+                {!["/uniform", "/payments", "/attendance", "/safeguarding", "/supporting-your-child", "/forms", "/data-protection"].includes(active.href) ? (
                   <Link
                     href={active.href}
                     target="_blank"

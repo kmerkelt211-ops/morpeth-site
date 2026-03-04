@@ -199,10 +199,27 @@ type AttendancePulse = {
   emailAddress?: string;
 };
 
-type RecruitmentMedia = {
-  videoSrc: string | null;
+type PulseMediaSlide = {
+  imageSrc: string;
+  alt?: string;
+  caption?: string;
+};
+
+type PulseMedia = {
+  title: string;
+  description: string;
+  ctaLabel: string;
+  ctaHref: string;
   loopSrc: string | null;
   posterSrc: string | null;
+  slides: PulseMediaSlide[];
+};
+
+type HomeSixthFormMedia = {
+  videoSrc: string | null;
+  posterSrc: string | null;
+  imageSrc: string;
+  imageAlt: string;
 };
 
 type TimelineEvent = {
@@ -213,10 +230,37 @@ type TimelineEvent = {
   href: string;
 };
 
-const DEFAULT_RECRUITMENT_MEDIA: RecruitmentMedia = {
-  videoSrc: null,
+const DEFAULT_PULSE_MEDIA: PulseMedia = {
+  title: "Inside Morpeth",
+  description: "Real moments from lessons, productions and school life.",
+  ctaLabel: "Explore school life",
+  ctaHref: "/our-school",
   loopSrc: null,
   posterSrc: null,
+  slides: [
+    {
+      imageSrc: "/images/welcome.webp",
+      alt: "Students learning at Morpeth",
+      caption: "Ambition in every classroom",
+    },
+    {
+      imageSrc: "/images/drama.webp",
+      alt: "Students performing on stage",
+      caption: "Creativity on stage and beyond",
+    },
+    {
+      imageSrc: "/images/music.webp",
+      alt: "Music performance at Morpeth",
+      caption: "Performance, confidence, expression",
+    },
+  ],
+};
+
+const DEFAULT_HOME_SIXTH_FORM_MEDIA: HomeSixthFormMedia = {
+  videoSrc: null,
+  posterSrc: "/images/sixthform-hero.jpg",
+  imageSrc: "/images/sixthform-hero.jpg",
+  imageAlt: "Morpeth Sixth Form students",
 };
 
 const audienceOptions: { key: AudienceKey; label: string }[] = [
@@ -323,7 +367,7 @@ function Hero({ variant }: { variant: HeroVariant }) {
           We are a community committed to learning and achievement, based on
           friendship and respect, where everyone is valued and known.
         </p>
-        <p className="mt-3 max-w-xl text-xs md:text-sm text-morpeth-light/85">
+        <p className="mt-3 max-w-xl text-xs md:text-sm text-morpeth-light/85" suppressHydrationWarning>
           {variant === "community"
             ? "Behind every grade is a story of hard work, resilience and pride. Here, people believe in you, and that changes everything."
             : "Students are challenged, coached and celebrated so they leave Morpeth ready for ambitious next steps in study, work and life."}
@@ -397,7 +441,8 @@ function SchoolPulse() {
   const [notice, setNotice] = useState<NoticePulse | null>(null);
   const [lunchMenu, setLunchMenu] = useState<LunchPulse | null>(null);
   const [attendance, setAttendance] = useState<AttendancePulse | null>(null);
-  const [recruitmentMedia, setRecruitmentMedia] = useState<RecruitmentMedia>(DEFAULT_RECRUITMENT_MEDIA);
+  const [pulseMedia, setPulseMedia] = useState<PulseMedia>(DEFAULT_PULSE_MEDIA);
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -405,13 +450,13 @@ function SchoolPulse() {
 
     const loadPulse = async () => {
       try {
-        const [eventsResponse, newsResponse, noticeResponse, lunchResponse, attendanceResponse, recruitmentResponse] = await Promise.all([
+        const [eventsResponse, newsResponse, noticeResponse, lunchResponse, attendanceResponse, mediaResponse] = await Promise.all([
           fetch("/api/events?limit=4"),
           sanityFetch<NewsCard[]>(NEWS_QUERY),
           sanityFetch<NoticePulse | null>(PULSE_NOTICE_QUERY),
           sanityFetch<LunchPulse | null>(PULSE_LUNCH_QUERY),
           sanityFetch<AttendancePulse | null>(PULSE_ATTENDANCE_QUERY),
-          fetch("/api/recruitment-video", { cache: "force-cache" }),
+          fetch("/api/pulse-media", { cache: "force-cache" }),
         ]);
 
         if (!mounted) return;
@@ -428,15 +473,41 @@ function SchoolPulse() {
         setLunchMenu(lunchResponse || null);
         setAttendance(attendanceResponse || null);
 
-        if (recruitmentResponse.ok) {
-          const recruitmentBody = (await recruitmentResponse.json()) as RecruitmentMedia;
-          setRecruitmentMedia({
-            videoSrc: recruitmentBody?.videoSrc ?? null,
-            loopSrc: recruitmentBody?.loopSrc ?? null,
-            posterSrc: recruitmentBody?.posterSrc ?? null,
+        if (mediaResponse.ok) {
+          const mediaBody = (await mediaResponse.json()) as Partial<PulseMedia> & { slides?: PulseMediaSlide[] };
+          const parsedSlides = Array.isArray(mediaBody?.slides)
+            ? mediaBody.slides
+                .map((slide) => ({
+                  imageSrc: typeof slide?.imageSrc === "string" ? slide.imageSrc.trim() : "",
+                  alt: typeof slide?.alt === "string" ? slide.alt : undefined,
+                  caption: typeof slide?.caption === "string" ? slide.caption : undefined,
+                }))
+                .filter((slide) => slide.imageSrc.length > 0)
+            : [];
+
+          setPulseMedia({
+            title:
+              typeof mediaBody?.title === "string" && mediaBody.title.trim().length > 0
+                ? mediaBody.title
+                : DEFAULT_PULSE_MEDIA.title,
+            description:
+              typeof mediaBody?.description === "string" && mediaBody.description.trim().length > 0
+                ? mediaBody.description
+                : DEFAULT_PULSE_MEDIA.description,
+            ctaLabel:
+              typeof mediaBody?.ctaLabel === "string" && mediaBody.ctaLabel.trim().length > 0
+                ? mediaBody.ctaLabel
+                : DEFAULT_PULSE_MEDIA.ctaLabel,
+            ctaHref:
+              typeof mediaBody?.ctaHref === "string" && mediaBody.ctaHref.trim().length > 0
+                ? mediaBody.ctaHref
+                : DEFAULT_PULSE_MEDIA.ctaHref,
+            loopSrc: typeof mediaBody?.loopSrc === "string" && mediaBody.loopSrc.trim() ? mediaBody.loopSrc : null,
+            posterSrc: typeof mediaBody?.posterSrc === "string" && mediaBody.posterSrc.trim() ? mediaBody.posterSrc : null,
+            slides: parsedSlides.length > 0 ? parsedSlides : DEFAULT_PULSE_MEDIA.slides,
           });
         } else {
-          setRecruitmentMedia(DEFAULT_RECRUITMENT_MEDIA);
+          setPulseMedia(DEFAULT_PULSE_MEDIA);
         }
       } catch {
         if (!mounted) return;
@@ -445,7 +516,7 @@ function SchoolPulse() {
         setNotice(null);
         setLunchMenu(null);
         setAttendance(null);
-        setRecruitmentMedia(DEFAULT_RECRUITMENT_MEDIA);
+        setPulseMedia(DEFAULT_PULSE_MEDIA);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -457,6 +528,14 @@ function SchoolPulse() {
     };
   }, []);
 
+  useEffect(() => {
+    if (pulseMedia.loopSrc || pulseMedia.slides.length < 2) return;
+    const timer = window.setInterval(() => {
+      setActiveSlideIndex((prev) => (prev + 1) % pulseMedia.slides.length);
+    }, 4200);
+    return () => window.clearInterval(timer);
+  }, [pulseMedia.loopSrc, pulseMedia.slides.length]);
+
   const currentDate = new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
     day: "2-digit",
@@ -465,7 +544,8 @@ function SchoolPulse() {
 
   const firstEvent = events[0];
   const latestStory = posts[0];
-  const recruitmentPreviewSrc = recruitmentMedia.loopSrc || recruitmentMedia.videoSrc;
+  const safeSlideIndex = pulseMedia.slides.length > 0 ? activeSlideIndex % pulseMedia.slides.length : 0;
+  const activeSlide = pulseMedia.slides[safeSlideIndex];
   const latestStoryDate = latestStory?.date
     ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short" }).format(new Date(latestStory.date))
     : null;
@@ -548,169 +628,202 @@ function SchoolPulse() {
           </div>
         </Reveal>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
-          {loading ? (
-            Array.from({ length: 6 }).map((_, idx) => (
-              <div key={idx} className="rounded-2xl border border-slate-200 bg-morpeth-offwhite p-4">
-                <div className="animate-pulse space-y-2">
-                  <div className="h-2 w-20 rounded bg-slate-300/70" />
-                  <div className="h-4 w-4/5 rounded bg-slate-300/70" />
-                  <div className="h-3 w-1/2 rounded bg-slate-300/60" />
-                </div>
-              </div>
-            ))
-          ) : (
-            <>
-              <Reveal delay={20}>
-                <article className="rounded-2xl border border-slate-200 bg-morpeth-offwhite p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Next event</p>
-                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy">
-                    {firstEvent ? firstEvent.title : "No upcoming events"}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-600">
-                    {firstEvent ? formatEventDate(firstEvent.start) : "Check full calendar"}
-                  </p>
-                </article>
-              </Reveal>
-
-              <Reveal delay={40}>
-                <article className="rounded-2xl border border-slate-200 bg-morpeth-offwhite p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Notices</p>
-                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy line-clamp-2">
-                    {notice?.title || "Latest letters and updates"}
-                  </p>
-                  <Link
-                    href="/letters-home"
-                    className="mt-1 inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
-                    onClick={() => trackCta("homepage_cta_click", { section: "school_pulse", cta: "open_notices" })}
-                  >
-                    Open letters
-                  </Link>
-                </article>
-              </Reveal>
-
-              <Reveal delay={60}>
-                <article className="rounded-2xl border border-slate-200 bg-morpeth-offwhite p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Lunch</p>
-                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy line-clamp-2">
-                    {lunchMenu?.title || "Latest school menu"}
-                  </p>
-                  <Link
-                    href="/school-lunches"
-                    className="mt-1 inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
-                    onClick={() => trackCta("homepage_cta_click", { section: "school_pulse", cta: "open_lunches" })}
-                  >
-                    {formatMonth(lunchMenu?.month)}
-                  </Link>
-                </article>
-              </Reveal>
-
-              <Reveal delay={80}>
-                <article className="rounded-2xl border border-slate-200 bg-morpeth-offwhite p-4 lg:col-span-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Achievement</p>
-                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy line-clamp-2">
-                    {latestStory?.title || "Latest student stories"}
-                  </p>
-                  <div className="mt-1 flex items-center gap-2">
-                    {latestStoryDate ? (
-                      <p className="text-[11px] uppercase tracking-[0.12em] text-slate-500">{latestStoryDate}</p>
-                    ) : null}
-                    <Link
-                      href={latestStory?.href || "/news"}
-                      className="inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
-                      onClick={() =>
-                        trackCta("homepage_cta_click", { section: "school_pulse", cta: "open_achievement_story" })
-                      }
-                    >
-                      View story
-                    </Link>
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1.45fr,0.95fr] lg:items-stretch">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {loading ? (
+              Array.from({ length: 5 }).map((_, idx) => (
+                <div key={idx} className="rounded-2xl border border-slate-200 bg-morpeth-offwhite p-4">
+                  <div className="animate-pulse space-y-2">
+                    <div className="h-2 w-20 rounded bg-slate-300/70" />
+                    <div className="h-4 w-4/5 rounded bg-slate-300/70" />
+                    <div className="h-3 w-1/2 rounded bg-slate-300/60" />
                   </div>
-                </article>
-              </Reveal>
+                </div>
+              ))
+            ) : (
+              <>
+                <Reveal delay={20} className="xl:col-span-1">
+                  <article className="h-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Next event</p>
+                    <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy">
+                      {firstEvent ? firstEvent.title : "No upcoming events"}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-600">
+                      {firstEvent ? formatEventDate(firstEvent.start) : "Check full calendar"}
+                    </p>
+                  </article>
+                </Reveal>
 
-              <Reveal delay={100}>
-                <article className="rounded-2xl border border-slate-200 bg-morpeth-offwhite p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Attendance</p>
-                  <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy line-clamp-2">
-                    {attendance?.title || "Report absence before 8:30am"}
-                  </p>
-                  <p className="mt-1 line-clamp-2 text-xs text-slate-600">
-                    {attendance?.description || "Call or email the school office before registration."}
-                  </p>
-                  <div className="mt-1 flex flex-wrap items-center gap-2">
-                    {attendance?.phoneHref && attendance?.phoneDisplay ? (
-                      <a
-                        href={attendance.phoneHref}
+                <Reveal delay={40} className="xl:col-span-2">
+                  <article className="h-full rounded-2xl border border-slate-200 bg-gradient-to-br from-[#f6f9ff] to-[#eef4ff] p-4 shadow-sm">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Achievement</p>
+                    <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy line-clamp-2">
+                      {latestStory?.title || "Latest student stories"}
+                    </p>
+                    <div className="mt-1 flex items-center gap-2">
+                      {latestStoryDate ? (
+                        <p className="text-[11px] uppercase tracking-[0.12em] text-slate-500">{latestStoryDate}</p>
+                      ) : null}
+                      <Link
+                        href={latestStory?.href || "/news"}
                         className="inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
                         onClick={() =>
-                          trackCta("homepage_cta_click", { section: "school_pulse", cta: "attendance_call" })
+                          trackCta("homepage_cta_click", { section: "school_pulse", cta: "open_achievement_story" })
                         }
                       >
-                        {attendance.phoneDisplay}
-                      </a>
-                    ) : null}
-                    <Link
-                      href="/parents"
-                      className="inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
-                      onClick={() =>
-                        trackCta("homepage_cta_click", { section: "school_pulse", cta: "attendance_guidance" })
-                      }
-                    >
-                      Guidance
-                    </Link>
-                  </div>
-                </article>
-              </Reveal>
+                        View story
+                      </Link>
+                    </div>
+                  </article>
+                </Reveal>
 
-              <Reveal delay={120}>
-                <article className="overflow-hidden rounded-2xl border border-slate-200 bg-morpeth-offwhite p-0 lg:col-span-2">
-                  <div className="relative h-28 w-full bg-slate-200">
-                    {recruitmentPreviewSrc ? (
-                      <video
-                        className="h-full w-full object-cover"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                        poster={recruitmentMedia.posterSrc || undefined}
-                      >
-                        <source src={recruitmentPreviewSrc} type="video/mp4" />
-                      </video>
-                    ) : recruitmentMedia.posterSrc ? (
-                      <Image
-                        src={recruitmentMedia.posterSrc}
-                        alt="Year 5 film preview"
-                        fill
-                        className="object-cover"
-                        sizes="(min-width: 1024px) 22vw, 100vw"
-                      />
-                    ) : (
-                      <div className="h-full w-full bg-gradient-to-r from-morpeth-navy to-[#1d4f89]" />
-                    )}
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-                    <p className="absolute left-3 top-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/80">
-                      Film spotlight
-                    </p>
-                  </div>
-                  <div className="p-4">
-                    <p className="text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy">
-                      Year 5 recruitment film
+                <Reveal delay={60} className="xl:col-span-1">
+                  <article className="h-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Notices</p>
+                    <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy line-clamp-2">
+                      {notice?.title || "Latest letters and updates"}
                     </p>
                     <Link
-                      href="/our-school#welcome"
+                      href="/letters-home"
                       className="mt-1 inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
-                      onClick={() =>
-                        trackCta("homepage_cta_click", { section: "school_pulse", cta: "open_recruitment_film" })
-                      }
+                      onClick={() => trackCta("homepage_cta_click", { section: "school_pulse", cta: "open_notices" })}
                     >
-                      Watch full preview
+                      Open letters
                     </Link>
+                  </article>
+                </Reveal>
+
+                <Reveal delay={80} className="xl:col-span-1">
+                  <article className="h-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Lunch</p>
+                    <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy line-clamp-2">
+                      {lunchMenu?.title || "Latest school menu"}
+                    </p>
+                    <Link
+                      href="/school-lunches"
+                      className="mt-1 inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
+                      onClick={() => trackCta("homepage_cta_click", { section: "school_pulse", cta: "open_lunches" })}
+                    >
+                      {formatMonth(lunchMenu?.month)}
+                    </Link>
+                  </article>
+                </Reveal>
+
+                <Reveal delay={100} className="xl:col-span-1">
+                  <article className="h-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Attendance</p>
+                    <p className="mt-2 text-sm font-semibold uppercase tracking-[0.1em] text-morpeth-navy line-clamp-2">
+                      {attendance?.title || "Report absence before 8:30am"}
+                    </p>
+                    <p className="mt-1 line-clamp-2 text-xs text-slate-600">
+                      {attendance?.description || "Call or email the school office before registration."}
+                    </p>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      {attendance?.phoneHref && attendance?.phoneDisplay ? (
+                        <a
+                          href={attendance.phoneHref}
+                          className="inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
+                          onClick={() =>
+                            trackCta("homepage_cta_click", { section: "school_pulse", cta: "attendance_call" })
+                          }
+                        >
+                          {attendance.phoneDisplay}
+                        </a>
+                      ) : null}
+                      <Link
+                        href="/parents"
+                        className="inline-flex text-xs font-semibold text-slate-700 underline underline-offset-4"
+                        onClick={() =>
+                          trackCta("homepage_cta_click", { section: "school_pulse", cta: "attendance_guidance" })
+                        }
+                      >
+                        Guidance
+                      </Link>
+                    </div>
+                  </article>
+                </Reveal>
+              </>
+            )}
+          </div>
+
+          <Reveal delay={120}>
+            <aside className="relative overflow-hidden rounded-2xl border border-slate-200 bg-[#07142d] text-white shadow-[0_28px_65px_-45px_rgba(2,12,27,0.9)]">
+              <div className="relative h-[340px] sm:h-[380px] lg:h-full lg:min-h-[430px]">
+                {loading ? (
+                  <div className="h-full w-full animate-pulse bg-slate-700/50" />
+                ) : pulseMedia.loopSrc ? (
+                  <video
+                    className="h-full w-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    poster={pulseMedia.posterSrc || undefined}
+                  >
+                    <source src={pulseMedia.loopSrc} type="video/mp4" />
+                  </video>
+                ) : activeSlide ? (
+                  pulseMedia.slides.map((slide, index) => (
+                    <Image
+                      key={`${slide.imageSrc}-${index}`}
+                      src={slide.imageSrc}
+                      alt={slide.alt || pulseMedia.title}
+                      fill
+                      className={[
+                        "object-cover transition-opacity duration-700",
+                        index === safeSlideIndex ? "opacity-100" : "opacity-0",
+                      ].join(" ")}
+                      sizes="(min-width: 1024px) 34vw, 100vw"
+                    />
+                  ))
+                ) : (
+                  <div className="h-full w-full bg-gradient-to-r from-morpeth-navy to-[#1d4f89]" />
+                )}
+
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,10,20,0.15)_0%,rgba(5,10,20,0.9)_100%)]" />
+
+                {pulseMedia.slides.length > 1 && !pulseMedia.loopSrc ? (
+                  <div className="absolute right-3 top-3 flex items-center gap-1.5">
+                    {pulseMedia.slides.map((_, index) => (
+                      <button
+                        key={`slide-dot-${index}`}
+                        type="button"
+                        aria-label={`Show image ${index + 1}`}
+                        onClick={() => {
+                          setActiveSlideIndex(index);
+                          trackCta("homepage_cta_click", { section: "school_pulse", cta: "pulse_media_slide" });
+                        }}
+                        className={[
+                          "h-2.5 w-2.5 rounded-full border transition",
+                          index === safeSlideIndex
+                            ? "border-white bg-white"
+                            : "border-white/70 bg-white/35 hover:bg-white/70",
+                        ].join(" ")}
+                      />
+                    ))}
                   </div>
-                </article>
-              </Reveal>
-            </>
-          )}
+                ) : null}
+
+                <div className="absolute inset-x-0 bottom-0 p-4 md:p-5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-100/90">Media</p>
+                  <p className="mt-1 text-lg font-heading uppercase tracking-[0.1em] text-white">{pulseMedia.title}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-slate-200">
+                    {activeSlide?.caption || pulseMedia.description}
+                  </p>
+                  <Link
+                    href={pulseMedia.ctaHref}
+                    className="mt-3 inline-flex text-xs font-semibold text-white underline underline-offset-4"
+                    onClick={() =>
+                      trackCta("homepage_cta_click", { section: "school_pulse", cta: "pulse_media_cta" })
+                    }
+                  >
+                    {pulseMedia.ctaLabel}
+                  </Link>
+                </div>
+              </div>
+            </aside>
+          </Reveal>
         </div>
       </div>
       <style jsx global>{`
@@ -1869,6 +1982,51 @@ function LifeAtMorpeth() {
 /* ===== SIXTH FORM STRIP ===== */
 
 function SixthFormHighlight() {
+  const [media, setMedia] = useState<HomeSixthFormMedia>(DEFAULT_HOME_SIXTH_FORM_MEDIA);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadMedia = async () => {
+      try {
+        const response = await fetch("/api/home-sixth-form-media", { cache: "force-cache" });
+        if (!response.ok || !mounted) return;
+
+        const mediaBody = (await response.json()) as Partial<HomeSixthFormMedia>;
+        if (!mounted) return;
+
+        const videoSrc = typeof mediaBody.videoSrc === "string" ? mediaBody.videoSrc.trim() : "";
+        const imageSrc =
+          typeof mediaBody.imageSrc === "string" && mediaBody.imageSrc.trim().length > 0
+            ? mediaBody.imageSrc.trim()
+            : DEFAULT_HOME_SIXTH_FORM_MEDIA.imageSrc;
+        const posterSrc =
+          typeof mediaBody.posterSrc === "string" && mediaBody.posterSrc.trim().length > 0
+            ? mediaBody.posterSrc.trim()
+            : imageSrc;
+        const imageAlt =
+          typeof mediaBody.imageAlt === "string" && mediaBody.imageAlt.trim().length > 0
+            ? mediaBody.imageAlt.trim()
+            : DEFAULT_HOME_SIXTH_FORM_MEDIA.imageAlt;
+
+        setMedia({
+          videoSrc: videoSrc || null,
+          posterSrc: posterSrc || null,
+          imageSrc,
+          imageAlt,
+        });
+      } catch {
+        if (!mounted) return;
+        setMedia(DEFAULT_HOME_SIXTH_FORM_MEDIA);
+      }
+    };
+
+    loadMedia();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   return (
     <section className="bg-gradient-to-r from-morpeth-navy via-morpeth-navy to-morpeth-mid" data-kpi-section="sixth-form-highlight">
       <div className="mx-auto max-w-6xl px-4 py-14 md:flex md:items-center md:gap-10">
@@ -1912,12 +2070,21 @@ function SixthFormHighlight() {
         <Reveal delay={120} direction="right">
           <div className="mt-8 flex-1 md:mt-0">
             <div className="relative h-56 w-full overflow-hidden rounded-3xl bg-morpeth-light/10 shadow-card md:h-72 lg:h-80">
-              <Image
-                src="/images/sixthform-hero.jpg"
-                alt="Morpeth Sixth Form students"
-                fill
-                className="object-cover"
-              />
+              {media.videoSrc ? (
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  poster={media.posterSrc || media.imageSrc || undefined}
+                  className="h-full w-full object-cover"
+                >
+                  <source src={media.videoSrc} />
+                </video>
+              ) : (
+                <Image src={media.imageSrc} alt={media.imageAlt} fill className="object-cover" />
+              )}
               <div className="absolute inset-0 bg-gradient-to-t from-morpeth-navy/40 via-transparent to-transparent" />
             </div>
           </div>
