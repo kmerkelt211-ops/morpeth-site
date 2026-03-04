@@ -443,7 +443,9 @@ function SchoolPulse() {
   const [attendance, setAttendance] = useState<AttendancePulse | null>(null);
   const [pulseMedia, setPulseMedia] = useState<PulseMedia>(DEFAULT_PULSE_MEDIA);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [pulseVideoMuted, setPulseVideoMuted] = useState(true);
   const [loading, setLoading] = useState(true);
+  const pulseVideoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -536,6 +538,10 @@ function SchoolPulse() {
     return () => window.clearInterval(timer);
   }, [pulseMedia.loopSrc, pulseMedia.slides.length]);
 
+  useEffect(() => {
+    if (pulseMedia.loopSrc) setPulseVideoMuted(true);
+  }, [pulseMedia.loopSrc]);
+
   const currentDate = new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
     day: "2-digit",
@@ -566,6 +572,30 @@ function SchoolPulse() {
     const parsed = new Date(isoLike);
     if (Number.isNaN(parsed.getTime())) return "Latest menu";
     return new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric" }).format(parsed);
+  };
+
+  const openPulseVideoFullscreen = () => {
+    const video = pulseVideoRef.current;
+    if (!video) return;
+
+    const videoWithWebkit = video as HTMLVideoElement & { webkitEnterFullscreen?: () => void };
+    const containerWithWebkit = video.parentElement as
+      | (HTMLElement & { webkitRequestFullscreen?: () => void })
+      | null;
+
+    if (typeof video.requestFullscreen === "function") {
+      void video.requestFullscreen().catch(() => undefined);
+      return;
+    }
+
+    if (containerWithWebkit && typeof containerWithWebkit.requestFullscreen === "function") {
+      void containerWithWebkit.requestFullscreen().catch(() => undefined);
+      return;
+    }
+
+    if (typeof videoWithWebkit.webkitEnterFullscreen === "function") {
+      videoWithWebkit.webkitEnterFullscreen();
+    }
   };
 
   const tickerItems = [
@@ -752,17 +782,31 @@ function SchoolPulse() {
                 {loading ? (
                   <div className="h-full w-full animate-pulse bg-slate-700/50" />
                 ) : pulseMedia.loopSrc ? (
-                  <video
-                    className="h-full w-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    poster={pulseMedia.posterSrc || undefined}
-                  >
-                    <source src={pulseMedia.loopSrc} type="video/mp4" />
-                  </video>
+                  <>
+                    <video
+                      ref={pulseVideoRef}
+                      className="h-full w-full object-cover"
+                      autoPlay
+                      muted={pulseVideoMuted}
+                      loop
+                      playsInline
+                      controls
+                      preload="metadata"
+                      poster={pulseMedia.posterSrc || undefined}
+                      onClick={openPulseVideoFullscreen}
+                      onVolumeChange={(event) => setPulseVideoMuted(event.currentTarget.muted)}
+                    >
+                      <source src={pulseMedia.loopSrc} type="video/mp4" />
+                    </video>
+                    <button
+                      type="button"
+                      onClick={openPulseVideoFullscreen}
+                      className="absolute right-3 top-3 z-20 rounded-full border border-white/60 bg-black/35 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm transition hover:bg-black/50"
+                      aria-label="Open School Pulse video fullscreen"
+                    >
+                      Full screen
+                    </button>
+                  </>
                 ) : activeSlide ? (
                   pulseMedia.slides.map((slide, index) => (
                     <Image
@@ -805,7 +849,7 @@ function SchoolPulse() {
                   </div>
                 ) : null}
 
-                <div className="absolute inset-x-0 bottom-0 p-4 md:p-5">
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 p-4 md:p-5">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-cyan-100/90">Media</p>
                   <p className="mt-1 text-lg font-heading uppercase tracking-[0.1em] text-white">{pulseMedia.title}</p>
                   <p className="mt-1 line-clamp-2 text-sm text-slate-200">
@@ -813,7 +857,7 @@ function SchoolPulse() {
                   </p>
                   <Link
                     href={pulseMedia.ctaHref}
-                    className="mt-3 inline-flex text-xs font-semibold text-white underline underline-offset-4"
+                    className="pointer-events-auto mt-3 inline-flex text-xs font-semibold text-white underline underline-offset-4"
                     onClick={() =>
                       trackCta("homepage_cta_click", { section: "school_pulse", cta: "pulse_media_cta" })
                     }
