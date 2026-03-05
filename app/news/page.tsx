@@ -1,8 +1,19 @@
 // app/news/page.tsx
 import Image from "next/image";
+import Link from "next/link";
 import { fetchInstagramNewsPosts } from "../../lib/instagramFeed";
 
 export const revalidate = 300;
+
+function formatDisplayDate(value: string): string {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(parsed);
+}
 
 export default async function NewsIndex() {
   const posts = await fetchInstagramNewsPosts({ limit: 200, revalidateSeconds: revalidate });
@@ -48,22 +59,29 @@ export default async function NewsIndex() {
 
                 <div className="p-4 md:p-5">
                   <p className="text-[10px] md:text-[11px] uppercase tracking-[0.18em] text-slate-500">
-                    {new Intl.DateTimeFormat("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    }).format(new Date(p.date))}
+                    {formatDisplayDate(p.date)}
                   </p>
 
                   <h2 className="mt-1 text-base md:text-lg font-heading uppercase tracking-[0.14em] text-morpeth-navy line-clamp-2">
-                    {p.title}
+                    <Link
+                      href={`/news/instagram/${encodeURIComponent(p.id)}`}
+                      className="hover:underline underline-offset-4"
+                    >
+                      {p.title}
+                    </Link>
                   </h2>
 
                   {p.excerpt && (
                     <p className="mt-1 md:mt-2 line-clamp-3 text-xs md:text-sm text-slate-800">{p.excerpt}</p>
                   )}
 
-                  <div className="mt-3 md:mt-4">
+                  <div className="mt-3 md:mt-4 flex flex-wrap items-center gap-4">
+                    <Link
+                      href={`/news/instagram/${encodeURIComponent(p.id)}`}
+                      className="text-xs md:text-sm font-medium text-morpeth-navy underline-offset-4 hover:underline"
+                    >
+                      Read full post
+                    </Link>
                     <a
                       href={p.href}
                       target="_blank"
