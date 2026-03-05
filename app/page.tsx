@@ -607,6 +607,13 @@ function SchoolPulse() {
               >
                 Notices
               </Link>
+              <Link
+                href="/news"
+                className="rounded-full border border-morpeth-navy/30 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-morpeth-navy transition hover:-translate-y-0.5 hover:shadow-sm"
+                onClick={() => trackCta("homepage_cta_click", { section: "school_pulse", cta: "full_news" })}
+              >
+                News
+              </Link>
             </div>
           </div>
         </Reveal>
