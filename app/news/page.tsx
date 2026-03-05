@@ -9,7 +9,10 @@ export default async function NewsIndex() {
 
   return (
     <main className="bg-white pb-16 md:pb-24">
-      <section className="mx-auto max-w-6xl px-4 pt-8 pb-20 md:pt-10 md:pb-28 mb-16 md:mb-24">
+      <section
+        data-reveal-ignore="true"
+        className="mx-auto max-w-6xl px-4 pt-8 pb-20 md:pt-10 md:pb-28 mb-16 md:mb-24"
+      >
         <h1 className="text-lg md:text-2xl font-heading uppercase tracking-[0.18em] text-morpeth-navy">
           Latest News
         </h1>
