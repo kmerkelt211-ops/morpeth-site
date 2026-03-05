@@ -62,14 +62,14 @@ type CalendarEvent = {
 const STUDENT_SPOTLIGHT_QUERY = `
 *[_type == "studentSpotlight" && coalesce(featured, true) == true && coalesce(publishedAt, _createdAt) <= now() && !(_id in path("drafts.**"))]
 | order(coalesce(publishedAt, _createdAt) desc)[0...8]{
+  "id": _id,
   title,
   studentName,
   yearGroup,
   highlight,
   "href": select(
-    defined(linkedPost->slug.current) => "/news/" + linkedPost->slug.current,
     defined(ctaHref) => ctaHref,
-    "/news"
+    "/student-spotlights/" + _id
   ),
   "date": coalesce(publishedAt, _createdAt),
   "imageUrl": coalesce(photo.asset->url, backgroundImage.asset->url),
@@ -142,6 +142,7 @@ type NewsCard = {
 };
 
 type SpotlightCard = NewsCard & {
+  id?: string;
   studentName?: string;
   yearGroup?: string;
   highlight?: string;
@@ -951,9 +952,9 @@ function SpotlightWall() {
               </p>
             </div>
             <Link
-              href="/news"
+              href="/student-spotlights"
               className="inline-flex text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy underline underline-offset-4"
-              onClick={() => trackCta("homepage_cta_click", { section: "spotlight_wall", cta: "open_news" })}
+              onClick={() => trackCta("homepage_cta_click", { section: "spotlight_wall", cta: "open_spotlights" })}
             >
               View all stories
             </Link>
@@ -1330,8 +1331,8 @@ function AudienceJourneys({
       {
         title: "Latest achievements",
         description: "See student stories, highlights and celebration updates.",
-        href: "/news",
-        cta: "Open news",
+        href: "/student-spotlights",
+        cta: "Open spotlights",
         tag: "Spotlights",
       },
       {
