@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   STAFF_OAUTH_RETURN_COOKIE,
   STAFF_OAUTH_STATE_COOKIE,
+  buildSecureCookieOptions,
   buildGoogleRedirectUri,
   isGoogleAuthConfigured,
   parseAllowedStaffDomains,
   randomUrlSafeString,
   sanitizeReturnTo,
 } from "../../../../lib/staffAuth";
-
-const IS_PRODUCTION = process.env.NODE_ENV === "production";
+import { serverEnv } from "../../../../lib/env";
 
 export async function GET(req: NextRequest) {
   const returnTo = sanitizeReturnTo(req.nextUrl.searchParams.get("returnTo"));
@@ -23,10 +23,10 @@ export async function GET(req: NextRequest) {
 
   const state = randomUrlSafeString(24);
   const redirectUri = buildGoogleRedirectUri(req);
-  const allowedDomains = parseAllowedStaffDomains(process.env.STAFF_ALLOWED_GOOGLE_DOMAINS);
+  const allowedDomains = parseAllowedStaffDomains(serverEnv.staffAllowedGoogleDomains);
 
   const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
-  authUrl.searchParams.set("client_id", process.env.STAFF_GOOGLE_CLIENT_ID || "");
+  authUrl.searchParams.set("client_id", serverEnv.staffGoogleClientId);
   authUrl.searchParams.set("redirect_uri", redirectUri);
   authUrl.searchParams.set("response_type", "code");
   authUrl.searchParams.set("scope", "openid email profile");
@@ -42,21 +42,12 @@ export async function GET(req: NextRequest) {
   response.cookies.set({
     name: STAFF_OAUTH_STATE_COOKIE,
     value: state,
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: IS_PRODUCTION,
-    maxAge: 60 * 10,
+    ...buildSecureCookieOptions(60 * 10),
   });
   response.cookies.set({
     name: STAFF_OAUTH_RETURN_COOKIE,
     value: returnTo,
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: IS_PRODUCTION,
-    maxAge: 60 * 10,
+    ...buildSecureCookieOptions(60 * 10),
   });
   return response;
 }
-

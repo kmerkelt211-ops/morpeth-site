@@ -10,6 +10,12 @@ import admissionsEnquiry from "../schemas/admissionsEnquiry";
 import studentSpotlight from "../schemas/studentSpotlight";
 import policyDocument from "../schemas/policyDocument";
 
+const AUTOPLAY_LOOP_GUIDANCE =
+  "For lightweight autoplay or looping sections, keep this at or under 12MB. Larger videos can still be used elsewhere on the site, but these instant-load surfaces will fall back to a poster image or static treatment if the media is too large.";
+
+const AUTOPLAY_LOOP_POSTER_GUIDANCE =
+  "Recommended whenever the loop is large or optional. The site will use this poster or another static fallback if the autoplay media is missing or too heavy for the homepage-style surface.";
+
 export const schema: { types: SchemaTypeDefinition[] } = {
   types: [
     // NEWS POSTS
@@ -227,26 +233,27 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           title: "School Pulse media loop (upload)",
           type: "file",
           options: { accept: "video/*", storeOriginalFilename: true },
-          description: "If set, this looping video is shown instead of the photo carousel.",
+          description: `If set, this looping video is shown instead of the photo carousel. ${AUTOPLAY_LOOP_GUIDANCE}`,
         }),
         defineField({
           name: "pulseMediaLoopUrl",
           title: "School Pulse media loop (URL)",
           type: "url",
-          description: "Optional external loop video URL used when no upload is provided.",
+          description: `Optional external loop video URL used when no upload is provided. ${AUTOPLAY_LOOP_GUIDANCE}`,
         }),
         defineField({
           name: "pulseMediaPoster",
           title: "School Pulse media poster",
           type: "image",
           options: { hotspot: true },
-          description: "Poster frame for the media loop.",
+          description: AUTOPLAY_LOOP_POSTER_GUIDANCE,
         }),
         defineField({
           name: "pulseMediaSlides",
           title: "School Pulse media slides",
           type: "array",
-          description: "Used as a rotating photo carousel when no loop video is set.",
+          description:
+            "Used as a rotating photo carousel when no loop video is set, or when the configured loop is too large for the lightweight autoplay slot.",
           of: [
             defineField({
               name: "slide",
@@ -303,20 +310,20 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           title: "Sixth Form highlight video (upload)",
           type: "file",
           options: { accept: "video/*", storeOriginalFilename: true },
-          description: "Homepage strip media under School Pulse. Upload a video to show instead of a photo.",
+          description: `Homepage strip media under School Pulse. Upload a video to show instead of a photo. ${AUTOPLAY_LOOP_GUIDANCE}`,
         }),
         defineField({
           name: "homeSixthFormHighlightVideoUrl",
           title: "Sixth Form highlight video (URL)",
           type: "url",
-          description: "Optional external video URL for the homepage Sixth Form strip.",
+          description: `Optional external video URL for the homepage Sixth Form strip. ${AUTOPLAY_LOOP_GUIDANCE}`,
         }),
         defineField({
           name: "homeSixthFormHighlightPoster",
           title: "Sixth Form highlight video poster",
           type: "image",
           options: { hotspot: true },
-          description: "Poster image shown before the video plays.",
+          description: AUTOPLAY_LOOP_POSTER_GUIDANCE,
         }),
         defineField({
           name: "homeSixthFormHighlightImage",
@@ -342,7 +349,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
       type: "document",
       groups: [
         { name: "general", title: "General" },
-        { name: "heroMedia", title: "Hero videos" },
+        { name: "heroMedia", title: "Hero media" },
         { name: "pageMedia", title: "Page media" },
         { name: "contactDetails", title: "Contact" },
       ],
@@ -354,7 +361,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           type: "url",
           group: "heroMedia",
           description:
-            "Default hero video for all pages. Use an MP4/WebM URL. Individual page overrides below are optional.",
+            `Default hero video for all pages. Use an MP4/WebM URL. Individual page overrides below are optional. ${AUTOPLAY_LOOP_GUIDANCE}`,
         }),
         defineField({
           name: "heroVideoFile",
@@ -363,7 +370,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           group: "heroMedia",
           options: { accept: "video/*", storeOriginalFilename: true },
           description:
-            "Upload a global hero video file. If set, this is preferred over the global URL.",
+            `Upload a global hero video file. If set, this is preferred over the global URL. ${AUTOPLAY_LOOP_GUIDANCE}`,
         }),
         defineField({
           name: "heroVideoWebmUrl",
@@ -371,7 +378,7 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           type: "url",
           group: "heroMedia",
           description:
-            "Optional WebM source used before MP4 for faster delivery on supported browsers.",
+            `Optional WebM source used before MP4 for faster delivery on supported browsers. ${AUTOPLAY_LOOP_GUIDANCE}`,
         }),
         defineField({
           name: "heroVideoWebmFile",
@@ -380,13 +387,31 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           group: "heroMedia",
           options: { accept: "video/webm", storeOriginalFilename: true },
           description:
-            "Upload a global WebM file for faster delivery. If set, this is preferred over the global WebM URL.",
+            `Upload a global WebM file for faster delivery. If set, this is preferred over the global WebM URL. ${AUTOPLAY_LOOP_GUIDANCE}`,
+        }),
+        defineField({
+          name: "heroImage",
+          title: "Global hero image override (optional)",
+          type: "image",
+          group: "heroMedia",
+          options: { hotspot: true },
+          description:
+            "Optional still image for the hero. If set without a Sanity hero video, this replaces the bundled fallback video.",
+          fields: [
+            defineField({
+              name: "alt",
+              title: "Alt text",
+              type: "string",
+            }),
+          ],
         }),
         defineField({
           name: "heroVideoOverrides",
           title: "Per-page hero overrides (optional)",
           type: "object",
           group: "heroMedia",
+          description:
+            "URL overrides for specific page heroes. These are used on lightweight autoplay hero surfaces, so keep them web-optimised and at or under 12MB where possible.",
           fields: [
             defineField({ name: "home", title: "Home hero video URL", type: "url" }),
             defineField({ name: "ourSchool", title: "Our School hero video URL", type: "url" }),
@@ -406,52 +431,118 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           ],
         }),
         defineField({
+          name: "heroImageOverrides",
+          title: "Per-page hero image overrides (optional)",
+          type: "object",
+          group: "heroMedia",
+          fields: [
+            defineField({
+              name: "home",
+              title: "Home hero image",
+              type: "image",
+              options: { hotspot: true },
+              fields: [defineField({ name: "alt", title: "Alt text", type: "string" })],
+            }),
+            defineField({
+              name: "ourSchool",
+              title: "Our School hero image",
+              type: "image",
+              options: { hotspot: true },
+              fields: [defineField({ name: "alt", title: "Alt text", type: "string" })],
+            }),
+            defineField({
+              name: "teachingLearning",
+              title: "Teaching & Learning hero image",
+              type: "image",
+              options: { hotspot: true },
+              fields: [defineField({ name: "alt", title: "Alt text", type: "string" })],
+            }),
+            defineField({
+              name: "sixthForm",
+              title: "Sixth Form hero image",
+              type: "image",
+              options: { hotspot: true },
+              fields: [defineField({ name: "alt", title: "Alt text", type: "string" })],
+            }),
+            defineField({
+              name: "extracurricular",
+              title: "Extracurricular hero image",
+              type: "image",
+              options: { hotspot: true },
+              fields: [defineField({ name: "alt", title: "Alt text", type: "string" })],
+            }),
+            defineField({
+              name: "parents",
+              title: "Parents hero image",
+              type: "image",
+              options: { hotspot: true },
+              fields: [defineField({ name: "alt", title: "Alt text", type: "string" })],
+            }),
+            defineField({
+              name: "staff",
+              title: "Staff hero image",
+              type: "image",
+              options: { hotspot: true },
+              fields: [defineField({ name: "alt", title: "Alt text", type: "string" })],
+            }),
+          ],
+        }),
+        defineField({
           name: "heroVideoFileOverrides",
           title: "Per-page hero file overrides (upload, optional)",
           type: "object",
           group: "heroMedia",
+          description:
+            "Upload overrides for specific page heroes. These are used on lightweight autoplay hero surfaces, so keep them web-optimised and at or under 12MB where possible.",
           fields: [
             defineField({
               name: "home",
               title: "Home hero video file",
               type: "file",
               options: { accept: "video/*", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "ourSchool",
               title: "Our School hero video file",
               type: "file",
               options: { accept: "video/*", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "teachingLearning",
               title: "Teaching & Learning hero video file",
               type: "file",
               options: { accept: "video/*", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "sixthForm",
               title: "Sixth Form hero video file",
               type: "file",
               options: { accept: "video/*", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "extracurricular",
               title: "Extracurricular hero video file",
               type: "file",
               options: { accept: "video/*", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "parents",
               title: "Parents hero video file",
               type: "file",
               options: { accept: "video/*", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "staff",
               title: "Staff hero video file",
               type: "file",
               options: { accept: "video/*", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
           ],
         }),
@@ -460,6 +551,8 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           title: "Per-page hero WebM overrides (optional)",
           type: "object",
           group: "heroMedia",
+          description:
+            "WebM overrides for specific page heroes. These are also used on lightweight autoplay hero surfaces, so keep them web-optimised and at or under 12MB where possible.",
           fields: [
             defineField({ name: "home", title: "Home hero WebM URL", type: "url" }),
             defineField({ name: "ourSchool", title: "Our School hero WebM URL", type: "url" }),
@@ -483,48 +576,57 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           title: "Per-page hero WebM file overrides (upload, optional)",
           type: "object",
           group: "heroMedia",
+          description:
+            "Upload WebM overrides for specific page heroes. These are used on lightweight autoplay hero surfaces, so keep them web-optimised and at or under 12MB where possible.",
           fields: [
             defineField({
               name: "home",
               title: "Home hero WebM file",
               type: "file",
               options: { accept: "video/webm", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "ourSchool",
               title: "Our School hero WebM file",
               type: "file",
               options: { accept: "video/webm", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "teachingLearning",
               title: "Teaching & Learning hero WebM file",
               type: "file",
               options: { accept: "video/webm", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "sixthForm",
               title: "Sixth Form hero WebM file",
               type: "file",
               options: { accept: "video/webm", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "extracurricular",
               title: "Extracurricular hero WebM file",
               type: "file",
               options: { accept: "video/webm", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "parents",
               title: "Parents hero WebM file",
               type: "file",
               options: { accept: "video/webm", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
             defineField({
               name: "staff",
               title: "Staff hero WebM file",
               type: "file",
               options: { accept: "video/webm", storeOriginalFilename: true },
+              description: AUTOPLAY_LOOP_GUIDANCE,
             }),
           ],
         }),
@@ -557,14 +659,14 @@ export const schema: { types: SchemaTypeDefinition[] } = {
           type: "file",
           group: "pageMedia",
           options: { accept: "video/*", storeOriginalFilename: true },
-          description: "Short looping teaser version of the Year 5 film.",
+          description: `Short looping teaser version of the Year 5 film. ${AUTOPLAY_LOOP_GUIDANCE}`,
         }),
         defineField({
           name: "recruitmentLoopUrl",
           title: "Year 5 loop (URL)",
           type: "url",
           group: "pageMedia",
-          description: "Optional external URL for the looping teaser clip.",
+          description: `Optional external URL for the looping teaser clip. ${AUTOPLAY_LOOP_GUIDANCE}`,
         }),
         defineField({
           name: "sixthFormWhyJoinVideoUrl",

@@ -4,6 +4,7 @@ import {
   STAFF_OAUTH_STATE_COOKIE,
   STAFF_SESSION_COOKIE,
   STAFF_SESSION_MAX_AGE_SECONDS,
+  buildSecureCookieOptions,
   buildGoogleRedirectUri,
   createStaffSessionToken,
   isAllowedStaffAccount,
@@ -11,8 +12,7 @@ import {
   parseAllowedStaffDomains,
   sanitizeReturnTo,
 } from "../../../../lib/staffAuth";
-
-const IS_PRODUCTION = process.env.NODE_ENV === "production";
+import { serverEnv } from "../../../../lib/env";
 
 type GoogleTokenResponse = {
   access_token?: string;
@@ -29,20 +29,12 @@ function clearOauthCookies(response: NextResponse) {
   response.cookies.set({
     name: STAFF_OAUTH_STATE_COOKIE,
     value: "",
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: IS_PRODUCTION,
-    maxAge: 0,
+    ...buildSecureCookieOptions(0),
   });
   response.cookies.set({
     name: STAFF_OAUTH_RETURN_COOKIE,
     value: "",
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: IS_PRODUCTION,
-    maxAge: 0,
+    ...buildSecureCookieOptions(0),
   });
 }
 
@@ -79,8 +71,8 @@ export async function GET(req: NextRequest) {
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       code,
-      client_id: process.env.STAFF_GOOGLE_CLIENT_ID || "",
-      client_secret: process.env.STAFF_GOOGLE_CLIENT_SECRET || "",
+      client_id: serverEnv.staffGoogleClientId,
+      client_secret: serverEnv.staffGoogleClientSecret,
       redirect_uri: buildGoogleRedirectUri(req),
       grant_type: "authorization_code",
     }),
@@ -107,7 +99,7 @@ export async function GET(req: NextRequest) {
 
   const profile = (await userInfoResponse.json()) as GoogleUserInfoResponse;
   const email = (profile.email || "").trim().toLowerCase();
-  const allowedDomains = parseAllowedStaffDomains(process.env.STAFF_ALLOWED_GOOGLE_DOMAINS);
+  const allowedDomains = parseAllowedStaffDomains(serverEnv.staffAllowedGoogleDomains);
 
   if (!email || profile.email_verified !== true) {
     return redirectToLogin(req, "email_unverified", returnTo);
@@ -117,7 +109,7 @@ export async function GET(req: NextRequest) {
     return redirectToLogin(req, "not_allowed", returnTo);
   }
 
-  const sessionSecret = process.env.STAFF_AUTH_SECRET || "";
+  const sessionSecret = serverEnv.staffAuthSecret;
   const token = await createStaffSessionToken(
     {
       email,
@@ -132,14 +124,9 @@ export async function GET(req: NextRequest) {
   response.cookies.set({
     name: STAFF_SESSION_COOKIE,
     value: token,
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: IS_PRODUCTION,
-    maxAge: STAFF_SESSION_MAX_AGE_SECONDS,
+    ...buildSecureCookieOptions(STAFF_SESSION_MAX_AGE_SECONDS),
   });
   clearOauthCookies(response);
 
   return response;
 }
-

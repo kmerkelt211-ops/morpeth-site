@@ -133,6 +133,16 @@ export default defineType({
                   title: "Card poster image",
                   type: "image",
                   options: { hotspot: true },
+                  description:
+                    "Still image shown on the card before hover, or when no hover loop is provided.",
+                }),
+                defineField({
+                  name: "hoverLoopFile",
+                  title: "Card hover loop (upload, optional)",
+                  type: "file",
+                  options: { accept: "video/*", storeOriginalFilename: true },
+                  description:
+                    "Optional lightweight video loop used on hover instead of the poster image. Keep this at or under 12MB. This is for the card preview only and does not replace the main video opened in the modal.",
                 }),
               ],
               preview: {

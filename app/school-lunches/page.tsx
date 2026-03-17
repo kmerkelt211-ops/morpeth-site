@@ -1,11 +1,25 @@
-"use client";
-// app/school-lunches/page.tsx
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
-import { createClient } from "@sanity/client";
+import { loadLatestSchoolMenu } from "../../lib/contentLoaders";
 
-export default function SchoolLunchesPage() {
+export const revalidate = 300;
+
+type MenuDoc = {
+  title?: string;
+  month?: string;
+  menuPdfUrl?: string;
+  allergensPdfUrl?: string;
+  specialMenuPdfUrl?: string;
+  specialMenuLabel?: string;
+  images?: { url: string; alt?: string }[];
+};
+
+function getMenuErrorMessage(menu: MenuDoc | null): string | null {
+  if (menu) return null;
+  return "No published school menu is available right now. Please contact the school office if you need the latest file.";
+}
+
+export default async function SchoolLunchesPage() {
   const chip =
     "inline-flex items-center rounded-full bg-morpeth-light/60 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-navy transition hover:-translate-y-0.5 hover:shadow-md hover:bg-morpeth-light/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-morpeth-mid";
   const docsChip =
@@ -14,109 +28,10 @@ export default function SchoolLunchesPage() {
   const card =
     "rounded-2xl bg-white/90 p-5 shadow-card transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-lg md:hover:scale-[1.01] will-change-transform border border-morpeth-navy/10";
 
-  type MenuDoc = {
-    title?: string;
-    month?: string;
-    menuPdfUrl?: string;
-    allergensPdfUrl?: string;
-    specialMenuPdfUrl?: string;
-    specialMenuLabel?: string;
-    images?: { url: string; alt?: string }[];
-  };
-
-  const getErrorMessage = (error: unknown) =>
-    error instanceof Error ? error.message : "Load failed";
-
-  const sanity = useMemo(() => {
-    const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-    const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET;
-    const apiVersion =
-      process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2025-01-01";
-
-    if (!projectId || !dataset) return null;
-
-    return createClient({
-      projectId,
-      dataset,
-      apiVersion,
-      useCdn: false,
-    });
-  }, []);
-
-  const [menu, setMenu] = useState<MenuDoc | null>(null);
-  const [menuError, setMenuError] = useState<string | null>(null);
-  const sanityEnv = {
-    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
-  };
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      if (!sanity) {
-        setMenuError(
-          "Sanity is not configured. Set NEXT_PUBLIC_SANITY_PROJECT_ID and NEXT_PUBLIC_SANITY_DATASET in .env.local."
-        );
-        return;
-      }
-
-      setMenuError(null);
-
-      // Fetch the latest published monthly menu (by month field)
-      const query = `*[_type == "schoolMenu"] | order(month desc, _updatedAt desc)[0]{
-        title,
-        month,
-        "menuPdfUrl": menuPdf.asset->url,
-        "allergensPdfUrl": allergensPdf.asset->url,
-        "specialMenuPdfUrl": specialMenuPdf.asset->url,
-        specialMenuLabel,
-        "images": images[]{"url": asset->url, alt}
-      }`;
-
-      try {
-        const data = await sanity.fetch(query);
-
-        if (!cancelled && data) {
-          setMenu({
-            title: data.title,
-            month: data.month,
-            menuPdfUrl: data.menuPdfUrl,
-            allergensPdfUrl: data.allergensPdfUrl,
-            specialMenuPdfUrl: data.specialMenuPdfUrl,
-            specialMenuLabel: data.specialMenuLabel,
-            images: Array.isArray(data.images)
-              ? data.images.filter((i: { url?: string; alt?: string }) => Boolean(i?.url)) as { url: string; alt?: string }[]
-              : [],
-          });
-          setMenuError(null);
-        } else if (!cancelled) {
-          setMenu(null);
-          setMenuError(
-            'No published School menu found. Create a School menu in Studio, upload the PDF + images, and publish it.'
-          );
-        }
-      } catch (error: unknown) {
-        console.error("Failed to load school menu from Sanity", error);
-        if (!cancelled) {
-          setMenu(null);
-          setMenuError(
-            `Error loading menu from Sanity: ${getErrorMessage(error)}. Check the browser console for details.`
-          );
-        }
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [sanity]);
-
-  const [activeImage, setActiveImage] = useState(0);
-
+  const menu = (await loadLatestSchoolMenu()) as MenuDoc | null;
+  const menuError = getMenuErrorMessage(menu);
   const menuImages = menu?.images ?? [];
-  const activeMenuImage = menuImages[activeImage];
+  const activeMenuImage = menuImages[0];
 
   return (
     <main className="bg-morpeth-offwhite text-slate-900">
@@ -321,9 +236,6 @@ export default function SchoolLunchesPage() {
             {menuError ? (
               <div className="mt-3 rounded-xl border border-white/10 bg-white/5 p-3">
                 <p className="text-sm text-morpeth-light/90">{menuError}</p>
-                <p className="mt-2 text-[11px] text-morpeth-light/70">
-                  Env: projectId={sanityEnv.projectId ? "set" : "missing"}, dataset={sanityEnv.dataset ? "set" : "missing"}
-                </p>
               </div>
             ) : null}
           </div>
@@ -350,47 +262,29 @@ export default function SchoolLunchesPage() {
                 </a>
 
                 <div className="mt-3 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setActiveImage((i) =>
-                        menuImages.length ? (i - 1 + menuImages.length) % menuImages.length : 0
-                      )
-                    }
-                    className="rounded-full bg-morpeth-light/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-light hover:bg-morpeth-light/20"
-                  >
-                    Prev
-                  </button>
                   <p className="text-[11px] text-morpeth-light/70">
-                    {menuImages.length ? activeImage + 1 : 0} / {menuImages.length}
+                    {menuImages.length} page{menuImages.length === 1 ? "" : "s"} available
                   </p>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setActiveImage((i) =>
-                        menuImages.length ? (i + 1) % menuImages.length : 0
-                      )
-                    }
-                    className="rounded-full bg-morpeth-light/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-light hover:bg-morpeth-light/20"
-                  >
-                    Next
-                  </button>
+                  <span className="rounded-full bg-morpeth-light/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-morpeth-light">
+                    Preview
+                  </span>
                 </div>
 
                 {menuImages.length > 1 ? (
                   <div className="mt-3 flex gap-2 overflow-x-auto pb-1 no-scrollbar touch-pan-x">
                     {menuImages.map((img, idx) => (
-                      <button
+                      <a
                         key={img.url + idx}
-                        type="button"
-                        onClick={() => setActiveImage(idx)}
+                        href={img.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className={
                           "relative h-14 w-20 flex-shrink-0 overflow-hidden rounded-lg border " +
-                          (idx === activeImage
+                          (idx === 0
                             ? "border-morpeth-light/70"
                             : "border-white/10 hover:border-white/20")
                         }
-                        aria-label={`View menu image ${idx + 1}`}
+                        aria-label={`Open menu image ${idx + 1}`}
                       >
                         <Image
                           src={img.url}
@@ -399,14 +293,14 @@ export default function SchoolLunchesPage() {
                           sizes="80px"
                           className="h-full w-full object-cover"
                         />
-                      </button>
+                      </a>
                     ))}
                   </div>
                 ) : null}
               </div>
             ) : (
               <div className="flex h-[55vh] max-h-[520px] min-h-[340px] items-center justify-center rounded-xl border border-white/10 bg-white/5 p-4 text-center text-sm text-morpeth-light/70 md:h-[520px]">
-                Add menu images in Sanity to show a preview carousel here.
+                Add menu images in Sanity to show a preview panel here.
               </div>
             )}
           </div>

@@ -7,11 +7,12 @@ import { createClient } from "@sanity/client"
 import { PortableText } from "@portabletext/react"
 import type { TypedObject } from "@portabletext/types"
 import imageUrlBuilder from "@sanity/image-url"
+import { publicEnv } from "../../../lib/env"
 
 const sanityClient = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || "production",
-  apiVersion: "2025-02-19",
+  projectId: publicEnv.sanityProjectId,
+  dataset: publicEnv.sanityDataset,
+  apiVersion: publicEnv.sanityApiVersion,
   useCdn: true,
 })
 

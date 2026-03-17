@@ -1,4 +1,8 @@
 import type { NextRequest } from "next/server";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { isProduction, serverEnv } from "./env";
+import { buildStaffLoginRedirectPath, sanitizeStaffReturnTo } from "./staffAuthPaths";
 
 export const STAFF_SESSION_COOKIE = "morpeth_staff_session";
 export const STAFF_OAUTH_STATE_COOKIE = "morpeth_staff_oauth_state";
@@ -104,22 +108,19 @@ export function parseAllowedStaffDomains(raw: string | undefined): string[] {
 }
 
 export function isGoogleAuthConfigured(): boolean {
-  return Boolean(process.env.STAFF_GOOGLE_CLIENT_ID && process.env.STAFF_GOOGLE_CLIENT_SECRET);
+  return Boolean(serverEnv.staffGoogleClientId && serverEnv.staffGoogleClientSecret);
 }
 
 export function isStaffAuthConfigured(): boolean {
-  return Boolean(process.env.STAFF_AUTH_SECRET && isGoogleAuthConfigured());
+  return Boolean(serverEnv.staffAuthSecret && isGoogleAuthConfigured());
 }
 
 export function sanitizeReturnTo(input: string | null | undefined): string {
-  if (!input) return "/staff";
-  if (!input.startsWith("/")) return "/staff";
-  if (input.startsWith("//")) return "/staff";
-  return input.startsWith("/staff") ? input : "/staff";
+  return sanitizeStaffReturnTo(input);
 }
 
 export function buildGoogleRedirectUri(req: NextRequest): string {
-  const configured = process.env.STAFF_GOOGLE_REDIRECT_URI?.trim();
+  const configured = serverEnv.staffGoogleRedirectUri;
   if (configured) return configured;
   return new URL("/api/staff-auth/callback", req.nextUrl.origin).toString();
 }
@@ -184,4 +185,26 @@ export function isAllowedStaffAccount(
   const emailDomain = normalizedEmail.split("@")[1] || "";
   const normalizedHostedDomain = (hostedDomain || "").trim().toLowerCase();
   return allowedDomains.some((domain) => domain === emailDomain || domain === normalizedHostedDomain);
+}
+
+export async function getCurrentStaffSession(): Promise<StaffSession | null> {
+  if (!serverEnv.staffAuthSecret) return null;
+  const store = await cookies();
+  return readStaffSessionFromStore(store, serverEnv.staffAuthSecret);
+}
+
+export async function requireStaffSession(returnTo = "/staff"): Promise<StaffSession> {
+  const session = await getCurrentStaffSession();
+  if (session) return session;
+  redirect(buildStaffLoginRedirectPath(returnTo));
+}
+
+export function buildSecureCookieOptions(maxAge: number) {
+  return {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: isProduction,
+    maxAge,
+  };
 }

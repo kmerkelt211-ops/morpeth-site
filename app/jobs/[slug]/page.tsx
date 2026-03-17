@@ -4,6 +4,7 @@ import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import type { TypedObject } from "@portabletext/types";
 import imageUrlBuilder from "@sanity/image-url";
 import Image from "next/image";
+import { stripHtmlToPlainText } from "../../../lib/richText";
 
 type RouteParams = { params: Promise<{ slug: string }> };
 
@@ -196,10 +197,9 @@ export default async function JobPage({ params }: RouteParams) {
       {(!Array.isArray(job.body) || job.body.length === 0) && job.howToApply && (
         <section className="mt-10 rounded-xl border border-slate-200 bg-white p-6 shadow-card">
           <h2 className="font-heading text-xl">How to apply</h2>
-          <div
-            className="prose prose-slate mt-3"
-            dangerouslySetInnerHTML={{ __html: job.howToApply }}
-          />
+          <div className="prose prose-slate mt-3 whitespace-pre-line">
+            {stripHtmlToPlainText(job.howToApply)}
+          </div>
         </section>
       )}
 

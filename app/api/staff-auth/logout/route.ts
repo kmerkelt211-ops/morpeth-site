@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { STAFF_SESSION_COOKIE } from "../../../../lib/staffAuth";
-
-const IS_PRODUCTION = process.env.NODE_ENV === "production";
+import { STAFF_SESSION_COOKIE, buildSecureCookieOptions } from "../../../../lib/staffAuth";
 
 function buildResponse(req: NextRequest) {
   const destination = new URL("/staff/login", req.url);
@@ -11,11 +9,7 @@ function buildResponse(req: NextRequest) {
   response.cookies.set({
     name: STAFF_SESSION_COOKIE,
     value: "",
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: IS_PRODUCTION,
-    maxAge: 0,
+    ...buildSecureCookieOptions(0),
   });
   return response;
 }
@@ -27,4 +21,3 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   return buildResponse(req);
 }
-

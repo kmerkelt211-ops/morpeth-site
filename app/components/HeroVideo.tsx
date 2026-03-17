@@ -19,10 +19,7 @@ type HeroVideoProps = {
   overlayClassName?: string;
   containerClassName?: string;
   videoClassName?: string;
-  posterSrc?: string;
-  posterAlt?: string;
   preload?: "none" | "metadata" | "auto";
-  priorityPoster?: boolean;
   fadeInDelayMs?: number;
   disableVideoOnMobile?: boolean;
   disableVideoOnConstrainedNetwork?: boolean;
@@ -32,9 +29,24 @@ const DEFAULT_HERO_OVERLAY =
   "pointer-events-none bg-gradient-to-b from-black/55 via-morpeth-navy/65 to-morpeth-navy/85";
 const DEFAULT_HERO_BASE_BG =
   "bg-gradient-to-r from-morpeth-navy via-[#12355b] to-[#3b6fb6]";
-const DEFAULT_HERO_POSTER = "/images/welcome.webp";
-const heroSrcCache = new Map<string, string>();
-const heroWebmSrcCache = new Map<string, string>();
+
+type HeroRemoteConfig = {
+  src: string | null;
+  webmSrc: string | null;
+  imageSrc: string | null;
+  imageAlt: string | null;
+  preferImage: boolean;
+};
+
+const EMPTY_HERO_REMOTE_CONFIG: HeroRemoteConfig = {
+  src: null,
+  webmSrc: null,
+  imageSrc: null,
+  imageAlt: null,
+  preferImage: false,
+};
+
+const heroConfigCache = new Map<string, HeroRemoteConfig>();
 
 type ConnectionInfo = {
   saveData?: boolean;
@@ -50,32 +62,24 @@ export default function HeroVideo({
   overlayClassName,
   containerClassName = "",
   videoClassName = "",
-  posterSrc,
-  posterAlt = "",
-  preload = "metadata",
-  priorityPoster = false,
-  fadeInDelayMs = 1800,
+  preload = "auto",
+  fadeInDelayMs = 120,
   disableVideoOnMobile = true,
   disableVideoOnConstrainedNetwork = true,
 }: HeroVideoProps) {
-  const effectivePosterSrc = posterSrc ?? DEFAULT_HERO_POSTER;
   const [forceLowBandwidth, setForceLowBandwidth] = useState(false);
-  const [remoteSrc, setRemoteSrc] = useState<string | null>(() => {
-    if (!pageKey) return null;
-    const cached = heroSrcCache.get(`${pageKey}:${src}`);
-    return cached && cached !== src ? cached : null;
-  });
-  const [remoteWebmSrc, setRemoteWebmSrc] = useState<string | null>(() => {
-    if (!pageKey) return null;
-    const cached = heroWebmSrcCache.get(`${pageKey}:${src}`);
-    return cached || null;
+  const [remoteConfig, setRemoteConfig] = useState<HeroRemoteConfig>(() => {
+    if (!pageKey) return EMPTY_HERO_REMOTE_CONFIG;
+    return heroConfigCache.get(pageKey) ?? EMPTY_HERO_REMOTE_CONFIG;
   });
   const [canPlayVideo, setCanPlayVideo] = useState(false);
   const [videoVisible, setVideoVisible] = useState(false);
   const overlay = overlayClassName ?? DEFAULT_HERO_OVERLAY;
-  const resolvedSrc = remoteSrc || src;
-  const resolvedWebmSrc = remoteWebmSrc || webmSrc;
-  const shouldRenderVideo = canPlayVideo;
+  const resolvedSrc = remoteConfig.src || src;
+  const resolvedWebmSrc = remoteConfig.webmSrc || webmSrc;
+  const resolvedImageSrc = remoteConfig.imageSrc;
+  const shouldPreferImage = remoteConfig.preferImage && Boolean(resolvedImageSrc);
+  const shouldRenderVideo = canPlayVideo && Boolean(resolvedSrc) && !shouldPreferImage;
   const fadeTimerRef = useRef<number | null>(null);
   const queuedRevealRef = useRef(false);
 
@@ -158,39 +162,51 @@ export default function HeroVideo({
   }, [disableVideoOnConstrainedNetwork, disableVideoOnMobile, forceLowBandwidth]);
 
   useEffect(() => {
-    if (!pageKey || !shouldRenderVideo) return;
+    if (!pageKey) return;
 
-    const cacheKey = `${pageKey}:${src}`;
-    if (heroSrcCache.has(cacheKey)) return;
+    if (heroConfigCache.has(pageKey)) return;
 
     let active = true;
     fetch(`/api/hero-video?page=${pageKey}`, { cache: "force-cache" })
       .then(async (res) => (res.ok ? res.json() : null))
-      .then((data: { src?: string | null; webmSrc?: string | null } | null) => {
+      .then((data:
+        | {
+            src?: string | null;
+            webmSrc?: string | null;
+            imageSrc?: string | null;
+            imageAlt?: string | null;
+            preferImage?: boolean;
+          }
+        | null) => {
         if (!active) return;
-        const remoteSrc =
-          typeof data?.src === "string" && data.src.trim()
-            ? data.src
-            : src;
-        const remoteWebmSrc =
-          typeof data?.webmSrc === "string" && data.webmSrc.trim()
-            ? data.webmSrc
-            : "";
-        heroSrcCache.set(cacheKey, remoteSrc);
-        heroWebmSrcCache.set(cacheKey, remoteWebmSrc);
-        if (remoteSrc !== src) {
-          setRemoteSrc(remoteSrc);
-        }
-        if (remoteWebmSrc) {
-          setRemoteWebmSrc(remoteWebmSrc);
-        }
+        const nextConfig: HeroRemoteConfig = {
+          src:
+            typeof data?.src === "string" && data.src.trim()
+              ? data.src
+              : null,
+          webmSrc:
+            typeof data?.webmSrc === "string" && data.webmSrc.trim()
+              ? data.webmSrc
+              : null,
+          imageSrc:
+            typeof data?.imageSrc === "string" && data.imageSrc.trim()
+              ? data.imageSrc
+              : null,
+          imageAlt:
+            typeof data?.imageAlt === "string" && data.imageAlt.trim()
+              ? data.imageAlt
+              : null,
+          preferImage: Boolean(data?.preferImage),
+        };
+        heroConfigCache.set(pageKey, nextConfig);
+        setRemoteConfig(nextConfig);
       })
       .catch(() => {});
 
     return () => {
       active = false;
     };
-  }, [pageKey, shouldRenderVideo, src]);
+  }, [pageKey]);
 
   useEffect(() => {
     return () => {
@@ -219,10 +235,14 @@ export default function HeroVideo({
       window.clearTimeout(fadeTimerRef.current);
     }
 
-    fadeTimerRef.current = window.setTimeout(
-      () => setVideoVisible(true),
-      Math.max(0, fadeInDelayMs)
-    );
+    const revealDelay = Math.max(0, fadeInDelayMs);
+    if (revealDelay === 0) {
+      fadeTimerRef.current = null;
+      window.requestAnimationFrame(() => setVideoVisible(true));
+      return;
+    }
+
+    fadeTimerRef.current = window.setTimeout(() => setVideoVisible(true), revealDelay);
   };
 
   const resetVideoReveal = () => {
@@ -243,19 +263,16 @@ export default function HeroVideo({
         aria-hidden="true"
       />
 
-      {effectivePosterSrc && (
+      {resolvedImageSrc && !shouldRenderVideo ? (
         <Image
-          src={effectivePosterSrc}
-          alt={posterAlt}
+          src={resolvedImageSrc}
+          alt={remoteConfig.imageAlt || ""}
           fill
-          priority={priorityPoster}
-          className={`object-cover transition-opacity duration-500 ${
-            shouldRenderVideo && videoVisible ? "opacity-0" : "opacity-100"
-          }`}
+          className="object-cover"
           sizes="100vw"
           aria-hidden="true"
         />
-      )}
+      ) : null}
 
       {shouldRenderVideo ? (
         <video

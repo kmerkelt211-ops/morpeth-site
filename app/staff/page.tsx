@@ -1,8 +1,8 @@
 import { client } from "../../sanity/client";
 import DirectoryClient from "./DirectoryClient";
 import HeroVideo from "../components/HeroVideo";
-import { cookies } from "next/headers";
-import { readStaffSessionFromStore } from "../../lib/staffAuth";
+import { requireStaffSession } from "../../lib/staffAuth";
+import { publicEnv } from "../../lib/env";
 
 export const revalidate = 60;
 
@@ -50,10 +50,8 @@ async function getStaff(): Promise<StaffMember[]> {
 }
 
 export default async function StaffPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const session = await requireStaffSession("/staff");
   const staff = await getStaff();
-  const cookieStore = await cookies();
-  const sessionSecret = process.env.STAFF_AUTH_SECRET || "";
-  const session = sessionSecret ? await readStaffSessionFromStore(cookieStore, sessionSecret) : null;
 
   // --- search & filtering from URL params (server-side, no JS needed) ---
   const params = await searchParams;
@@ -204,7 +202,7 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
                   </p>
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <a
-                      href={process.env.NEXT_PUBLIC_EMAIL_URL || 'https://mail.lgflmail.org/owa/auth/logon.aspx?replaceCurrent=1&url=https%3a%2f%2fmail.lgflmail.org%2fowa%2f%23authRedirect%3dtrue'}
+                      href={publicEnv.emailUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="rounded-full bg-morpeth-navy px-5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-lg"
@@ -212,9 +210,9 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
                       Open Email
                     </a>
                     <a
-                      href={process.env.NEXT_PUBLIC_EMAIL_HELP_URL || '#'}
-                      target={process.env.NEXT_PUBLIC_EMAIL_HELP_URL ? '_blank' : undefined}
-                      rel={process.env.NEXT_PUBLIC_EMAIL_HELP_URL ? 'noopener noreferrer' : undefined}
+                      href={publicEnv.emailHelpUrl || "#"}
+                      target={publicEnv.emailHelpUrl ? "_blank" : undefined}
+                      rel={publicEnv.emailHelpUrl ? "noopener noreferrer" : undefined}
                       className="rounded-full border border-slate-300 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-700 hover:bg-slate-100"
                     >
                       How to use
@@ -241,7 +239,7 @@ export default async function StaffPage({ searchParams }: { searchParams: Promis
                   </p>
                   <div className="mt-4 flex flex-wrap items-center gap-3">
                     <a
-                      href={process.env.NEXT_PUBLIC_REMOTE_ACCESS_URL || 'https://remote.morpeth.towerhamlets.sch.uk/rdweb/webclient/'}
+                      href={publicEnv.remoteAccessUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="rounded-full bg-morpeth-navy px-5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition-transform duration-150 hover:-translate-y-0.5 hover:shadow-lg"

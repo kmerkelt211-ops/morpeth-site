@@ -109,7 +109,7 @@ function MonthNav({ months, currentMonth }: { months: string[]; currentMonth: st
   );
 }
 
-export const revalidate = 0; // always fresh
+export const revalidate = 300;
 export const runtime = "nodejs";
 
 export const metadata = {

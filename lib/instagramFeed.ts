@@ -1,3 +1,5 @@
+import { serverEnv } from "./env";
+
 const INSTAGRAM_API_BASE = "https://graph.instagram.com";
 const DEFAULT_REVALIDATE_SECONDS = 300;
 const PAGE_SIZE = 25;
@@ -103,8 +105,8 @@ function buildFirstPageUrl(accessToken: string, userId?: string): string {
 }
 
 export async function fetchInstagramNewsPosts(options: FetchInstagramOptions = {}): Promise<InstagramNewsPost[]> {
-  const accessToken = process.env.INSTAGRAM_ACCESS_TOKEN?.trim();
-  const userId = process.env.INSTAGRAM_USER_ID?.trim();
+  const accessToken = serverEnv.instagramAccessToken;
+  const userId = serverEnv.instagramUserId;
   const limit = Math.max(1, Math.min(options.limit ?? 200, 200));
   const revalidateSeconds = Math.max(30, options.revalidateSeconds ?? DEFAULT_REVALIDATE_SECONDS);
 

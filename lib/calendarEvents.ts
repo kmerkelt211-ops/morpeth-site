@@ -1,4 +1,4 @@
-import * as ical from "node-ical";
+import * as nodeIcal from "node-ical";
 
 const ICS_URL = "https://www.morpethschool.org.uk/calendar/events.ics";
 const LOOKBACK_MS = 24 * 60 * 60 * 1000;
@@ -23,8 +23,12 @@ export type CalendarEvent = {
 };
 
 let lastKnownGoodEvents: CalendarEvent[] = [];
+const parseIcs =
+  nodeIcal.sync?.parseICS ||
+  (nodeIcal as { default?: { sync?: { parseICS?: (text: string) => unknown } } }).default?.sync
+    ?.parseICS;
 
-function clampLimit(limit?: number): number {
+export function clampCalendarLimit(limit?: number): number {
   if (!Number.isFinite(limit)) return DEFAULT_LIMIT;
   const n = Math.trunc(limit as number);
   if (n < 1) return DEFAULT_LIMIT;
@@ -42,8 +46,10 @@ function toDate(value?: Date | string): Date | null {
   return null;
 }
 
-function parseEventsFromIcs(text: string): CalendarEvent[] {
-  const data = ical.sync.parseICS(text);
+export function parseEventsFromIcs(text: string): CalendarEvent[] {
+  if (!parseIcs) return [];
+
+  const data = parseIcs(text);
   const nowCutoff = Date.now() - LOOKBACK_MS;
 
   return Object.values(data as Record<string, IcalEventCandidate>)
@@ -71,7 +77,7 @@ function parseEventsFromIcs(text: string): CalendarEvent[] {
 }
 
 export async function getCalendarEvents(limit?: number): Promise<CalendarEvent[]> {
-  const safeLimit = clampLimit(limit);
+  const safeLimit = clampCalendarLimit(limit);
 
   try {
     const response = await fetch(ICS_URL, {

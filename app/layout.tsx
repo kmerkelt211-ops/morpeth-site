@@ -7,10 +7,11 @@ import type { ReactNode } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import ContinuousImprovementTracker from "./components/ContinuousImprovementTracker";
+import { publicEnv } from "../lib/env";
 
 const metadataBase = (() => {
   try {
-    return new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://morpeth-site.vercel.app");
+    return new URL(publicEnv.siteUrl);
   } catch {
     return new URL("https://morpeth-site.vercel.app");
   }
@@ -64,7 +65,6 @@ const parentQuickLinks = [
 
 const mainNav = [
   { href: "/", label: "Home" },
-  { href: "/#ask-morpeth", label: "Ask Morpeth" },
   { href: "/our-school", label: "Our School" },
   { href: "/news", label: "News" },
   { href: "/teaching-learning", label: "Teaching & Learning" },
@@ -72,6 +72,7 @@ const mainNav = [
   { href: "/extracurricular", label: "Extracurricular" },
   { href: "/parents", label: "Parents" },
   { href: "/staff", label: "Staff" },
+  { href: "/#ask-morpeth", label: "Ask Morpeth" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -81,9 +82,9 @@ const socialLinks = [
   { label: "YouTube", href: "https://www.youtube.com/@MorpethSch" },
 ];
 
-const clarityProjectId = (process.env.NEXT_PUBLIC_CLARITY_ID || "").trim();
-const hotjarSiteId = (process.env.NEXT_PUBLIC_HOTJAR_ID || "").trim();
-const hotjarSnippetVersion = (process.env.NEXT_PUBLIC_HOTJAR_SNIPPET_VERSION || "6").trim();
+const clarityProjectId = publicEnv.clarityProjectId;
+const hotjarSiteId = publicEnv.hotjarSiteId;
+const hotjarSnippetVersion = publicEnv.hotjarSnippetVersion;
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const currentYear = new Date().getFullYear();

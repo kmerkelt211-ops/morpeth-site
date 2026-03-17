@@ -1,7 +1,5 @@
-export const EXTERNAL_GALLERY_URL =
-  process.env.NEXT_PUBLIC_EXTERNAL_GALLERY_URL ||
-  "https://morpeth-gallery.vercel.app";
+import { publicEnv } from "./env";
 
-export const EXTERNAL_MUSIC_URL =
-  process.env.NEXT_PUBLIC_EXTERNAL_MUSIC_URL ||
-  "https://www.morpethmusic.net";
+export const EXTERNAL_GALLERY_URL = publicEnv.externalGalleryUrl;
+
+export const EXTERNAL_MUSIC_URL = publicEnv.externalMusicUrl;

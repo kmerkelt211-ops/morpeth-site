@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:smoke": "node --experimental-strip-types --test tests/**/*.test.ts",
+    "check": "npm run lint && npm run test:smoke && npm run build",
+    "perf:report": "node scripts/perf-report.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^5.0.0",

@@ -22,15 +22,22 @@ type VideoAsset = {
   size?: number;
 };
 
+type ImageAsset = {
+  url?: string;
+  alt?: string | null;
+};
+
 type HeroSettings = {
   heroVideoUrl?: string | null;
   heroVideoFile?: VideoAsset | null;
   heroVideoWebmUrl?: string | null;
   heroVideoWebmFile?: VideoAsset | null;
+  heroImage?: ImageAsset | null;
   heroVideoOverrides?: Partial<Record<PageKey, string | null>>;
   heroVideoFileOverrides?: Partial<Record<PageKey, VideoAsset | null>>;
   heroVideoWebmOverrides?: Partial<Record<PageKey, string | null>>;
   heroVideoWebmFileOverrides?: Partial<Record<PageKey, VideoAsset | null>>;
+  heroImageOverrides?: Partial<Record<PageKey, ImageAsset | null>>;
 };
 
 const QUERY = `*[_type == "siteSettings"][0]{
@@ -38,6 +45,10 @@ const QUERY = `*[_type == "siteSettings"][0]{
   heroVideoUrl,
   "heroVideoWebmFile": heroVideoWebmFile.asset->{url, size},
   heroVideoWebmUrl,
+  "heroImage": {
+    "url": heroImage.asset->url,
+    "alt": heroImage.alt
+  },
   "heroVideoFileOverrides": {
     "home": heroVideoFileOverrides.home.asset->{url, size},
     "ourSchool": heroVideoFileOverrides.ourSchool.asset->{url, size},
@@ -55,6 +66,15 @@ const QUERY = `*[_type == "siteSettings"][0]{
     extracurricular,
     parents,
     staff
+  },
+  "heroImageOverrides": {
+    "home": {"url": heroImageOverrides.home.asset->url, "alt": heroImageOverrides.home.alt},
+    "ourSchool": {"url": heroImageOverrides.ourSchool.asset->url, "alt": heroImageOverrides.ourSchool.alt},
+    "teachingLearning": {"url": heroImageOverrides.teachingLearning.asset->url, "alt": heroImageOverrides.teachingLearning.alt},
+    "sixthForm": {"url": heroImageOverrides.sixthForm.asset->url, "alt": heroImageOverrides.sixthForm.alt},
+    "extracurricular": {"url": heroImageOverrides.extracurricular.asset->url, "alt": heroImageOverrides.extracurricular.alt},
+    "parents": {"url": heroImageOverrides.parents.asset->url, "alt": heroImageOverrides.parents.alt},
+    "staff": {"url": heroImageOverrides.staff.asset->url, "alt": heroImageOverrides.staff.alt}
   },
   "heroVideoWebmFileOverrides": {
     "home": heroVideoWebmFileOverrides.home.asset->{url, size},
@@ -97,13 +117,21 @@ function pickAssetUrl(
   return url;
 }
 
+function pickImageAsset(asset?: ImageAsset | null): ImageAsset | null {
+  if (!asset) return null;
+  const url = pickUrl(asset.url);
+  if (!url) return null;
+  const alt = pickUrl(asset.alt) || null;
+  return { url, alt };
+}
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const page = searchParams.get("page") || "";
     if (!isPageKey(page)) {
       return NextResponse.json(
-        { src: null },
+        { src: null, webmSrc: null, imageSrc: null, imageAlt: null, preferImage: false },
         {
           status: 200,
           headers: {
@@ -136,8 +164,19 @@ export async function GET(req: Request) {
       webmUrlGlobal ||
       null;
 
+    const imageOverride = pickImageAsset(settings?.heroImageOverrides?.[page]);
+    const imageGlobal = pickImageAsset(settings?.heroImage);
+    const image = imageOverride || imageGlobal || null;
+    const preferImage = Boolean(image?.url) && !src && !webmSrc;
+
     return NextResponse.json(
-      { src, webmSrc },
+      {
+        src,
+        webmSrc,
+        imageSrc: image?.url || null,
+        imageAlt: image?.alt || null,
+        preferImage,
+      },
       {
         status: 200,
         headers: {
@@ -147,7 +186,7 @@ export async function GET(req: Request) {
     );
   } catch {
     return NextResponse.json(
-      { src: null, webmSrc: null },
+      { src: null, webmSrc: null, imageSrc: null, imageAlt: null, preferImage: false },
       {
         status: 200,
         headers: {

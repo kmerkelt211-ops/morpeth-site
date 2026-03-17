@@ -7,13 +7,14 @@ import { client } from "../../../sanity/client";
 import Image from "next/image";
 import imageUrlBuilder from "@sanity/image-url";
 import type { Metadata } from "next";
+import { publicEnv } from "../../../lib/env";
 
 const builder = imageUrlBuilder(client);
 const urlFor = (source: Record<string, unknown>) => builder.image(source);
 
 export const revalidate = 60;
 export const dynamicParams = true;
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://morpeth-site.vercel.app";
+const SITE_URL = publicEnv.siteUrl;
 
 const QUERY = `
 *[_type in ["post", "newsPost"] && slug.current == $slug && !(_id in path("drafts.**"))][0]{

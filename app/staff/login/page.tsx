@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import {
+  getCurrentStaffSession,
   isStaffAuthConfigured,
-  readStaffSessionFromStore,
   sanitizeReturnTo,
 } from "../../../lib/staffAuth";
 
@@ -33,12 +32,8 @@ export default async function StaffLoginPage({
   const error = firstParam(params.error);
   const signedOut = firstParam(params.signedOut) === "1";
 
-  const store = await cookies();
-  const secret = process.env.STAFF_AUTH_SECRET || "";
-  if (secret) {
-    const session = await readStaffSessionFromStore(store, secret);
-    if (session) redirect(returnTo);
-  }
+  const session = await getCurrentStaffSession();
+  if (session) redirect(returnTo);
 
   const configured = isStaffAuthConfigured();
   const loginHref = `/api/staff-auth/login?returnTo=${encodeURIComponent(returnTo)}`;
@@ -118,4 +113,3 @@ export default async function StaffLoginPage({
     </main>
   );
 }
-

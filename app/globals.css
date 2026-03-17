@@ -216,6 +216,29 @@ html[data-reveal-ready="true"] [data-reveal][data-reveal-visible="true"] {
   }
 }
 
+@keyframes journeyPanelEnter {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.985);
+    filter: blur(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.journey-panel-enter {
+  animation: journeyPanelEnter 620ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .journey-panel-enter {
+    animation: none !important;
+  }
+}
+
 /* -----------------------------
    Sticky header scroll-state
 ------------------------------ */

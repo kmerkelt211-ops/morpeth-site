@@ -135,6 +135,14 @@ export default defineType({
       group: "workflow",
       readOnly: true,
     }),
+    defineField({
+      name: "requestFingerprint",
+      title: "Request fingerprint",
+      type: "string",
+      group: "workflow",
+      readOnly: true,
+      hidden: true,
+    }),
   ],
   preview: {
     select: {
