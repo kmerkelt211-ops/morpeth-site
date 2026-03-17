@@ -13,7 +13,7 @@ const contentSecurityPolicy = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   "connect-src 'self' https://cdn.sanity.io https://*.apicdn.sanity.io https://graph.instagram.com https://oauth2.googleapis.com https://openidconnect.googleapis.com https://www.clarity.ms https://*.hotjar.com https://*.hotjar.io https://vitals.vercel-insights.com https://region1.google-analytics.com",
-  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com",
+  "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.openstreetmap.org",
   "media-src 'self' blob: https:",
 ].join("; ");
 

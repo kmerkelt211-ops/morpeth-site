@@ -259,22 +259,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
               <div className="mt-6">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  Translate this page
+                  Language support
                 </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <button type="button" className="mobile-drawer__chip" data-translate-lang="bn">
-                    Bengali
-                  </button>
-                  <button type="button" className="mobile-drawer__chip" data-translate-lang="so">
-                    Somali
-                  </button>
-                  <button type="button" className="mobile-drawer__chip" data-translate-lang="ar">
-                    Arabic
-                  </button>
-                  <button type="button" className="mobile-drawer__chip" data-translate-lang="tr">
-                    Turkish
-                  </button>
-                </div>
+                <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                  This site is currently published in English. If you need help in another language, call school reception and we will arrange interpreter support.
+                </p>
               </div>
             </aside>
           </div>
@@ -425,7 +414,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
               <div className="mx-auto mt-8 max-w-4xl rounded-2xl border border-slate-200 bg-white/85 p-4">
                 <h3 className="text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                  Accessibility & Language
+                  Accessibility
                 </h3>
                 <div className="mt-3 flex flex-wrap justify-center gap-2">
                   <button type="button" className="site-pref-toggle" data-pref-toggle="lowBandwidth" data-label-on="Low-bandwidth: On" data-label-off="Low-bandwidth: Off">
@@ -439,22 +428,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </button>
                 </div>
                 <div className="mt-3 flex flex-wrap justify-center gap-2">
-                  <button type="button" className="site-pref-toggle" data-translate-lang="bn">
-                    Translate: Bengali
-                  </button>
-                  <button type="button" className="site-pref-toggle" data-translate-lang="so">
-                    Translate: Somali
-                  </button>
-                  <button type="button" className="site-pref-toggle" data-translate-lang="ar">
-                    Translate: Arabic
-                  </button>
-                  <button type="button" className="site-pref-toggle" data-translate-lang="tr">
-                    Translate: Turkish
-                  </button>
-                </div>
-                <p className="mt-3 text-center text-xs text-slate-600">
+                  <p className="text-center text-xs text-slate-600">
                   Need support in another language? Call school reception and we will arrange interpreter support.
-                </p>
+                  </p>
+                </div>
               </div>
 
               <div className="mt-5 text-center">
@@ -565,21 +542,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     });
   };
 
-  const bindTranslateButtons = () => {
-    document.querySelectorAll('[data-translate-lang]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const lang = button.getAttribute('data-translate-lang');
-        if (!lang) return;
-        const currentUrl = window.location.href;
-        const target = 'https://translate.google.com/translate?sl=auto&tl=' + encodeURIComponent(lang) + '&u=' + encodeURIComponent(currentUrl);
-        window.open(target, '_blank', 'noopener,noreferrer');
-      });
-    });
-  };
-
   applyPrefs();
   bindPrefButtons();
-  bindTranslateButtons();
 
   // Sticky header scroll-state and hide-on-scroll
   let lastScroll = window.scrollY;
