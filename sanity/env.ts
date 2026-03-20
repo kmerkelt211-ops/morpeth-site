@@ -1,10 +1,10 @@
-import { publicEnv, assertEnv } from "../lib/env";
+import { publicEnv } from "../lib/env";
 
 export const apiVersion = publicEnv.sanityApiVersion;
 
-export const dataset = assertValue(assertEnv("NEXT_PUBLIC_SANITY_DATASET"));
+export const dataset = assertValue(publicEnv.sanityDataset);
 
-export const projectId = assertValue(assertEnv("NEXT_PUBLIC_SANITY_PROJECT_ID"));
+export const projectId = assertValue(publicEnv.sanityProjectId);
 
 function assertValue<T>(value: T): T {
   return value;

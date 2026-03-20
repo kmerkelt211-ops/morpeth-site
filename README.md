@@ -27,7 +27,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Key Environment Variables
 ### Sanity
 ```bash
-NEXT_PUBLIC_SANITY_PROJECT_ID=
+NEXT_PUBLIC_SANITY_PROJECT_ID=8492tcbd
 NEXT_PUBLIC_SANITY_DATASET=production
 NEXT_PUBLIC_SANITY_API_VERSION=2024-11-01
 SANITY_API_WRITE_TOKEN=
